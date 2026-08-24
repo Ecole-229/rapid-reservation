@@ -13,7 +13,10 @@
     "format": "oxfmt src/"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "axios": "^1.19.0",
     "pinia": "^4.0.2",
+    "tailwindcss": "^4.3.3",
     "vue": "rc",
     "vue-router": "^5.2.0"
   },
