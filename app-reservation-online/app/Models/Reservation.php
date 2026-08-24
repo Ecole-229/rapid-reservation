@@ -15,7 +15,7 @@ class Reservation extends Model
     }
 
     public function salle(): BelongsTo {
-        return $this->belongsTo(User::class) ;
+        return $this->belongsTo(Salle::class) ;
     }
 
     public function equipements(): BelongsToMany {
