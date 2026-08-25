@@ -12,6 +12,17 @@ class EquipementController extends Controller
     {
         $equipements = Equipement::where('status', 'disponible')->get();
 
-        return response()->json($equipements);
+        return response()->json([
+            'success' => true,
+            'data' => $equipements,
+        ]);
+    }
+
+    public function show(Equipement $equipement): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $equipement,
+        ]);
     }
 }

@@ -14,3 +14,4 @@ Route::get('/salles/{salle}', [SalleController::class, 'show']);
 Route::get('/salles/{salle}/disponibilites', [SalleController::class, 'disponibilites']);
 
 Route::get('/equipements', [EquipementController::class, 'index']);
+Route::get('/equipements/{equipement}', [EquipementController::class, 'show']);
