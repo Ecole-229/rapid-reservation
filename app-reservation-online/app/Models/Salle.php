@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Salle extends Model
 {
@@ -29,8 +30,11 @@ class Salle extends Model
         return $this->hasMany(Image::class);
     }
 
-    public function estDisponible(\DateTimeInterface $debut, \DateTimeInterface $fin): bool
+    public function estDisponible(string|\DateTimeInterface $debut, string|\DateTimeInterface $fin): bool
     {
+        $debut = Carbon::parse($debut);
+        $fin = Carbon::parse($fin);
+
         return !$this->reservations()
             ->whereIn('status', ['en_attente', 'confirmee'])
             ->where('date_heure_debut', '<', $fin)
