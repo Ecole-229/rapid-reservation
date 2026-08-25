@@ -25,4 +25,18 @@ class Equipement extends Model
             'equipement_reservation'
         )->withPivot('quantity');
     }
+
+    public function quantiteDisponible(string|\DateTimeInterface $debut, string|\DateTimeInterface $fin): int
+    {
+        $debut = \Carbon\Carbon::parse($debut);
+        $fin = \Carbon\Carbon::parse($fin);
+
+        $quantiteReservee = $this->reservations()
+            ->whereIn('reservations.status', ['en_attente', 'confirmee'])
+            ->where('date_heure_debut', '<', $fin)
+            ->where('date_heure_fin', '>', $debut)
+            ->sum('equipement_reservation.quantity');
+
+        return $this->stock_total - $quantiteReservee;
+    }
 }

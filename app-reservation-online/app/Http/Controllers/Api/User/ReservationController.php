@@ -93,9 +93,6 @@ class ReservationController extends Controller
             ]);
         }
 
-        // TODO: vérifier le stock d'équipement disponible SUR LA PÉRIODE demandée
-        // (pas seulement stock_total) une fois l'auth branchée et les tests repris.
-
         $reservation = DB::transaction(function () use ($validated, $request) {
 
             $reservation = Reservation::create([
@@ -115,10 +112,15 @@ class ReservationController extends Controller
                         $equipementData['equipement_id']
                     );
 
-                    if ($equipementData['quantity'] > $equipement->stock_total) {
+                    $disponible = $equipement->quantiteDisponible(
+                        $validated['date_heure_debut'],
+                        $validated['date_heure_fin']
+                    );
+
+                    if ($equipementData['quantity'] > $disponible) {
                         throw ValidationException::withMessages([
                             'equipements' => [
-                                "La quantité demandée pour {$equipement->nom} dépasse le stock disponible.",
+                                "Il ne reste que {$disponible} unité(s) disponible(s) pour {$equipement->nom} sur cette période.",
                             ],
                         ]);
                     }
