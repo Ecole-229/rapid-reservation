@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\EquipementController;
-use App\Http\Controllers\Api\SalleController;
+use App\Http\Controllers\Api\User\EquipementController;
+use App\Http\Controllers\Api\User\SalleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
