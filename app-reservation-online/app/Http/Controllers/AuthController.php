@@ -114,7 +114,7 @@ class AuthController extends Controller
         DB::beginTransaction();
         try {
             $user = new User();
-            $user->nom = $data['nom'] ?? $data['name'];
+            $user->nom = $data['nom'];
             $user->email = $data['email'];
             $user->telephone = $data['telephone'] ?? null;
             $user->mot_de_passe = Hash::make($data['password']);

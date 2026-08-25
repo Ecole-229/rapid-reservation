@@ -22,8 +22,7 @@ class RegisterStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nom' => ['sometimes', 'required', 'string', 'max:255'],
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'nom' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'telephone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
@@ -37,7 +36,6 @@ class RegisterStoreRequest extends FormRequest
     {
         return [
             'nom.required' => 'Le nom est obligatoire.',
-            'name.required' => 'Le nom est obligatoire.',
             'email.required' => 'L\'adresse e-mail est obligatoire.',
             'email.email' => 'L\'adresse e-mail doit être valide.',
             'email.unique' => 'Cette adresse e-mail est déjà utilisée.',

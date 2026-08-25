@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('nom');
             $table->string('path');
             $table->string('designation')->nullable();
-            $table->string('designation')->nullable();
             $table->foreignId('salle_id')->constrained('salles')->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
