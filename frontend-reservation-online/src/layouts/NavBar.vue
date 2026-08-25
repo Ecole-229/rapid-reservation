@@ -129,7 +129,7 @@ const handleLogout = () => {
           <div class="flex items-center gap-3">
             <div class="flex flex-col text-right">
               <span class="text-[14px] font-bold text-black">
-                {{ authStore.currentUser?.nom || authStore.currentUser?.name || 'Utilisateur' }}
+                {{ authStore.currentUser?.nom || 'Utilisateur' }}
               </span>
               <span class="text-[11px] capitalize text-gray-500">
                 {{ authStore.userRole }}

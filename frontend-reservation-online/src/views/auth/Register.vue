@@ -32,7 +32,6 @@ const handleRegister = async () => {
 
   try {
     await authStore.register({
-      name: form.nom,
       nom: form.nom,
       email: form.email,
       telephone: form.telephone || null,
@@ -94,13 +93,13 @@ const handleRegister = async () => {
             autocomplete="name"
             placeholder="Jean Dupont"
             class="h-[42px] w-full rounded-[8px] border border-[#c9c9c9] bg-white px-3.5 text-[14px] outline-none transition focus:border-black focus:ring-1 focus:ring-black"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': authStore.errors.nom || authStore.errors.name }"
+            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': authStore.errors.nom }"
           />
           <p
-            v-if="authStore.errors.nom || authStore.errors.name"
+            v-if="authStore.errors.nom"
             class="mt-1 text-[13px] text-red-600"
           >
-            {{ (authStore.errors.nom || authStore.errors.name)[0] }}
+            {{ authStore.errors.nom[0] }}
           </p>
         </div>
 
