@@ -7,75 +7,118 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    /**
+     * Connexion de l'utilisateur.
+     */
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ], [
+            'email.required' => 'L\'adresse e-mail est requise.',
+            'email.email' => 'L\'adresse e-mail n\'est pas valide.',
+            'password.required' => 'Le mot de passe est requis.',
+        ]);
 
-    public function login(Request $request) {
         try {
+            $user = User::where('email', $request->email)->first();
 
-            if(!Auth::guard('web')->attempt($request->only('email' , 'password'))) {
+            if (!$user || !Hash::check($request->password, $user->mot_de_passe)) {
                 return response()->json([
-                    'message' => 'Unhauthorized',
+                    'message' => 'Identifiants invalides (e-mail ou mot de passe incorrect).',
                     'data' => null,
-                ] , 401) ;
+                ], 401);
             }
 
-            $user =  Auth::user();
-            $token = $user->createToken('auth_token')->plainTextToken ;
+            $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
-                'message' => 'Login success',
-                 'data' => ['user' => new UserResource( $user) ,'token' => $token]
-             ] , 200) ;
+                'message' => 'Connexion réussie',
+                'data' => [
+                    'user' => new UserResource($user),
+                    'token' => $token,
+                ],
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Une erreur est survenue lors de la connexion.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Informations de l'utilisateur actuellement connecté.
+     */
+    public function me(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Utilisateur non authentifié.',
+                    'data' => null,
+                ], 401);
+            }
+
+            return response()->json([
+                'message' => 'Utilisateur connecté',
+                'data' => new UserResource($user),
+            ], 200);
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Erreur',
                 'error' => $e->getMessage(),
-            ] , 500) ;
+            ], 500);
         }
     }
 
-    public function me() {
+    /**
+     * Déconnexion (révocation du token Sanctum).
+     */
+    public function logout(Request $request)
+    {
         try {
-            $user = Auth::user();
-            return response()->json( [ 'message' => 'User Connected' , 'data' =>  new UserResource($user) ] , 200 ) ;
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => 'Erreur',
-                'error' => $e->getMessage(),
-            ] , 500) ;
-        }
-    }
+            $user = $request->user();
 
-    public function logout() {
-        try {
+            if ($user && $user->currentAccessToken()) {
+                $user->currentAccessToken()->delete();
+            }
 
-            $user = Auth::user();
-            $user->currentAccessToken()->delete();
             return response()->json([
-                'message' => 'Logout Success',
+                'message' => 'Déconnexion réussie',
                 'data' => null,
-            ] , 200) ;
-            } catch (Exception $e) {
+            ], 200);
+        } catch (Exception $e) {
             return response()->json([
-                'message' => 'Erreur',
+                'message' => 'Erreur lors de la déconnexion',
                 'error' => $e->getMessage(),
-            ] , 500) ;
+            ], 500);
         }
     }
 
-    public function register(RegisterStoreRequest $request) {
+    /**
+     * Inscription d'un nouvel utilisateur.
+     */
+    public function register(RegisterStoreRequest $request)
+    {
         $data = $request->validated();
+
         DB::beginTransaction();
         try {
-            $user = new User ;
-            $user->name = $data['name'];
+            $user = new User();
+            $user->nom = $data['nom'] ?? $data['name'];
             $user->email = $data['email'];
-            $user->password = Hash::make($data['password']);
+            $user->telephone = $data['telephone'] ?? null;
+            $user->mot_de_passe = Hash::make($data['password']);
+            $user->role = 'user';
             $user->save();
 
             $token = $user->createToken('auth_token')->plainTextToken;
@@ -83,19 +126,20 @@ class AuthController extends Controller
             DB::commit();
 
             return response()->json([
-                "message" => "Register Success",
-                "data" => [
-                    "token" => $token,
-                    "user" => new UserResource($user)
-                ]
-        ], 201) ;
-        } catch (Exception $e ) {
+                'message' => 'Compte créé avec succès',
+                'data' => [
+                    'token' => $token,
+                    'user' => new UserResource($user),
+                ],
+            ], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+
             return response()->json([
-                'message' => 'Erreur',
+                'message' => 'Une erreur est survenue lors de l\'inscription.',
                 'error' => $e->getMessage(),
-            ] , 500) ;
+            ], 500);
         }
-
     }
-
 }
+

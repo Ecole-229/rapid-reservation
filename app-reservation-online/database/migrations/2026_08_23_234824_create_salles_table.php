@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('salles', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
-            $table->integer('capacite');
-            $table->string('description');
-            $table->string('image');
+            $table->unsignedBigInteger('capacite');
+            $table->longText('description');
             $table->enum('status' , ['disponible' , 'reserver'])->default('disponible');
             $table->string('localisation' , 255);
             $table->decimal('prix' , 8 , 2);

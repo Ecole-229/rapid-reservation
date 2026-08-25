@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('reservation_id')->constrained('reservations')->cascadeOnDelete();
             $table->foreignId('equipement_id')->constrained('equipements')->cascadeOnDelete();
+            $table->unique(['reservation_id', 'equipement_id']);
             $table->unsignedInteger('quantity');
-            $table->softDeletes();
             $table->timestamps();
         });
     }

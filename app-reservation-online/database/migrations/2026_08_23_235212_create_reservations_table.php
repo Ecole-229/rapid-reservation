@@ -13,14 +13,13 @@ return new class extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
-            $table->timestamp('date_heure_reservation_debut');
-            $table->date('date_fin_reservation');
-            $table->time('durer_reservation');
-            $table->integer('nombre_personne');
-            $table->enum('status' , ['attente' , 'confrimer' , 'rejecter' , 'terminer'])->default('attente');
+            $table->dateTime('date_heure_debut');
+            $table->dateTime('date_heure_fin');
+            $table->unsignedBigInteger('nombre_personnes');
+            $table->enum('status' , ['en_attente' , 'confirmee' , 'rejetee' , 'terminee'])->default('en_attente');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('salle_id')->references('id')->on('salles')->cascadeOnDelete();
-            $table->timestamp('terminer_at')->nullable();
+            $table->timestamp('terminee_at')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

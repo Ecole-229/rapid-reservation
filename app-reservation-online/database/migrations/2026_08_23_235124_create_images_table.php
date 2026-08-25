@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->string('path');
-            $table->enum('designation' , ['salon' ,  'chambre','douche']);
+            $table->string('designation')->nullable();
             $table->foreignId('salle_id')->references('id')->on('salles')->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
