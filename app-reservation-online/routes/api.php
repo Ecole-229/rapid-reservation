@@ -11,5 +11,6 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/salles', [SalleController::class, 'index']);
 Route::get('/salles/{salle}', [SalleController::class, 'show']);
+Route::get('/salles/{salle}/disponibilites', [SalleController::class, 'disponibilites']);
 
 Route::get('/equipements', [EquipementController::class, 'index']);
