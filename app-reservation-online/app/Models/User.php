@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -12,15 +11,23 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['nom', 'email', 'mot_de_passe' , 'role' , 'telephone'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['nom', 'email', 'mot_de_passe', 'role', 'telephone'])]
+#[Hidden(['mot_de_passe', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-
     use HasFactory, Notifiable, HasApiTokens;
 
-    public function reservations() : HasMany {
+    /**
+     * Spécifie la colonne utilisée pour le mot de passe dans la base de données.
+     */
+    public function getAuthPasswordName(): string
+    {
+        return 'mot_de_passe';
+    }
+
+    public function reservations(): HasMany
+    {
         return $this->hasMany(Reservation::class);
     }
 
@@ -28,7 +35,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'mot_de_passe' => 'hashed',
         ];
     }
 }
+

@@ -10,14 +10,11 @@ return new class extends Migration {
         Schema::create('salles', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
-            $table->unsignedInteger('capacite');
-            $table->text('description')->nullable();
-            $table->enum('status', ['disponible', 'indisponible'])
-                ->default('disponible');
+            $table->unsignedBigInteger('capacite');
+            $table->longText('description')->nullable();
+            $table->enum('status' , ['disponible' , 'indisponible'])->default('disponible');
             $table->string('localisation');
-            $table->decimal('prix', 10, 2);
-            $table->softDeletes();
-            $table->timestamps();
+            $table->decimal('prix' , 10 , 2);
         });
     }
 

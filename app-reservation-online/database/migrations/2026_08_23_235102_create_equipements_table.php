@@ -10,10 +10,9 @@ return new class extends Migration {
         Schema::create('equipements', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
-            $table->text('description')->nullable();
+            $table->longText('description');
             $table->string('image')->nullable();
-            $table->enum('status', ['disponible', 'indisponible'])
-                ->default('disponible');
+            $table->enum('status' , ['disponible' , 'indisponible'])->default('disponible');
             $table->unsignedInteger('stock_total')->default(0);
             $table->softDeletes();
             $table->timestamps();
