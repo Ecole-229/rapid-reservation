@@ -82,7 +82,7 @@ const handleLogout = () => {
           <RouterLink
             v-if="authStore.isAdmin"
             to="/admin/home"
-            class="rounded-xl bg-purple-100 px-4 py-2 text-[13px] font-bold text-purple-800 transition hover:bg-purple-200"
+            class="rounded-xl bg-[#EEF2FF] px-4 py-2 text-[13px] font-bold text-[#3730A3] transition hover:bg-[#E0E7FF]"
           >
             Dashboard Admin
           </RouterLink>
