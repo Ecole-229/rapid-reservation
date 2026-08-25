@@ -142,4 +142,24 @@ class ReservationController extends Controller
             'data' => $reservation,
         ], 201);
     }
+
+    public function destroy(Request $request, Reservation $reservation): JsonResponse
+    {
+        if ($reservation->user_id !== $request->user()->id) {
+            abort(403, 'Vous ne pouvez annuler que vos propres réservations.');
+        }
+
+        if (!in_array($reservation->status, ['en_attente', 'confirmee'])) {
+            throw ValidationException::withMessages([
+                'status' => ["Cette réservation ne peut plus être annulée (statut actuel : {$reservation->status})."],
+            ]);
+        }
+
+        $reservation->update(['status' => 'annulee']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réservation annulée avec succès.',
+        ]);
+    }
 }
