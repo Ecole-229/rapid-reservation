@@ -12,7 +12,7 @@ class Salle extends Model
 {
     use SoftDeletes;
 
-   protected $fillable = [ 'nom' , 'description' , 'capacite' , 'status', 'description' , 'prix', 'localisation'];
+   protected $fillable = [ 'nom' , 'description', 'capacite' , 'status'  , 'prix', 'localisation'];
 
    public function reservations(): HasMany {
     return $this->hasMany(Reservation::class);

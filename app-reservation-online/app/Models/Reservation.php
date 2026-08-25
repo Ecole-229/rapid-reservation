@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Reservation extends Model
 {
-    protected $fillable = ['date_heure_reservation_debut' , 'date_fin_reservation' , 'durer_reservation' , 'nombre_personnes' , 'status' , 'user_id' , 'completed_at'] ;
+    protected $fillable = ['date_heure_debut' , 'date_heure_fin' , 'nombre_personnes' , 'status' , 'user_id', 'salle_id' , 'terminee_at'] ;
 
     public function user(): BelongsTo {
         return $this->belongsTo(User::class) ;
@@ -21,4 +21,10 @@ class Reservation extends Model
     public function equipements(): BelongsToMany {
         return $this->belongsToMany(Equipement::class)->withPivot('quantity') ;
     }
+
+    protected $casts = [
+        'date_heure_debut' => 'datetime',
+        'date_heure_fin' => 'datetime',
+        'terminee_at' => 'datetime',
+    ];
 }

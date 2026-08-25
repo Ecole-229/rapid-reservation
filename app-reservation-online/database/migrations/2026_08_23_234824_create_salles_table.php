@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->unsignedBigInteger('capacite');
-            $table->longText('description');
-            $table->enum('status' , ['disponible' , 'reserver'])->default('disponible');
-            $table->string('localisation' , 255);
-            $table->decimal('prix' , 8 , 2);
+            $table->longText('description')->nullable();
+            $table->enum('status' , ['disponible' , 'indisponible'])->default('disponible');
+            $table->string('localisation');
+            $table->decimal('prix' , 10 , 2);
             $table->softDeletes();
             $table->timestamps();
         });

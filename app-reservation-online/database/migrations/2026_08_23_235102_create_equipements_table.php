@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('equipements', function (Blueprint $table) {
             $table->id();
-            $table->string('nom' , 255);
-            $table->string('description');
-            $table->string('image');
+            $table->string('nom');
+            $table->longText('description');
+            $table->string('image')->nullable();
             $table->enum('status' , ['disponible' , 'indisponible'])->default('disponible');
-            $table->integer('stock_total');
+            $table->unsignedInteger('stock_total')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

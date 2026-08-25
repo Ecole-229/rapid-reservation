@@ -17,9 +17,16 @@ return new class extends Migration
             $table->dateTime('date_heure_fin');
             $table->unsignedBigInteger('nombre_personnes');
             $table->enum('status' , ['en_attente' , 'confirmee' , 'rejetee' , 'terminee'])->default('en_attente');
-            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreignId('salle_id')->references('id')->on('salles')->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->foreignId('salle_id')
+                ->constrained('salles')
+                ->cascadeOnDelete();
+
             $table->timestamp('terminee_at')->nullable();
+            
             $table->softDeletes();
             $table->timestamps();
         });
