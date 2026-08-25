@@ -10,9 +10,19 @@ class Equipement extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['nom' , 'description' , 'status' , 'stock_total' ,'image'];
+    protected $fillable = [
+        'nom',
+        'description',
+        'status',
+        'stock_total',
+        'image',
+    ];
 
-    public function reservations(): BelongsToMany {
-        return $this->belongsToMany(Reservation::class)->withPivot('quantity') ;
+    public function reservations(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Reservation::class,
+            'equipement_reservation'
+        )->withPivot('quantity');
     }
 }
