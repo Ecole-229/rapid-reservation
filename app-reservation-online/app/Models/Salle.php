@@ -28,4 +28,13 @@ class Salle extends Model
     {
         return $this->hasMany(Image::class);
     }
+
+    public function estDisponible(\DateTimeInterface $debut, \DateTimeInterface $fin): bool
+    {
+        return !$this->reservations()
+            ->whereIn('status', ['en_attente', 'confirmee'])
+            ->where('date_heure_debut', '<', $fin)
+            ->where('date_heure_fin', '>', $debut)
+            ->exists();
+    }
 }
