@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\SalleController as AdminSalleController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
@@ -18,5 +19,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('users/role/{role}', [AdminUserController::class, 'byRole']);
         Route::apiResource('users', AdminUserController::class);
+        Route::apiResource('salles', AdminSalleController::class);
     });
 });
