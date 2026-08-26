@@ -1,12 +1,15 @@
+import CreateSalle from '@/views/admin/CreateSalle.vue'
 import CreateUser from '@/views/admin/CreateUser.vue'
+import InfosSalle from '@/views/admin/InfosSalle.vue'
 import InfosUser from '@/views/admin/InfosUser.vue'
+import UpdateSalle from '@/views/admin/UpdateSalle.vue'
+import UpdateUser from '@/views/admin/UpdateUser.vue'
 import Dashbord from '@/views/admin/layouts/Dashbord.vue'
 import Equipements from '@/views/admin/layouts/Equipements.vue'
 import Galeries from '@/views/admin/layouts/Galeries.vue'
 import Reservations from '@/views/admin/layouts/Reservations.vue'
 import Salles from '@/views/admin/layouts/Salles.vue'
 import Users from '@/views/admin/layouts/Users.vue'
-import UpdateUser from '@/views/admin/UpdateUser.vue'
 import Login from '@/views/auth/Login.vue'
 import Register from '@/views/auth/Register.vue'
 import Home from '@/views/Home.vue'
@@ -20,27 +23,28 @@ const routes = [
     component: Home,
     meta: { requiresAuth: true, role: 'user' },
   },
+
+  // ==========================================
+  // ADMIN — UTILISATEURS
+  // ==========================================
   {
     path: '/admin/users',
     name: 'admin-users',
     component: Users,
     meta: { requiresAuth: true, role: 'admin' },
   },
-
   {
     path: '/admin/create-user',
     name: 'create-user',
     component: CreateUser,
     meta: { requiresAuth: true, role: 'admin' },
   },
-
   {
     path: '/admin/update-user/:id',
     name: 'update-user',
     component: UpdateUser,
     meta: { requiresAuth: true, role: 'admin' },
   },
-
   {
     path: '/admin/info-user/:id',
     name: 'info-user',
@@ -48,6 +52,37 @@ const routes = [
     meta: { requiresAuth: true, role: 'admin' },
   },
 
+  // ==========================================
+  // ADMIN — SALLES
+  // ==========================================
+  {
+    path: '/admin/salles',
+    name: 'admin-salles',
+    component: Salles,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/create-salle',
+    name: 'create-salle',
+    component: CreateSalle,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/update-salle/:id',
+    name: 'update-salle',
+    component: UpdateSalle,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/info-salle/:id',
+    name: 'info-salle',
+    component: InfosSalle,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
+  // ==========================================
+  // ADMIN — AUTRES
+  // ==========================================
   {
     path: '/admin/dashboard',
     name: 'admin-dashboard',
@@ -61,13 +96,6 @@ const routes = [
     meta: { requiresAuth: true, role: 'admin' },
   },
   {
-    path: '/admin/salles',
-    name: 'admin-salles',
-    component: Salles,
-    meta: { requiresAuth: true, role: 'admin' },
-  },
-
-  {
     path: '/admin/equipments',
     name: 'admin-equipments',
     component: Equipements,
@@ -79,12 +107,20 @@ const routes = [
     component: Galeries,
     meta: { requiresAuth: true, role: 'admin' },
   },
+
+  // ==========================================
+  // RESPONSABLE
+  // ==========================================
   {
     path: '/responsable/home',
     name: 'responsable-home',
     component: AppResponsable,
     meta: { requiresAuth: true, role: 'responsable' },
   },
+
+  // ==========================================
+  // AUTH
+  // ==========================================
   {
     path: '/auth/login',
     name: 'login',
@@ -97,6 +133,7 @@ const routes = [
     component: Register,
     meta: { guestOnly: true },
   },
+
   // Redirection par défaut pour les routes inexistantes
   {
     path: '/:pathMatch(.*)*',
@@ -139,7 +176,6 @@ router.beforeEach((to, from, next) => {
 
   // 3. Vérification du rôle requis
   if (to.meta.role && user?.role !== to.meta.role) {
-    // Si l'utilisateur n'a pas le bon rôle, on le redirige selon son rôle réel
     if (user?.role === 'admin') {
       return next({ name: 'admin-users' })
     } else if (user?.role === 'responsable') {
@@ -152,4 +188,3 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
-
