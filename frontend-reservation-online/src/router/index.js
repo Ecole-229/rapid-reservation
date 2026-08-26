@@ -1,4 +1,3 @@
-
 import Dashbord from '@/views/admin/layouts/Dashbord.vue'
 import Equipements from '@/views/admin/layouts/Equipements.vue'
 import Galeries from '@/views/admin/layouts/Galeries.vue'
