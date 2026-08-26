@@ -1,9 +1,12 @@
+import CreateUser from '@/views/admin/CreateUser.vue'
+import InfosUser from '@/views/admin/InfosUser.vue'
 import Dashbord from '@/views/admin/layouts/Dashbord.vue'
 import Equipements from '@/views/admin/layouts/Equipements.vue'
 import Galeries from '@/views/admin/layouts/Galeries.vue'
 import Reservations from '@/views/admin/layouts/Reservations.vue'
 import Salles from '@/views/admin/layouts/Salles.vue'
 import Users from '@/views/admin/layouts/Users.vue'
+import UpdateUser from '@/views/admin/UpdateUser.vue'
 import Login from '@/views/auth/Login.vue'
 import Register from '@/views/auth/Register.vue'
 import Home from '@/views/Home.vue'
@@ -15,6 +18,7 @@ const routes = [
     path: '/',
     name: 'home',
     component: Home,
+    meta: { requiresAuth: true, role: 'user' },
   },
   {
     path: '/admin/users',
@@ -22,6 +26,34 @@ const routes = [
     component: Users,
     meta: { requiresAuth: true, role: 'admin' },
   },
+
+  {
+    path: '/admin/create-user',
+    name: 'create-user',
+    component: CreateUser,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
+  {
+    path: '/admin/delete-user/:id',
+    name: 'delete-user',
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
+  {
+    path: '/admin/update-user/:id',
+    name: 'update-user',
+    component: UpdateUser,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
+  {
+    path: '/admin/info-user/:id',
+    name: 'info-user',
+    component: InfosUser,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
   {
     path: '/admim/dashboard',
     name: 'admin-dashboard',

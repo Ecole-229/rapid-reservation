@@ -36,10 +36,16 @@ const createDropdownRef = ref(null)
 
 // Définition des options de création
 const createOptions = [
+
+    {
+
+        label: 'Ajouter',
+        routeName: '#',
+    } ,
     {
         key: 'user',
         label: 'Utilisateur',
-        routeName: 'admin-users',
+        routeName: 'create-user',
         icon: 'UserPlus',
         color: '#818CF8',
         desc: 'Gérer les comptes',
@@ -76,6 +82,8 @@ const createOptions = [
         color: '#F9A8D4',
         desc: 'Photos & médias',
     },
+
+
 ]
 
 // Option par défaut basée sur la route active
