@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -16,7 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
 
     /**
      * Spécifie la colonne utilisée pour le mot de passe dans la base de données.
@@ -29,6 +30,54 @@ class User extends Authenticatable
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isResponsable(): bool
+    {
+        return $this->role === 'responsable';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    /**
+     * Scope pour filtrer par rôle(s).
+     */
+    public function scopeRole($query, string|array $roles)
+    {
+        if (is_array($roles)) {
+            return $query->whereIn('role', $roles);
+        }
+
+        if (str_contains($roles, ',')) {
+            $roleArray = array_map('trim', explode(',', $roles));
+            return $query->whereIn('role', $roleArray);
+        }
+
+        return $query->where('role', $roles);
+    }
+
+    /**
+     * Scope pour la recherche par nom, email ou téléphone.
+     */
+    public function scopeSearch($query, ?string $search)
+    {
+        if (empty($search)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($search) {
+            $q->where('nom', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('telephone', 'like', "%{$search}%");
+        });
     }
 
     protected function casts(): array
