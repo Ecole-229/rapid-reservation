@@ -35,12 +35,6 @@ const routes = [
   },
 
   {
-    path: '/admin/delete-user/:id',
-    name: 'delete-user',
-    meta: { requiresAuth: true, role: 'admin' },
-  },
-
-  {
     path: '/admin/update-user/:id',
     name: 'update-user',
     component: UpdateUser,
@@ -55,7 +49,7 @@ const routes = [
   },
 
   {
-    path: '/admim/dashboard',
+    path: '/admin/dashboard',
     name: 'admin-dashboard',
     component: Dashbord,
     meta: { requiresAuth: true, role: 'admin' },
