@@ -42,7 +42,7 @@ export const useAuthStore = defineStore("auth", {
 
     redirectUserByRole(role) {
       if (role === "admin") {
-        router.push({ name: "admin-home" });
+        router.push({ name: "admin-users" });
       } else if (role === "responsable") {
         router.push({ name: "responsable-home" });
       } else {
@@ -51,6 +51,10 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async login(payload) {
+      // Réinitialisation complète avant la requête
+      this.errors = {};
+      this.errorMessage = null;
+      this.successMessage = null;
       this.clearErrors();
       this.loading = true;
 
