@@ -18,7 +18,7 @@ const routes = [
   },
   {
     path: '/admin/users',
-    name: 'admin-user',
+    name: 'admin-users',
     component: Users,
     meta: { requiresAuth: true, role: 'admin' },
   },
@@ -99,7 +99,7 @@ router.beforeEach((to, from, next) => {
   // 1. Si la route requiert d'être invité (login/register) et que l'utilisateur est déjà connecté
   if (to.meta.guestOnly && token) {
     if (user?.role === 'admin') {
-      return next({ name: 'admin-home' })
+      return next({ name: 'admin-users' })
     } else if (user?.role === 'responsable') {
       return next({ name: 'responsable-home' })
     }

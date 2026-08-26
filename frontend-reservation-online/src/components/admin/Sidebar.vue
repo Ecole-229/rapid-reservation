@@ -67,7 +67,7 @@ const router = useRouter()
                     USER
                 </p>
 
-                <RouterLink :to="{name : 'admin-user'}"
+                <RouterLink :to="{name : 'admin-users'}"
                     class="flex h-[50px] w-full items-center gap-4 rounded-[10px]
                            bg-[#EEF2FF] px-3 text-left transition-all duration-150 active:scale-[0.98]"
                 >

@@ -39,7 +39,7 @@ const createOptions = [
     {
         key: 'user',
         label: 'Utilisateur',
-        routeName: 'admin-user',
+        routeName: 'admin-users',
         icon: 'UserPlus',
         color: '#818CF8',
         desc: 'Gérer les comptes',
@@ -295,7 +295,7 @@ onUnmounted(() => {
                     </div>
                 </div>
 
-                
+
 
                 <!-- PROFILE MENU (DROPDOWN) -->
                 <div ref="profileDropdownRef" class="relative">
