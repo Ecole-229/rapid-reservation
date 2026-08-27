@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware(['auth:sanctum', 'role:responsable'])->prefix('responsable')->group(function () {
     Route::get('/reservations', [ResponsableReservationController::class, 'index']);
+    Route::post('/reservations', [ResponsableReservationController::class, 'store']);
     Route::patch('/reservations/{reservation}/confirmer', [ResponsableReservationController::class, 'confirmer']);
     Route::patch('/reservations/{reservation}/rejeter', [ResponsableReservationController::class, 'rejeter']);
 });

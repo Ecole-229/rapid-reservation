@@ -19,6 +19,9 @@ class Reservation extends Model
         'user_id',
         'salle_id',
         'terminee_at',
+        'nom_client',
+        'telephone_client',
+        'cree_par_id',
     ];
 
     protected $casts = [
@@ -26,6 +29,8 @@ class Reservation extends Model
         'date_heure_fin' => 'datetime',
         'terminee_at' => 'datetime',
     ];
+
+    protected $appends = ['nom_demandeur'];
 
     public function user(): BelongsTo
     {
@@ -43,5 +48,15 @@ class Reservation extends Model
             Equipement::class,
             'equipement_reservation'
         )->withPivot('quantity');
+    }
+
+    public function creePar(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cree_par_id');
+    }
+
+    public function getNomDemandeurAttribute(): string
+    {
+        return $this->user?->nom ?? $this->nom_client ?? 'Client sans compte';
     }
 }
