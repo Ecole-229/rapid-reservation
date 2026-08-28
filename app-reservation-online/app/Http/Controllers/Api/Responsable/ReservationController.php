@@ -15,7 +15,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $reservations = Reservation::with(['user', 'salle', 'equipements', 'creePar'])
+        $reservations = Reservation::with(['user', 'salle.image', 'equipements', 'creePar'])
             ->latest()
             ->get();
 
@@ -95,7 +95,7 @@ class ReservationController extends Controller
             return $reservation;
         });
 
-        $reservation->load(['salle', 'equipements', 'creePar']);
+        $reservation->load(['salle.image', 'equipements', 'creePar']);
 
         return response()->json([
             'success' => true,
@@ -113,7 +113,7 @@ class ReservationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Réservation confirmée.',
-            'data' => $reservation->load(['user', 'salle', 'equipements']),
+            'data' => $reservation->load(['user', 'salle.image', 'equipements']),
         ]);
     }
 
@@ -126,7 +126,7 @@ class ReservationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Réservation rejetée.',
-            'data' => $reservation->load(['user', 'salle', 'equipements']),
+            'data' => $reservation->load(['user', 'salle.image', 'equipements']),
         ]);
     }
 

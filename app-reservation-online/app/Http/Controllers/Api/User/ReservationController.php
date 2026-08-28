@@ -15,7 +15,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $reservations = Reservation::with(['salle', 'equipements'])
+        $reservations = Reservation::with(['salle.image', 'equipements'])
             ->where('user_id', $request->user()->id)
             ->latest()
             ->get();
@@ -136,7 +136,7 @@ class ReservationController extends Controller
             return $reservation;
         });
 
-        $reservation->load(['salle', 'equipements']);
+        $reservation->load(['salle.image', 'equipements']);
 
         return response()->json([
             'success' => true,
