@@ -15,6 +15,12 @@ import Register from '@/views/auth/Register.vue'
 import Home from '@/views/Home.vue'
 import AppResponsable from '@/views/responsable/AppResponsable.vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import CreateEquipement from '@/views/admin/CreateEquipement.vue'
+import UpdateEquipement from '@/views/admin/UpdateEquipement.vue'
+import InfosEquipement from '@/views/admin/InfosEquipement.vue'
+import CreateImage from '@/views/admin/CreateImage.vue'
+import UpdateImage from '@/views/admin/UpdateImage.vue'
+import InfosImage from '@/views/admin/InfosImage.vue'
 
 const routes = [
   {
@@ -81,20 +87,30 @@ const routes = [
   },
 
   // ==========================================
-  // ADMIN — AUTRES
+  // ADMIN — DASHBORD
   // ==========================================
+
   {
     path: '/admin/dashboard',
     name: 'admin-dashboard',
     component: Dashbord,
     meta: { requiresAuth: true, role: 'admin' },
   },
+
+  // ==========================================
+  // ADMIN — RESERVATINONS
+  // ==========================================
   {
     path: '/admin/reservations',
     name: 'admin-reservations',
     component: Reservations,
     meta: { requiresAuth: true, role: 'admin' },
   },
+
+  // ==========================================
+  // ADMIN — EQUIPEMENTS
+  // ==========================================
+
   {
     path: '/admin/equipments',
     name: 'admin-equipments',
@@ -102,9 +118,54 @@ const routes = [
     meta: { requiresAuth: true, role: 'admin' },
   },
   {
+    path: '/admin/create-equipment',
+    name: 'create-equipment',
+    component: CreateEquipement,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/update-equipment/:id',
+    name: 'update-equipment',
+    component: UpdateEquipement,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/info-equipment/:id',
+    name: 'info-equipment',
+    component: InfosEquipement,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
+
+  // ==========================================
+  // ADMIN — GALERIES
+  // ==========================================
+
+  {
     path: '/admin/galeries',
     name: 'admin-galeries',
     component: Galeries,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
+  {
+    path: '/admin/create-image',
+    name: 'create-image',
+    component: CreateImage,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
+  {
+    path: '/admin/update-image/:id',
+    name: 'update-image',
+    component: UpdateImage,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+
+  {
+    path: '/admin/info-image/:id',
+    name: 'info-image',
+    component: InfosImage,
     meta: { requiresAuth: true, role: 'admin' },
   },
 

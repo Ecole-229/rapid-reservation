@@ -4,6 +4,7 @@ import {
     Table2,
     SlidersHorizontal,
     Server,
+    Image as ImageIcon,
     File,
     LogIn
 } from 'lucide-vue-next'
@@ -195,7 +196,7 @@ const router = useRouter()
                                rounded-[10px] px-3 text-left
                                transition-colors duration-200 hover:bg-[#F8FAFC] active:scale-[0.98]"
                     >
-                        <Server
+                        <ImageIcon
                             :size="20"
                             :stroke-width="1.6"
                             class="text-[#64748B] transition-colors duration-200 group-hover:text-[#0F172A]"
