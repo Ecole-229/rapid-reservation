@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\ImageController as AdminImageController;
 use App\Http\Controllers\Api\Admin\SalleController as AdminSalleController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
@@ -20,5 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('users/role/{role}', [AdminUserController::class, 'byRole']);
         Route::apiResource('users', AdminUserController::class);
         Route::apiResource('salles', AdminSalleController::class);
+        Route::get('images/salle/{salleId}', [AdminImageController::class, 'bySalle']);
+        Route::apiResource('images', AdminImageController::class);
     });
 });
