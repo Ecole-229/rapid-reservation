@@ -21,6 +21,9 @@ import InfosEquipement from '@/views/admin/InfosEquipement.vue'
 import CreateImage from '@/views/admin/CreateImage.vue'
 import UpdateImage from '@/views/admin/UpdateImage.vue'
 import InfosImage from '@/views/admin/InfosImage.vue'
+import CreateReservation from '@/views/admin/CreateReservation.vue'
+import UpdateReservation from '@/views/admin/UpdateReservation.vue'
+import InfosReservation from '@/views/admin/InfosReservation.vue'
 
 const routes = [
   {
@@ -98,12 +101,30 @@ const routes = [
   },
 
   // ==========================================
-  // ADMIN — RESERVATINONS
+  // ADMIN — RESERVATIONS
   // ==========================================
   {
     path: '/admin/reservations',
     name: 'admin-reservations',
     component: Reservations,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/create-reservation',
+    name: 'create-reservation',
+    component: CreateReservation,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/update-reservation/:id',
+    name: 'update-reservation',
+    component: UpdateReservation,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/info-reservation/:id',
+    name: 'info-reservation',
+    component: InfosReservation,
     meta: { requiresAuth: true, role: 'admin' },
   },
 
