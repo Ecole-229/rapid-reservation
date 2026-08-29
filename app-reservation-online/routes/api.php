@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\EquipementController as AdminEquipementController;
 use App\Http\Controllers\Api\Admin\ImageController as AdminImageController;
+use App\Http\Controllers\Api\Admin\ReservationController as AdminReservationController;
 use App\Http\Controllers\Api\Admin\SalleController as AdminSalleController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
@@ -25,5 +26,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('images/salle/{salleId}', [AdminImageController::class, 'bySalle']);
         Route::apiResource('images', AdminImageController::class);
         Route::apiResource('equipements', AdminEquipementController::class);
+
+        // Gestion des réservations (actions spécifiques & CRUD complet)
+        Route::patch('reservations/{id}/confirm', [AdminReservationController::class, 'confirmer']);
+        Route::patch('reservations/{id}/reject', [AdminReservationController::class, 'rejeter']);
+        Route::patch('reservations/{id}/terminate', [AdminReservationController::class, 'terminer']);
+        Route::apiResource('reservations', AdminReservationController::class);
     });
 });
