@@ -25,9 +25,9 @@ class Reservation extends Model
     ];
 
     protected $casts = [
-        'date_heure_debut' => 'datetime',
-        'date_heure_fin' => 'datetime',
-        'terminee_at' => 'datetime',
+        'date_heure_debut' => 'datetime:Y-m-d H:i:s',
+        'date_heure_fin' => 'datetime:Y-m-d H:i:s',
+        'terminee_at' => 'datetime:Y-m-d H:i:s',
     ];
 
     protected $appends = ['nom_demandeur'];
