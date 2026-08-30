@@ -15,7 +15,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $reservations = Reservation::with(['salle.image', 'equipements'])
+        $reservations = Reservation::with(['salle.images', 'equipements'])
             ->where('user_id', $request->user()->id)
             ->latest()
             ->get();
@@ -31,11 +31,7 @@ class ReservationController extends Controller
         $validated = $request->validate([
             'salle_id' => ['required', 'integer', 'exists:salles,id'],
 
-            'date_heure_debut' => [
-                'required',
-                'date',
-                'after:now',
-            ],
+            'date_heure_debut' => ['required', 'date', 'after_or_equal:now'],
 
             'date_heure_fin' => [
                 'required',
@@ -136,7 +132,7 @@ class ReservationController extends Controller
             return $reservation;
         });
 
-        $reservation->load(['salle.image', 'equipements']);
+        $reservation->load(['salle.images', 'equipements']);
 
         return response()->json([
             'success' => true,

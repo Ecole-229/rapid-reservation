@@ -15,7 +15,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $reservations = Reservation::with(['user', 'salle.image', 'equipements', 'creePar'])
+        $reservations = Reservation::with(['user', 'salle.images', 'equipements', 'creePar'])
             ->latest()
             ->get();
 
@@ -28,17 +28,26 @@ class ReservationController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'nom_client' => ['required', 'string', 'max:255'],
-            'telephone_client' => ['required', 'string', 'max:30'],
+            'nom_client' => [
+                'required',
+                'string',
+                'min:2',
+                'max:100',
+                'regex:/^[\p{L}\s\'-]+$/u',
+            ],
+            'telephone_client' => ['required', 'string', 'regex:/^[0-9+\s().-]{8,20}$/'],
 
             'salle_id' => ['required', 'integer', 'exists:salles,id'],
-            'date_heure_debut' => ['required', 'date', 'after:now'],
+            'date_heure_debut' => ['required', 'date', 'after_or_equal:now'],
             'date_heure_fin' => ['required', 'date', 'after:date_heure_debut'],
-            'nombre_personnes' => ['required', 'integer', 'min:1'],
+            'nombre_personnes' => ['required', 'integer', 'min:1', 'max:500'],
 
-            'equipements' => ['nullable', 'array'],
+            'equipements' => ['nullable', 'array', 'max:20'],
             'equipements.*.equipement_id' => ['required', 'integer', 'distinct', 'exists:equipements,id'],
-            'equipements.*.quantity' => ['required', 'integer', 'min:1'],
+            'equipements.*.quantity' => ['required', 'integer', 'min:1', 'max:1000'],
+        ], [
+            'nom_client.regex' => 'Le nom ne doit contenir que des lettres, espaces, apostrophes et tirets.',
+            'telephone_client.regex' => 'Le numéro de téléphone contient des caractères invalides.',
         ]);
 
         $salle = Salle::findOrFail($validated['salle_id']);
@@ -95,7 +104,7 @@ class ReservationController extends Controller
             return $reservation;
         });
 
-        $reservation->load(['salle.image', 'equipements', 'creePar']);
+        $reservation->load(['salle.images', 'equipements', 'creePar']);
 
         return response()->json([
             'success' => true,
@@ -113,7 +122,7 @@ class ReservationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Réservation confirmée.',
-            'data' => $reservation->load(['user', 'salle.image', 'equipements']),
+            'data' => $reservation->load(['user', 'salle.images', 'equipements']),
         ]);
     }
 
@@ -126,7 +135,7 @@ class ReservationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Réservation rejetée.',
-            'data' => $reservation->load(['user', 'salle.image', 'equipements']),
+            'data' => $reservation->load(['user', 'salle.images', 'equipements']),
         ]);
     }
 
