@@ -18,10 +18,10 @@ class Reservation extends Model
         'status',
         'user_id',
         'salle_id',
-        'terminee_at',
-        'creer_par',
         'nom_client',
         'telephone',
+        'cree_par_id',
+        'terminee_at',
     ];
 
     protected $casts = [
@@ -29,21 +29,24 @@ class Reservation extends Model
         'date_heure_fin' => 'datetime',
         'terminee_at' => 'datetime',
         'nombre_personnes' => 'integer',
+        'user_id' => 'integer',
+        'salle_id' => 'integer',
+        'cree_par_id' => 'integer',
     ];
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function salle(): BelongsTo
     {
-        return $this->belongsTo(Salle::class);
+        return $this->belongsTo(Salle::class, 'salle_id');
     }
 
     public function createur(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'creer_par');
+        return $this->belongsTo(User::class, 'cree_par_id');
     }
 
     public function equipements(): BelongsToMany
@@ -144,14 +147,8 @@ class Reservation extends Model
     {
         return $query->where('salle_id', $salleId)
             ->whereIn('status', ['en_attente', 'confirmee'])
-            ->where(function ($q) use ($debut, $fin) {
-                $q->where(function ($sub) use ($debut, $fin) {
-                    $sub->where('date_heure_debut', '<', $fin)
-                        ->where('date_heure_fin', '>', $debut);
-                });
-            })
-            ->when($excludeId, function ($q) use ($excludeId) {
-                $q->where('id', '!=', $excludeId);
-            });
+            ->where('date_heure_debut', '<', $fin)
+            ->where('date_heure_fin', '>', $debut)
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId));
     }
 }
