@@ -147,4 +147,21 @@ class ReservationController extends Controller
             ]);
         }
     }
+
+    public function annuler(Reservation $reservation): JsonResponse
+    {
+        if (!in_array($reservation->status, ['en_attente', 'confirmee'])) {
+            throw ValidationException::withMessages([
+                'status' => ["Cette réservation a le statut '{$reservation->status}', elle ne peut plus être annulée."],
+            ]);
+        }
+
+        $reservation->update(['status' => 'annulee']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réservation annulée.',
+            'data' => $reservation->load(['user', 'salle', 'equipements', 'creePar']),
+        ]);
+    }
 }

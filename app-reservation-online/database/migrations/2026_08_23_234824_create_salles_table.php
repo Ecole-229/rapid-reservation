@@ -12,9 +12,11 @@ return new class extends Migration {
             $table->string('nom');
             $table->unsignedBigInteger('capacite');
             $table->longText('description')->nullable();
-            $table->enum('status' , ['disponible' , 'indisponible'])->default('disponible');
+            $table->enum('status', ['disponible', 'indisponible'])->default('disponible');
             $table->string('localisation');
-            $table->decimal('prix' , 10 , 2);
+            $table->decimal('prix', 10, 2);
+            $table->softDeletes();
+            $table->timestamps();
         });
     }
 

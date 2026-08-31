@@ -41,6 +41,7 @@ Route::middleware(['auth:sanctum', 'role:responsable'])->prefix('responsable')->
     Route::post('/reservations', [ResponsableReservationController::class, 'store']);
     Route::patch('/reservations/{reservation}/confirmer', [ResponsableReservationController::class, 'confirmer']);
     Route::patch('/reservations/{reservation}/rejeter', [ResponsableReservationController::class, 'rejeter']);
+    Route::patch('/reservations/{reservation}/annuler', [ResponsableReservationController::class, 'annuler']);
 });
 
 
