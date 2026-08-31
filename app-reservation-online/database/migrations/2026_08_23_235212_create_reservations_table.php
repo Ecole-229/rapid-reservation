@@ -12,14 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reservations', function (Blueprint $table) {
-            
+
             $table->id();
             $table->dateTime('date_heure_debut');
             $table->dateTime('date_heure_fin');
             $table->unsignedBigInteger('nombre_personnes');
             $table->enum('status' , ['en_attente' , 'confirmee' , 'rejetee' , 'terminee'])->default('en_attente');
             $table->foreignId('user_id')
-                ->nullable()
                 ->constrained('users')
                 ->cascadeOnDelete();
 
@@ -31,10 +30,6 @@ return new class extends Migration
 
             $table->timestamp('terminee_at')->nullable();
 
-            $table->foreignId('creer_par')
-                ->nullable()
-                ->constrained('users')
-                ->cascadeOnDelete();
 
             $table->string('nom_client')->nullable();
             $table->string('telephone')->nullable();

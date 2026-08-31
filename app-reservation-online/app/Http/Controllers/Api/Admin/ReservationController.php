@@ -136,7 +136,7 @@ class ReservationController extends Controller
                 'date_heure_fin' => $validated['date_heure_fin'],
                 'nombre_personnes' => $validated['nombre_personnes'],
                 'status' => $validated['status'] ?? 'confirmee',
-                'creer_par' => $request->user() ? $request->user()->id : null,
+                'cree_par_id' => $request->user()?->id,
             ]);
 
             // Attacher les équipements avec les quantités
@@ -288,15 +288,13 @@ class ReservationController extends Controller
                 ], 404);
             }
 
-            // Vérifier les conflits éventuels avec une autre réservation confirmée
-            $conflict = Reservation::where('salle_id', $reservation->salle_id)
-                ->where('id', '!=', $reservation->id)
-                ->where('status', 'confirmee')
-                ->where(function ($q) use ($reservation) {
-                    $q->where('date_heure_debut', '<', $reservation->date_heure_fin)
-                        ->where('date_heure_fin', '>', $reservation->date_heure_debut);
-                })
-                ->first();
+            // Vérifier les conflits éventuels avec une autre réservation déjà confirmée
+            $conflict = Reservation::overlapping(
+                $reservation->salle_id,
+                (string) $reservation->date_heure_debut,
+                (string) $reservation->date_heure_fin,
+                $reservation->id
+            )->where('status', 'confirmee')->first();
 
             if ($conflict) {
                 return response()->json([

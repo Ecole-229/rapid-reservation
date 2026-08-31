@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
 
 
         User::create([
-            'nom' => 'Roméo',
+            'nom' => 'git pull ',
             'role' => 'responsable',
             'email' => 'roméo@gmail.com',
             'mot_de_passe' => Hash::make('22222222'),

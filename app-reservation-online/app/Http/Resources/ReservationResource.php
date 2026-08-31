@@ -29,7 +29,7 @@ class ReservationResource extends JsonResource
             'user' => new UserResource($this->whenLoaded('user')),
             'salle_id' => (int) $this->salle_id,
             'salle' => new SalleResource($this->whenLoaded('salle')),
-            'creer_par' => $this->creer_par,
+            'cree_par_id' => $this->cree_par_id ? (int) $this->cree_par_id : null,
             'createur' => new UserResource($this->whenLoaded('createur')),
             'equipements' => $this->whenLoaded('equipements', function () {
                 return $this->equipements->map(function ($equipement) {
