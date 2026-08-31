@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class Equipement extends Model
@@ -15,9 +16,36 @@ class Equipement extends Model
 
     protected $appends = ['image_url'];
 
+    protected static function booted(): void
+    {
+        static::saving(function (Equipement $equipement) {
+            if ($equipement->stock_total <= 0) {
+                $equipement->status = 'indisponible';
+            }
+        });
+    }
+
     public function reservations(): BelongsToMany
     {
         return $this->belongsToMany(Reservation::class)->withPivot('quantity');
+    }
+
+    /**
+     * Calcule le stock disponible pour cet équipement sur une plage horaire donnée.
+     */
+    public function getAvailableStockForPeriod(string $debut, string $fin, ?int $excludeReservationId = null): int
+    {
+        $quantiteReservee = DB::table('equipement_reservation')
+            ->join('reservations', 'reservations.id', '=', 'equipement_reservation.reservation_id')
+            ->where('equipement_reservation.equipement_id', $this->id)
+            ->whereNull('reservations.deleted_at')
+            ->whereIn('reservations.status', ['en_attente', 'confirmee'])
+            ->where('reservations.date_heure_debut', '<', $fin)
+            ->where('reservations.date_heure_fin', '>', $debut)
+            ->when($excludeReservationId, fn ($q) => $q->where('reservations.id', '!=', $excludeReservationId))
+            ->sum('equipement_reservation.quantity');
+
+        return max(0, (int) $this->stock_total - (int) $quantiteReservee);
     }
 
     /**
