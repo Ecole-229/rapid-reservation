@@ -99,14 +99,58 @@ class ReservationController extends Controller
             ], 404);
         }
 
+        // Vérification du statut de la salle (impossible de réserver une salle indisponible)
+        if ($salle->status !== 'disponible') {
+            return response()->json([
+                'message' => "Impossible : la salle '{$salle->nom}' est actuellement indisponible.",
+                'errors' => [
+                    'salle_id' => ["Impossible de réserver la salle '{$salle->nom}' car elle est actuellement indisponible."],
+                ],
+            ], 422);
+        }
+
         // Vérification de la capacité de la salle
         if ($validated['nombre_personnes'] > $salle->capacite) {
             return response()->json([
-                'message' => "Le nombre de personnes ({$validated['nombre_personnes']}) dépasse la capacité maximale de la salle '{$salle->nom}' ({$salle->capacite} places).",
+                'message' => "Impossible : le nombre de personnes ({$validated['nombre_personnes']}) dépasse la capacité maximale de la salle '{$salle->nom}' ({$salle->capacite} places).",
                 'errors' => [
                     'nombre_personnes' => ["La capacité maximale est de {$salle->capacite} places."],
                 ],
             ], 422);
+        }
+
+        // Vérification de la disponibilité et du stock des équipements demandés sur le créneau horaire
+        if (!empty($validated['equipements']) && is_array($validated['equipements'])) {
+            foreach ($validated['equipements'] as $item) {
+                $equipement = Equipement::find($item['id']);
+                if (!$equipement) {
+                    continue;
+                }
+
+                if ($equipement->status !== 'disponible' || $equipement->stock_total <= 0) {
+                    return response()->json([
+                        'message' => "Impossible : l'équipement '{$equipement->nom}' est actuellement indisponible ou en rupture de stock.",
+                        'errors' => [
+                            'equipements' => ["Impossible de réserver l'équipement '{$equipement->nom}' car il est indisponible ou en rupture de stock."],
+                        ],
+                    ], 422);
+                }
+
+                $requestedQty = (int) ($item['quantity'] ?? 1);
+                $availableStockOnPeriod = $equipement->getAvailableStockForPeriod(
+                    $validated['date_heure_debut'],
+                    $validated['date_heure_fin']
+                );
+
+                if ($requestedQty > $availableStockOnPeriod) {
+                    return response()->json([
+                        'message' => "Impossible : stock insuffisant pour l'équipement '{$equipement->nom}' sur ce créneau horaire. Stock restant : {$availableStockOnPeriod}, demandé : {$requestedQty}.",
+                        'errors' => [
+                            'equipements' => ["Impossible de réserver l'équipement '{$equipement->nom}' sur ce créneau horaire (stock disponible : {$availableStockOnPeriod})."],
+                        ],
+                    ], 422);
+                }
+            }
         }
 
         // Vérification des conflits de disponibilité de la salle
@@ -118,9 +162,9 @@ class ReservationController extends Controller
 
         if ($conflict) {
             return response()->json([
-                'message' => "La salle '{$salle->nom}' est déjà réservée sur ce créneau horaire (du {$conflict->date_heure_debut->format('d/m/Y H:i')} au {$conflict->date_heure_fin->format('d/m/Y H:i')}).",
+                'message' => "Impossible : la salle '{$salle->nom}' est déjà réservée sur ce créneau horaire (du {$conflict->date_heure_debut->format('d/m/Y H:i')} au {$conflict->date_heure_fin->format('d/m/Y H:i')}).",
                 'errors' => [
-                    'date_heure_debut' => ['Ce créneau horaire chevauche une réservation existante.'],
+                    'date_heure_debut' => ["Impossible de réserver ce créneau horaire car il chevauche une réservation existante."],
                 ],
             ], 422);
         }
@@ -136,6 +180,7 @@ class ReservationController extends Controller
                 'date_heure_fin' => $validated['date_heure_fin'],
                 'nombre_personnes' => $validated['nombre_personnes'],
                 'status' => $validated['status'] ?? 'confirmee',
+                
                 'cree_par_id' => $request->user()?->id,
             ]);
 
@@ -219,14 +264,59 @@ class ReservationController extends Controller
             ], 404);
         }
 
+        // Vérification du statut de la salle
+        if ($salle->status !== 'disponible') {
+            return response()->json([
+                'message' => "Impossible : la salle '{$salle->nom}' est actuellement indisponible et ne peut pas être réservée.",
+                'errors' => [
+                    'salle_id' => ["Impossible de réserver la salle '{$salle->nom}' car elle est actuellement indisponible."],
+                ],
+            ], 422);
+        }
+
         // Vérification de la capacité
         if ($nombrePersonnes > $salle->capacite) {
             return response()->json([
-                'message' => "Le nombre de personnes ({$nombrePersonnes}) dépasse la capacité maximale ({$salle->capacite} places).",
+                'message' => "Impossible : le nombre de personnes ({$nombrePersonnes}) dépasse la capacité maximale de la salle '{$salle->nom}' ({$salle->capacite} places).",
                 'errors' => [
-                    'nombre_personnes' => ["La capacité maximale est de {$salle->capacite} places."],
+                    'nombre_personnes' => ["Impossible : la capacité maximale est de {$salle->capacite} places."],
                 ],
             ], 422);
+        }
+
+        // Vérification de la disponibilité et du stock des équipements sur le créneau horaire
+        if (isset($validated['equipements']) && is_array($validated['equipements'])) {
+            foreach ($validated['equipements'] as $item) {
+                $equipement = Equipement::find($item['id']);
+                if (!$equipement) {
+                    continue;
+                }
+
+                if ($equipement->status !== 'disponible' || $equipement->stock_total <= 0) {
+                    return response()->json([
+                        'message' => "Impossible : l'équipement '{$equipement->nom}' est actuellement indisponible ou en rupture de stock.",
+                        'errors' => [
+                            'equipements' => ["Impossible de réserver l'équipement '{$equipement->nom}' car il est indisponible ou en rupture de stock."],
+                        ],
+                    ], 422);
+                }
+
+                $requestedQty = (int) ($item['quantity'] ?? 1);
+                $availableStockOnPeriod = $equipement->getAvailableStockForPeriod(
+                    (string) $debut,
+                    (string) $fin,
+                    $reservation->id
+                );
+
+                if ($requestedQty > $availableStockOnPeriod) {
+                    return response()->json([
+                        'message' => "Impossible : stock insuffisant pour l'équipement '{$equipement->nom}' sur ce créneau horaire. Stock restant : {$availableStockOnPeriod}, demandé : {$requestedQty}.",
+                        'errors' => [
+                            'equipements' => ["Impossible de réserver l'équipement '{$equipement->nom}' sur ce créneau horaire (stock disponible : {$availableStockOnPeriod})."],
+                        ],
+                    ], 422);
+                }
+            }
         }
 
         // Vérification des conflits si dates ou salle modifiées
@@ -239,9 +329,9 @@ class ReservationController extends Controller
 
         if ($conflict) {
             return response()->json([
-                'message' => "La salle '{$salle->nom}' est déjà réservée sur ce créneau horaire.",
+                'message' => "Impossible : la salle '{$salle->nom}' est déjà réservée sur ce créneau horaire (du {$conflict->date_heure_debut->format('d/m/Y H:i')} au {$conflict->date_heure_fin->format('d/m/Y H:i')}).",
                 'errors' => [
-                    'date_heure_debut' => ['Ce créneau horaire chevauche une autre réservation.'],
+                    'date_heure_debut' => ["Impossible de réserver ce créneau horaire car il chevauche une réservation existante."],
                 ],
             ], 422);
         }
@@ -280,12 +370,41 @@ class ReservationController extends Controller
     public function confirmer(string $id): JsonResponse
     {
         try {
-            $reservation = Reservation::find($id);
+            $reservation = Reservation::with(['salle', 'equipements'])->find($id);
 
             if (!$reservation) {
                 return response()->json([
                     'message' => 'Réservation introuvable.',
                 ], 404);
+            }
+
+            // Vérification de la disponibilité de la salle
+            if ($reservation->salle && $reservation->salle->status !== 'disponible') {
+                return response()->json([
+                    'message' => "Impossible de confirmer : la salle '{$reservation->salle->nom}' est actuellement marquée comme indisponible.",
+                ], 422);
+            }
+
+            // Vérification de la disponibilité et du stock des équipements associés sur le créneau
+            foreach ($reservation->equipements as $equipement) {
+                if ($equipement->status !== 'disponible' || $equipement->stock_total <= 0) {
+                    return response()->json([
+                        'message' => "Impossible de confirmer : l'équipement '{$equipement->nom}' est actuellement indisponible ou en rupture de stock.",
+                    ], 422);
+                }
+
+                $requestedQty = (int) ($equipement->pivot->quantity ?? 1);
+                $availableStockOnPeriod = $equipement->getAvailableStockForPeriod(
+                    (string) $reservation->date_heure_debut,
+                    (string) $reservation->date_heure_fin,
+                    $reservation->id
+                );
+
+                if ($requestedQty > $availableStockOnPeriod) {
+                    return response()->json([
+                        'message' => "Impossible de confirmer : stock insuffisant pour l'équipement '{$equipement->nom}' sur ce créneau horaire (restant : {$availableStockOnPeriod}, demandé : {$requestedQty}).",
+                    ], 422);
+                }
             }
 
             // Vérifier les conflits éventuels avec une autre réservation déjà confirmée
