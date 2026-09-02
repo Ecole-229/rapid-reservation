@@ -24,8 +24,24 @@ import InfosImage from '@/views/admin/InfosImage.vue'
 import CreateReservation from '@/views/admin/CreateReservation.vue'
 import UpdateReservation from '@/views/admin/UpdateReservation.vue'
 import InfosReservation from '@/views/admin/InfosReservation.vue'
+import SallesUser from '@/views/SallesUser.vue'
+import EquipementsUser from '@/views/EquipementsUser.vue'
 
 const routes = [
+
+  {
+    path: '/salles',
+    name: 'salles',
+    component: SallesUser,
+  },
+
+  {
+    path: '/equipements',
+    name: 'equipements',
+    component: EquipementsUser ,
+  },
+
+
   {
     path: '/',
     name: 'home',

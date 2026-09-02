@@ -1,254 +1,100 @@
 <script setup>
 import { ref } from 'vue'
-import { ArrowRight } from 'lucide-vue-next'
+import { Plus, X } from 'lucide-vue-next'
 
-const activeFaq = ref(null)
+// Premier élément ouvert par défaut (index 0)
+const openIndex = ref(0)
 
 const faqs = [
-    {
-        question: 'Qu’est-ce que RoomBook ?',
-        answer:
-            'RoomBook est une plateforme de réservation qui permet de consulter les disponibilités et de réserver facilement des salles et des équipements.',
-    },
-    {
-        question: 'À qui s’adresse RoomBook ?',
-        answer:
-            'RoomBook s’adresse aux entreprises, établissements, organisations et particuliers qui souhaitent réserver des espaces ou des équipements.',
-    },
-    {
-        question: 'Comment réserver une salle ?',
-        answer:
-            'Choisissez une salle, sélectionnez la date et l’heure souhaitées, indiquez le nombre de personnes puis confirmez votre réservation.',
-    },
-    {
-        question: 'Puis-je réserver des équipements ?',
-        answer:
-            'Oui. Vous pouvez réserver les équipements disponibles avec une salle ou effectuer une réservation selon les équipements proposés.',
-    },
-    {
-        question: 'Comment savoir si une salle est disponible ?',
-        answer:
-            'Le calendrier de disponibilité vous permet de consulter les créneaux disponibles avant de confirmer votre réservation.',
-    },
-    {
-        question: 'Puis-je annuler une réservation ?',
-        answer:
-            'Oui, une réservation peut être annulée selon les conditions définies par l’établissement ou le responsable de la salle.',
-    },
+  {
+    question: 'Comment puis-je réserver une salle ou un équipement ?',
+    answer: 'Il vous suffit de sélectionner la salle ou l’équipement souhaité, de choisir la date et les créneaux horaires disponibles, puis de valider votre demande en quelques clics.',
+  },
+  {
+    question: 'Mes informations de réservation sont-elles sécurisées ?',
+    answer: 'Oui, nous prenons la confidentialité et la sécurité des données très au sérieux. Toutes vos informations personnelles et vos réservations sont chiffrées et stockées de manière sécurisée.',
+  },
+  {
+    question: 'Puis-je modifier ou annuler une réservation à tout moment ?',
+    answer: 'Oui, vous pouvez gérer vos réservations depuis votre espace personnel. Les annulations sont possibles selon les conditions définies par l’établissement.',
+  },
+  {
+    question: 'Comment savoir si une salle est disponible immédiatement ?',
+    answer: 'Le calendrier en ligne affiche les disponibilités en temps réel. Un créneau disponible est marqué comme tel dès que vous sélectionnez l’espace.',
+  },
+  {
+    question: 'Recevrai-je une confirmation après ma réservation ?',
+    answer: 'Absolument. Un e-mail de confirmation contenant tous les détails (heure, lieu, équipements inclus) vous est automatiquement envoyé dès la validation.',
+  },
+  {
+    question: 'Que faire si je rencontre un problème lors de l’utilisation d’une salle ?',
+    answer: 'Un service d’assistance est joignable directement depuis la plateforme pour vous aider en cas de problème technique ou d’accès à la salle.',
+  },
 ]
-
-const toggleFaq = (index) => {
-    activeFaq.value =
-        activeFaq.value === index
-            ? null
-            : index
-}
 </script>
 
 <template>
-    <section
-        class="bg-white
-               px-6 py-20
-               sm:px-10
-               lg:px-20 lg:py-28"
-    >
+  <section class="min-h-screen bg-white text-gray-900 px-6 py-20 flex items-center justify-center">
+    <div class="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
-        <!-- ========================================= -->
-        <!-- CONTENEUR -->
-        <!-- ========================================= -->
+      <!-- Colonne Gauche : Titre & Sous-titre -->
+      <div class="lg:col-span-5 space-y-4 pt-4">
+        <span class="text-xl font-semibold tracking-[0.2em] text-slate-900 uppercase">
+          Avez-vous des questions ?
+        </span>
+        <h2 class="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-900 mt-10">
+          Our Faqs
+        </h2>
+      </div>
 
-        <div
-            class="mx-auto max-w-[1000px]"
-        >
+      <!-- Colonne Droite : Carte Accordéon sur fond blanc/gris très léger -->
+      <div class="lg:col-span-7 bg-slate-50/70 border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div class="divide-y divide-slate-200">
 
-            <!-- ========================================= -->
-            <!-- TITRE -->
-            <!-- ========================================= -->
-
+          <div
+            v-for="(faq, index) in faqs"
+            :key="index"
+            class="py-5 first:pt-0 last:pb-0 transition-colors duration-200"
+            @mouseenter="openIndex = index"
+          >
+            <!-- En-tête de la question (Déclencheur au survol) -->
             <div
-                class="mb-16 text-center"
+              class="w-full flex items-center justify-between gap-4 text-left cursor-pointer group"
             >
-                <h2
-                    class="text-[38px]
-                           font-bold
-                           uppercase
-                           leading-none
-                           tracking-[-1.5px]
-                           text-[#0F172A]
-                           sm:text-[46px]
-                           lg:text-[52px]"
-                >
-                    Encore des questions ?
-                </h2>
+              <span
+                class="text-base sm:text-lg font-medium transition-colors duration-200"
+                :class="openIndex === index ? 'text-indigo-600' : 'text-slate-800 group-hover:text-slate-950'"
+              >
+                {{ faq.question }}
+              </span>
 
-                <p
-                    class="mx-auto mt-5
-                           max-w-[560px]
-                           text-[14px]
-                           leading-[1.7]
-                           text-[#64748B]"
-                >
-                    Retrouvez les réponses aux questions les plus
-                    fréquentes concernant la réservation de salles
-                    et d'équipements.
+              <!-- Icône + / X -->
+              <span
+                class="transition-colors duration-200 shrink-0"
+                :class="openIndex === index ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-700'"
+              >
+                <X v-if="openIndex === index" class="w-5 h-5" />
+                <Plus v-else class="w-5 h-5" />
+              </span>
+            </div>
+
+            <!-- Contenu de la réponse qui s'ouvre au survol -->
+            <div
+              class="grid transition-all duration-300 ease-in-out"
+              :class="openIndex === index ? 'grid-rows-[1fr] opacity-100 pt-3' : 'grid-rows-[0fr] opacity-0'"
+            >
+              <div class="overflow-hidden">
+                <p class="text-sm sm:text-base text-slate-600 leading-relaxed pr-6">
+                  {{ faq.answer }}
                 </p>
+              </div>
             </div>
 
-
-            <!-- ========================================= -->
-            <!-- FAQ -->
-            <!-- ========================================= -->
-
-            <div
-                class="space-y-5"
-            >
-
-                <div
-                    v-for="(faq, index) in faqs"
-                    :key="faq.question"
-                    class="overflow-hidden
-                           rounded-[22px]
-                           bg-[#F8FAFC]
-                           transition-all duration-300
-                           hover:bg-[#F1F5F9]"
-                    :class="
-                        activeFaq === index
-                            ? 'ring-1 ring-[#E2E8F0]'
-                            : ''
-                    "
-                >
-
-                    <!-- ================================= -->
-                    <!-- QUESTION -->
-                    <!-- ================================= -->
-
-                    <button
-                        type="button"
-                        class="flex w-full
-                               items-center
-                               justify-between
-                               gap-6
-                               px-6 py-7
-                               text-left
-                               sm:px-7"
-                        @click="toggleFaq(index)"
-                    >
-
-                        <!-- QUESTION -->
-                        <span
-                            class="text-[15px]
-                                   font-semibold
-                                   leading-[1.4]
-                                   text-[#0F172A]
-                                   sm:text-[16px]"
-                        >
-                            {{ faq.question }}
-                        </span>
-
-
-                        <!-- BOUTON -->
-                        <span
-                            class="flex h-[34px]
-                                   w-[34px]
-                                   shrink-0
-                                   items-center
-                                   justify-center
-                                   rounded-full
-                                   bg-[#0F172A]
-                                   text-white
-                                   transition-all
-                                   duration-300"
-                            :class="
-                                activeFaq === index
-                                    ? 'rotate-90 bg-[#4F46E5]'
-                                    : 'rotate-0'
-                            "
-                        >
-                            <ArrowRight
-                                :size="17"
-                                :stroke-width="2"
-                            />
-                        </span>
-
-                    </button>
-
-
-                    <!-- ================================= -->
-                    <!-- REPONSE -->
-                    <!-- ================================= -->
-
-                    <div
-                        class="grid transition-all
-                               duration-300 ease-in-out"
-                        :class="
-                            activeFaq === index
-                                ? 'grid-rows-[1fr] opacity-100'
-                                : 'grid-rows-[0fr] opacity-0'
-                        "
-                    >
-
-                        <div
-                            class="overflow-hidden"
-                        >
-
-                            <div
-                                class="border-t
-                                       border-[#E2E8F0]
-                                       px-6 pb-7 pt-5
-                                       sm:px-7"
-                            >
-
-                                <p
-                                    class="max-w-[780px]
-                                           text-[14px]
-                                           leading-[1.7]
-                                           text-[#64748B]"
-                                >
-                                    {{ faq.answer }}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ========================================= -->
-            <!-- FOOTER FAQ -->
-            <!-- ========================================= -->
-
-            <div
-                class="mt-12 text-center"
-            >
-
-                <p
-                    class="text-[13px]
-                           text-[#64748B]"
-                >
-                    Vous ne trouvez pas la réponse à votre question ?
-                </p>
-
-                <button
-                    type="button"
-                    class="mt-3
-                           text-[13px]
-                           font-semibold
-                           text-[#4F46E5]
-                           transition-colors
-                           duration-200
-                           hover:text-[#4338CA]"
-                >
-                    Contactez-nous →
-                </button>
-
-            </div>
+          </div>
 
         </div>
+      </div>
 
-    </section>
+    </div>
+  </section>
 </template>

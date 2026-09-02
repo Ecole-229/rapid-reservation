@@ -15,7 +15,7 @@ const partners = [
 <template>
     <section
         class="relative overflow-hidden bg-[#F8FAFC]
-               px-6 py-24 sm:px-10 lg:px-20 lg:py-16"
+                py-20  lg:px-20 lg:py-16"
     >
 
         <div
@@ -38,16 +38,7 @@ const partners = [
                 <div>
 
                     <!-- PETIT LABEL -->
-                    <p
-                        class="mb-7
-                               text-[12px]
-                               font-semibold
-                               uppercase
-                               tracking-[2.5px]
-                               text-[#64748B]"
-                    >
-                        UNE SOLUTION LOCALE
-                    </p>
+
 
 
                     <!-- TITRE -->
