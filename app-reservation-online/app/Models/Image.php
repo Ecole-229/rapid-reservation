@@ -11,10 +11,17 @@ class Image extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['nom', 'path', 'designation', 'salle_id'];
+    protected $fillable = [
+        'nom',
+        'path',
+        'designation',
+        'salle_id',
+    ];
 
     protected $appends = ['url'];
 
+
+    
     public function salle(): BelongsTo
     {
         return $this->belongsTo(Salle::class);

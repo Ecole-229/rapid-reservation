@@ -4,15 +4,10 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('equipement_reservation', function (Blueprint $table) {
-          
             $table->foreignId('reservation_id')
                 ->constrained('reservations')
                 ->cascadeOnDelete();
@@ -21,16 +16,17 @@ return new class extends Migration
                 ->constrained('equipements')
                 ->cascadeOnDelete();
 
-            $table->unique(['reservation_id', 'equipement_id']);
-
             $table->unsignedInteger('quantity');
+
+            $table->unique([
+                'reservation_id',
+                'equipement_id'
+            ]);
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('equipement_reservation');
