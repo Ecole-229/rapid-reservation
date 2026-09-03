@@ -10,9 +10,18 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <nav class="w-full border-b border-gray-100 bg-white">
+  <div class="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
+    <nav
+      class="w-full max-w-[1110px]
+             rounded-full
+             border border-white/40
+             bg-white/60
+             shadow-[0_8px_32px_rgba(15,23,42,0.08)]
+             backdrop-blur-xl
+             backdrop-saturate-150"
+    >
     <div
-      class="mx-auto flex h-[76px] max-w-[1110px] items-center justify-between px-4"
+      class="mx-auto flex h-[64px] items-center justify-between px-6"
     >
       <!-- Logo -->
       <RouterLink
@@ -27,29 +36,29 @@ const handleLogout = () => {
         <!-- 1. Menu pour l'utilisateur avec le rôle 'user' connecté -->
         <template v-if="authStore.isAuthenticated && authStore.isUser">
           <RouterLink
-            to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            to="/salles"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Salles</span>
           </RouterLink>
 
           <RouterLink
-            to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            to="/equipements"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Équipements</span>
           </RouterLink>
 
           <RouterLink
             to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Réservations</span>
           </RouterLink>
 
           <RouterLink
             to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Mon profil</span>
           </RouterLink>
@@ -59,21 +68,21 @@ const handleLogout = () => {
         <template v-else-if="authStore.isAuthenticated && (authStore.isAdmin || authStore.isResponsable)">
           <RouterLink
             to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Accueil</span>
           </RouterLink>
 
           <RouterLink
             to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Salles</span>
           </RouterLink>
 
           <RouterLink
             to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Équipements</span>
           </RouterLink>
@@ -82,7 +91,7 @@ const handleLogout = () => {
           <RouterLink
             v-if="authStore.isAdmin"
             to="/admin/home"
-            class="rounded-xl bg-[#EEF2FF] px-4 py-2 text-[13px] font-bold text-[#3730A3] transition hover:bg-[#E0E7FF]"
+            class="rounded-full bg-[#EEF2FF]/80 px-4 py-2 text-[13px] font-bold text-[#3730A3] transition hover:bg-[#E0E7FF]"
           >
             Dashboard Admin
           </RouterLink>
@@ -91,7 +100,7 @@ const handleLogout = () => {
           <RouterLink
             v-else-if="authStore.isResponsable"
             to="/responsable/home"
-            class="rounded-xl bg-blue-100 px-4 py-2 text-[13px] font-bold text-blue-800 transition hover:bg-blue-200"
+            class="rounded-full bg-blue-100/80 px-4 py-2 text-[13px] font-bold text-blue-800 transition hover:bg-blue-200"
           >
             Dashboard Responsable
           </RouterLink>
@@ -101,21 +110,21 @@ const handleLogout = () => {
         <template v-else>
           <RouterLink
             to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Accueil</span>
           </RouterLink>
 
           <RouterLink
-            to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            to="/salles"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Salles</span>
           </RouterLink>
 
           <RouterLink
-            to="/"
-            class="flex cursor-pointer items-center gap-1 rounded-xl px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#e6f0f6]"
+            to="/equipements"
+            class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
           >
             <span>Équipements</span>
           </RouterLink>
@@ -138,7 +147,7 @@ const handleLogout = () => {
 
             <button
               @click="handleLogout"
-              class="cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-[13px] font-bold text-red-600 transition hover:bg-red-50 hover:border-red-200"
+              class="cursor-pointer rounded-full border border-gray-200/70 bg-white/50 px-4 py-2 text-[13px] font-bold text-red-600 transition hover:bg-red-50 hover:border-red-200"
             >
               Déconnexion
             </button>
@@ -149,22 +158,53 @@ const handleLogout = () => {
         <template v-else>
           <RouterLink
             to="/auth/login"
-            class="rounded-xl bg-[#e5f1f8] px-5 py-2.5 text-[14px] font-bold text-black transition hover:bg-[#d9eaf3]"
+            class="rounded-full bg-white/70 px-5 py-2.5 text-[14px] font-bold text-black transition hover:bg-white"
           >
             Se connecter
           </RouterLink>
 
           <RouterLink
             to="/auth/register"
-            class="rounded-xl bg-[#111111] px-5 py-2.5 text-[14px] font-bold text-white transition hover:bg-black"
+            class="rounded-full bg-[#111111] px-5 py-2.5 text-[14px] font-bold text-white transition hover:bg-black"
           >
             S'inscrire
           </RouterLink>
         </template>
       </div>
     </div>
-  </nav>
+    </nav>
+  </div>
 </template>
 
 
+<style scoped>
 
+/* ================================================================
+   FILET DE SECURITE - indépendant de Tailwind
+   Garantit l'effet verre dépoli et le centrage même si les
+   classes Tailwind ne sont pas correctement générées.
+================================================================ */
+
+.fixed {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 16px;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+nav {
+    width: 100%;
+    max-width: 1110px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+}
+</style>

@@ -1,14 +1,13 @@
 <script setup>
 
 import NavBar from '@/layouts/NavBar.vue'
-import Exprerience from '@/layouts/Exprerience.vue'
-import TrueSections from '@/layouts/TrueSections.vue'
-import FaqSection from '@/layouts/FaqSection.vue'
-import HeroSection from '@/layouts/HeroSection.vue'
-import Marketing from '@/layouts/Marketing.vue'
-import M from '@/layouts/M.vue'
-import Temoignage from '@/layouts/Temoignage.vue'
+
+
 import Footer from '@/layouts/Footer.vue'
+import Quality from '@/layouts/equipements/Quality.vue'
+import NosEquipement from '@/layouts/equipements/NosEquipement.vue';
+import FaqSection from '@/layouts/FaqSection.vue';
+import HeroSection from '@/layouts/equipements/HeroSection.vue';
 
 
 </script>
@@ -17,11 +16,8 @@ import Footer from '@/layouts/Footer.vue'
 
     <NavBar :class="$route.name === 'login' || $route.name === 'register' ? 'hidden' : 'block'" />
     <HeroSection/>
-    <TrueSections/>
-    <M></M>
-    <Marketing/>
-    <Temoignage/>
-    <Exprerience/>
+    <Quality/>
+    <NosEquipement/>
     <FaqSection/>
     <Footer/>
 
