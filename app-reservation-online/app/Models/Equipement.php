@@ -12,9 +12,37 @@ class Equipement extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['nom', 'description', 'status', 'stock_total', 'image'];
+    protected $fillable = [
+        'nom',
+        'description',
+        'status',
+        'stock_total',
+        'image',
+    ];
 
     protected $appends = ['image_url'];
+
+    public function reservations(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Reservation::class,
+            'equipement_reservation'
+        )->withPivot('quantity');
+    }
+
+    public function quantiteDisponible(string|\DateTimeInterface $debut, string|\DateTimeInterface $fin): int
+    {
+        $debut = \Carbon\Carbon::parse($debut);
+        $fin = \Carbon\Carbon::parse($fin);
+
+        $quantiteReservee = $this->reservations()
+            ->whereIn('reservations.status', ['en_attente', 'confirmee'])
+            ->where('date_heure_debut', '<', $fin)
+            ->where('date_heure_fin', '>', $debut)
+            ->sum('equipement_reservation.quantity');
+
+        return $this->stock_total - $quantiteReservee;
+    }
 
     protected static function booted(): void
     {
@@ -25,10 +53,7 @@ class Equipement extends Model
         });
     }
 
-    public function reservations(): BelongsToMany
-    {
-        return $this->belongsToMany(Reservation::class)->withPivot('quantity');
-    }
+
 
     /**
      * Calcule le stock disponible pour cet équipement sur une plage horaire donnée.

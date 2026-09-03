@@ -1,6 +1,9 @@
 <script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useEquipementsStore } from '@/store/equipements'
 import {
-    Plus,
+    Eye,
     MapPin,
     Package,
     Banknote,
@@ -8,57 +11,80 @@ import {
     Monitor,
     Volume2,
     Wifi,
+    Calendar,
+    CheckCircle2,
+    AlertCircle,
 } from 'lucide-vue-next'
 
-const equipments = [
-    {
-        id: 1,
-        name: 'Vidéoprojecteur Epson',
-        image: '/images/equipements/equipement-1.png',
-        age: 'Disponible',
-        status: 'Disponible',
-        location: 'Cotonou, Bénin',
-        quantity: 8,
-        price: '15 000',
-        type: 'Vidéoprojecteur',
-    },
+const router = useRouter()
+const equipementsStore = useEquipementsStore()
 
-    {
-        id: 2,
-        name: 'Système de sonorisation',
-        image: '/images/equipements/equipement-2.png',
-        age: 'Disponible',
-        status: 'Disponible',
-        location: 'Abomey-Calavi, Bénin',
-        quantity: 5,
-        price: '20 000',
-        type: 'Audio',
-    },
+// Filtre par statut actif (par défaut 'disponible')
+const activeStatusFilter = ref('disponible') // 'disponible', 'all', 'indisponible'
 
-    {
-        id: 3,
-        name: 'Écran de projection',
-        image: '/images/equipements/equipement-3.png',
-        age: 'Disponible',
-        status: 'Disponible',
-        location: 'Cotonou, Bénin',
-        quantity: 10,
-        price: '10 000',
-        type: 'Affichage',
-    },
+// État de connexion
+const isConnected = computed(() => !!localStorage.getItem('token'))
 
-    {
-        id: 4,
-        name: 'Microphone sans fil',
-        image: '/images/equipements/equipement-4.png',
-        age: 'Disponible',
-        status: 'Disponible',
-        location: 'Porto-Novo, Bénin',
-        quantity: 12,
-        price: '7 500',
-        type: 'Audio',
+const formatAge = (createdAt) => {
+    if (!createdAt) return 'Disponible'
+    const diffDays = Math.floor((new Date() - new Date(createdAt)) / (1000 * 60 * 60 * 24))
+    if (diffDays < 30) return 'Nouveau'
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`
+    return `${Math.floor(diffDays / 365)} an${Math.floor(diffDays / 365) > 1 ? 's' : ''}`
+}
+
+const defaultPlaceholder = '/images/equipements/equipement-1.png'
+
+const allEquipments = computed(() => {
+    return equipementsStore.equipements.map((eq, index) => {
+        const isDispo = !eq.status || eq.status.toLowerCase() === 'disponible'
+        const img = eq.image_url || eq.image || defaultPlaceholder
+
+        return {
+            id: eq.id,
+            name: eq.nom || `Équipement ${index + 1}`,
+            image: img,
+            age: formatAge(eq.created_at),
+            status: isDispo ? 'Disponible' : 'Indisponible',
+            isDisponible: isDispo,
+            location: 'Disponible sur site',
+            quantity: eq.stock_total || 0,
+            price: eq.prix ? new Intl.NumberFormat('fr-FR').format(eq.prix) : 'Inclus',
+            type: eq.description ? (eq.description.length > 25 ? eq.description.substring(0, 25) + '...' : eq.description) : 'Matériel Pro',
+            raw: eq,
+        }
+    })
+})
+
+const countDisponibles = computed(() => allEquipments.value.filter(e => e.isDisponible).length)
+const countAll = computed(() => allEquipments.value.length)
+const countIndisponibles = computed(() => allEquipments.value.filter(e => !e.isDisponible).length)
+
+const equipments = computed(() => {
+    if (activeStatusFilter.value === 'disponible') {
+        return allEquipments.value.filter((e) => e.isDisponible)
+    } else if (activeStatusFilter.value === 'indisponible') {
+        return allEquipments.value.filter((e) => !e.isDisponible)
     }
-]
+    return allEquipments.value
+})
+
+onMounted(() => {
+    equipementsStore.fetchEquipements()
+})
+
+const handleDetails = (equipment) => {
+    router.push({ name: 'info-user-equipement', params: { id: equipment.id } })
+}
+
+const handleVoirTous = () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+        router.push({ name: 'login' })
+        return
+    }
+    activeStatusFilter.value = 'all'
+}
 </script>
 
 <template>
@@ -111,6 +137,7 @@ const equipments = [
 
                 <button
                     type="button"
+                    @click="handleVoirTous"
                     class="hidden shrink-0 items-center gap-2
                            rounded-full
                            border border-[#E2E8F0]
@@ -124,7 +151,8 @@ const equipments = [
                            hover:border-[#4F46E5]
                            hover:bg-[#EEF2FF]
                            hover:text-[#3730A3]
-                           sm:flex"
+                           sm:flex
+                           cursor-pointer"
                 >
                     Voir tous les équipements
 
@@ -134,6 +162,58 @@ const equipments = [
                     />
                 </button>
 
+            </div>
+
+            <!-- ================================================= -->
+            <!-- BARRE DE FILTRE PAR STATUT (Visible uniquement quand connecté) -->
+            <!-- ================================================= -->
+
+            <div v-if="isConnected" class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-white p-1.5 border border-[#E2E8F0] shadow-sm">
+                    <button
+                        type="button"
+                        @click="activeStatusFilter = 'disponible'"
+                        :class="[
+                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                            activeStatusFilter === 'disponible'
+                                ? 'bg-[#4F46E5] text-white shadow-sm'
+                                : 'text-[#64748B] hover:text-[#4F46E5] hover:bg-[#EEF2FF]/60'
+                        ]"
+                    >
+                        Disponibles ({{ countDisponibles }})
+                    </button>
+
+                    <button
+                        type="button"
+                        @click="activeStatusFilter = 'all'"
+                        :class="[
+                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                            activeStatusFilter === 'all'
+                                ? 'bg-[#0F172A] text-white shadow-sm'
+                                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100/70'
+                        ]"
+                    >
+                        Tous ({{ countAll }})
+                    </button>
+
+                    <button
+                        type="button"
+                        @click="activeStatusFilter = 'indisponible'"
+                        :class="[
+                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                            activeStatusFilter === 'indisponible'
+                                ? 'bg-rose-600 text-white shadow-sm'
+                                : 'text-[#64748B] hover:text-rose-600 hover:bg-rose-50/70'
+                        ]"
+                    >
+                        Indisponibles ({{ countIndisponibles }})
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2 text-xs text-[#4F46E5] font-medium bg-[#EEF2FF] px-3.5 py-1.5 rounded-full border border-indigo-100">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Connecté : matériel réservable</span>
+                </div>
             </div>
 
 
@@ -227,10 +307,11 @@ const equipments = [
                                    flex flex-col gap-2"
                         >
 
-                            <!-- PLUS -->
+                            <!-- DETAILS (OEIL) -->
 
                             <button
                                 type="button"
+                                @click="handleDetails(equipment)"
                                 class="flex h-10 w-10
                                        items-center justify-center
                                        rounded-full
@@ -239,10 +320,12 @@ const equipments = [
                                        backdrop-blur-md
                                        transition-all duration-200
                                        hover:bg-[#4F46E5]
-                                       active:scale-[0.95]"
-                                aria-label="Voir les détails"
+                                       active:scale-[0.95]
+                                       cursor-pointer"
+                                aria-label="Voir les détails de l'équipement"
+                                title="Voir les détails de l'équipement"
                             >
-                                <Plus
+                                <Eye
                                     :size="19"
                                     :stroke-width="1.8"
                                 />
@@ -319,6 +402,7 @@ const equipments = [
                                     {{ equipment.price }}
 
                                     <span
+                                        v-if="equipment.price !== 'Inclus'"
                                         class="ml-1
                                                text-[12px]
                                                font-medium
@@ -498,38 +582,7 @@ const equipments = [
                         </div>
 
 
-                        <!-- ================================================= -->
-                        <!-- BOUTON RÉSERVER -->
-                        <!-- ================================================= -->
 
-                        <div
-                            class="mt-5 flex items-center
-                                   justify-end"
-                        >
-
-                            <button
-                                type="button"
-                                aria-label="Réserver cet équipement"
-                                class="flex h-[48px] w-[48px]
-                                       items-center justify-center
-                                       rounded-full
-                                       bg-[#0F172A]
-                                       text-white
-                                       shadow-[0_6px_20px_-5px_rgba(15,23,42,0.25)]
-                                       transition-all duration-200
-                                       hover:scale-105
-                                       hover:bg-[#4F46E5]
-                                       active:scale-95"
-                            >
-
-                                <ArrowUpRight
-                                    :size="19"
-                                    :stroke-width="1.8"
-                                />
-
-                            </button>
-
-                        </div>
 
                     </div>
 

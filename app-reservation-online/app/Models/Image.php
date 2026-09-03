@@ -11,9 +11,16 @@ class Image extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['nom', 'path', 'designation', 'salle_id'];
+    protected $fillable = [
+        'nom',
+        'path',
+        'designation',
+        'salle_id',
+    ];
 
     protected $appends = ['url'];
+
+
 
     public function salle(): BelongsTo
     {
@@ -23,6 +30,7 @@ class Image extends Model
     /**
      * Accesseur pour obtenir l'URL complète accessible de l'image.
      */
+    
     public function getUrlAttribute(): ?string
     {
         if (empty($this->path)) {

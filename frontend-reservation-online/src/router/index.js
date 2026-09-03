@@ -26,6 +26,12 @@ import UpdateReservation from '@/views/admin/UpdateReservation.vue'
 import InfosReservation from '@/views/admin/InfosReservation.vue'
 import SallesUser from '@/views/SallesUser.vue'
 import EquipementsUser from '@/views/EquipementsUser.vue'
+import UserInfoEquipements from '@/views/UserInfoEquipements.vue'
+import UserInfosSalle from '@/views/UserInfosSalle.vue'
+import UserCreateReservation from '@/views/UserCreateReservation.vue'
+import UserReservations from '@/views/UserReservations.vue'
+import InfoReservation from '@/views/InfoReservation.vue'
+import UserUpdateReservation from '@/views/UserUpdateReservation.vue'
 
 const routes = [
 
@@ -36,9 +42,49 @@ const routes = [
   },
 
   {
+    path: '/salles/:id',
+    name: 'info-user-salle',
+    component: UserInfosSalle,
+  },
+
+  {
     path: '/equipements',
     name: 'equipements',
-    component: EquipementsUser ,
+    component: EquipementsUser,
+  },
+
+  {
+    path: '/equipements/:id',
+    name: 'info-user-equipement',
+    component: UserInfoEquipements,
+  },
+
+  {
+    path: '/reserver',
+    name: 'user-create-reservation',
+    component: UserCreateReservation,
+    meta: { requiresAuth: true },
+  },
+
+  {
+    path: '/reservations',
+    name: 'user-reservations',
+    component: UserReservations,
+    meta: { requiresAuth: true },
+  },
+
+  {
+    path: '/reservations/:id',
+    name: 'user-reservation-details',
+    component: InfoReservation,
+    meta: { requiresAuth: true },
+  },
+
+  {
+    path: '/reservations/:id/modifier',
+    name: 'user-update-reservation',
+    component: UserUpdateReservation,
+    meta: { requiresAuth: true },
   },
 
 

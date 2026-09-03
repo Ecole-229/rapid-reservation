@@ -20,12 +20,12 @@ class DatabaseSeeder extends Seeder
 
 
         User::create([
-            'nom' => 'git pull ',
-            'role' => 'responsable',
-            'email' => 'roméo@gmail.com',
-            'mot_de_passe' => Hash::make('22222222'),
-            'telephone' => '+2290164458813',
 
+                'nom' => 'Tihno',
+                'email' => 'a@gmail.com',
+                'mot_de_passe' => Hash::make('11111111'),
+                'telephone' => '0164458812',
+                'role' => 'admin',
         ]);
 
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+
 class Reservation extends Model
 {
     use SoftDeletes;
@@ -18,11 +19,12 @@ class Reservation extends Model
         'status',
         'user_id',
         'salle_id',
-        'nom_client',
-        'telephone',
-        'cree_par_id',
         'terminee_at',
+        'nom_client',
+        'telephone_client',
+        'cree_par_id',
     ];
+
 
     protected $casts = [
         'date_heure_debut' => 'datetime',
@@ -34,6 +36,8 @@ class Reservation extends Model
         'cree_par_id' => 'integer',
     ];
 
+    protected $appends = ['nom_demandeur'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -44,21 +48,32 @@ class Reservation extends Model
         return $this->belongsTo(Salle::class, 'salle_id');
     }
 
+
     public function createur(): BelongsTo
     {
         return $this->belongsTo(User::class, 'cree_par_id');
     }
 
+
     public function equipements(): BelongsToMany
     {
-        return $this->belongsToMany(Equipement::class)
-            ->withPivot('quantity')
-            ->withTimestamps();
+        return $this->belongsToMany(
+            Equipement::class,
+            'equipement_reservation'
+        )->withPivot('quantity');
     }
 
-    /**
-     * Nom effectif du client (soit l'utilisateur inscrit, soit le client externe).
-     */
+
+    public function creePar(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cree_par_id');
+    }
+
+    public function getNomDemandeurAttribute(): string
+    {
+        return $this->user?->nom ?? $this->nom_client ?? 'Client sans compte';
+    }
+
     public function getNomAfficheAttribute(): string
     {
         if ($this->user) {
@@ -71,13 +86,15 @@ class Reservation extends Model
     /**
      * Téléphone effectif du client.
      */
+
+
     public function getTelephoneAfficheAttribute(): ?string
     {
         if ($this->user && !empty($this->user->telephone)) {
             return $this->user->telephone;
         }
 
-        return $this->telephone;
+        return $this->telephone_client;
     }
 
     /**
@@ -127,7 +144,7 @@ class Reservation extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('nom_client', 'like', "%{$search}%")
-                ->orWhere('telephone', 'like', "%{$search}%")
+                ->orWhere('telephone_client', 'like', "%{$search}%")
                 ->orWhereHas('user', function ($u) use ($search) {
                     $u->where('nom', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
