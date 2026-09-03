@@ -9,11 +9,15 @@ use Illuminate\Http\Request;
 
 class SalleController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $salles = Salle::with('images')
-            ->where('status', 'disponible')
-            ->get();
+        $query = Salle::with('images')->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $salles = $query->get();
 
         return response()->json([
             'success' => true,

@@ -21,7 +21,7 @@ class Image extends Model
     protected $appends = ['url'];
 
 
-    
+
     public function salle(): BelongsTo
     {
         return $this->belongsTo(Salle::class);
@@ -30,6 +30,7 @@ class Image extends Model
     /**
      * Accesseur pour obtenir l'URL complète accessible de l'image.
      */
+    
     public function getUrlAttribute(): ?string
     {
         if (empty($this->path)) {

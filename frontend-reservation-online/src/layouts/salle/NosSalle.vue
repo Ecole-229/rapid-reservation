@@ -1,90 +1,194 @@
 <script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useSallesStore } from '@/store/salles'
 import {
     Plus,
-    Heart,
-    Share2,
     MapPin,
-    Star,
     Users,
     Banknote,
     ArrowUpRight,
-    Maximize,
+    Calendar,
+    CheckCircle2,
+    AlertCircle,
+    X,
+    Loader2,
 } from 'lucide-vue-next'
 
-const rooms = [
-    {
-        id: 1,
-        name: 'Salle Atlantique',
-        image: '/images/rooms/salle-1.jpg',
-        age: '2 ans',
-        status: 'Disponible',
-        location: 'Cotonou, Bénin',
-        capacity: 25,
-        price: '25 000',
-        rating: '4.8',
-        reviews: 22,
-    },
-    {
-        id: 2,
-        name: 'Salle Horizon',
-        image: '/images/rooms/salle-2.jpg',
-        age: '1 an',
-        status: 'Disponible',
-        location: 'Abomey-Calavi, Bénin',
-        capacity: 40,
-        price: '35 000',
-        rating: '4.9',
-        reviews: 18,
-    },
-    {
-        id: 3,
-        name: 'Salle Élite',
-        image: '/images/rooms/salle-3.jpg',
-        age: '3 ans',
-        status: 'Occupée',
-        location: 'Porto-Novo, Bénin',
-        capacity: 60,
-        price: '50 000',
-        rating: '4.7',
-        reviews: 31,
-    },
-    {
-        id: 4,
-        name: 'Salle Prestige',
-        image: '/images/rooms/salle-4.jpg',
-        age: '1 an',
-        status: 'Disponible',
-        location: 'Cotonou, Bénin',
-        capacity: 80,
-        price: '65 000',
-        rating: '5.0',
-        reviews: 14,
-    },
-    {
-        id: 5,
-        name: 'Salle Business',
-        image: '/images/rooms/salle-5.jpg',
-        age: '2 ans',
-        status: 'Disponible',
-        location: 'Cotonou, Bénin',
-        capacity: 20,
-        price: '20 000',
-        rating: '4.6',
-        reviews: 11,
-    },
-    {
-        id: 6,
-        name: 'Salle Émeraude',
-        image: '/images/rooms/salle-6.jpg',
-        age: '1 an',
-        status: 'Disponible',
-        location: 'Abomey-Calavi, Bénin',
-        capacity: 35,
-        price: '30 000',
-        rating: '4.9',
-        reviews: 27,
-    },
-]
+const router = useRouter()
+const sallesStore = useSallesStore()
+
+// Filtre par statut actif (par défaut 'disponible')
+const activeStatusFilter = ref('disponible') // 'disponible', 'all', 'indisponible'
+
+// État de connexion
+const isConnected = computed(() => !!localStorage.getItem('token'))
+
+// État de la modale de disponibilité (pour utilisateur connecté)
+const isDispoModalOpen = ref(false)
+const selectedSalleForDispo = ref(null)
+const debutDateTime = ref('')
+const finDateTime = ref('')
+const checkingDispo = ref(false)
+const dispoResult = ref(null)
+const dispoError = ref(null)
+
+const formatPrice = (val) => {
+    if (!val && val !== 0) return '0'
+    return new Intl.NumberFormat('fr-FR').format(val)
+}
+
+const formatAge = (createdAt) => {
+    if (!createdAt) return 'Récent'
+    const diffDays = Math.floor((new Date() - new Date(createdAt)) / (1000 * 60 * 60 * 24))
+    if (diffDays < 30) return 'Nouveau'
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`
+    return `${Math.floor(diffDays / 365)} an${Math.floor(diffDays / 365) > 1 ? 's' : ''}`
+}
+
+const defaultPlaceholder = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
+
+// Liste globale mappée
+const allRooms = computed(() => {
+    return sallesStore.salles.map((salle, index) => {
+        const firstImg = salle.images && salle.images.length > 0
+            ? (salle.images[0].url || salle.images[0].path || defaultPlaceholder)
+            : defaultPlaceholder
+
+        const isDispo = !salle.status || salle.status.toLowerCase() === 'disponible'
+
+        return {
+            id: salle.id,
+            name: salle.nom || `Salle ${index + 1}`,
+            image: firstImg,
+            age: formatAge(salle.created_at),
+            status: isDispo ? 'Disponible' : 'Occupée',
+            isDisponible: isDispo,
+            location: salle.localisation || 'Localisation non spécifiée',
+            capacity: salle.capacite || 0,
+            price: formatPrice(salle.prix),
+            rawPrice: salle.prix,
+            raw: salle,
+        }
+    })
+})
+
+// Compteurs pour les boutons de filtre
+const countDisponibles = computed(() => allRooms.value.filter(r => r.isDisponible).length)
+const countAll = computed(() => allRooms.value.length)
+const countOccupes = computed(() => allRooms.value.filter(r => !r.isDisponible).length)
+
+// Salles filtrées selon le filtre actif (par défaut 'disponible')
+const rooms = computed(() => {
+    if (activeStatusFilter.value === 'disponible') {
+        return allRooms.value.filter((r) => r.isDisponible)
+    } else if (activeStatusFilter.value === 'indisponible') {
+        return allRooms.value.filter((r) => !r.isDisponible)
+    }
+    return allRooms.value
+})
+
+onMounted(() => {
+    sallesStore.fetchSalles()
+})
+
+const handlePlus = (room) => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+        router.push({ name: 'login', query: { redirect: 'reservation', salle_id: room.id } })
+        return
+    }
+    // Si connecté : ouvrir la vérification de disponibilité pour cette salle
+    openDisponibiliteModal(room)
+}
+
+const handleVoir = (room) => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+        router.push({ name: 'login', query: { redirect: 'salle', salle_id: room.id } })
+        return
+    }
+    // Si connecté : ouvrir la disponibilité pour cette salle
+    openDisponibiliteModal(room)
+}
+
+const handleVoirToutes = () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+        router.push({ name: 'login' })
+        return
+    }
+    activeStatusFilter.value = 'all'
+}
+
+const openDisponibiliteModal = (room) => {
+    selectedSalleForDispo.value = room
+    dispoResult.value = null
+    dispoError.value = null
+
+    // Initialiser dates par défaut : demain de 09:00 à 12:00
+    const now = new Date()
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const yyyy = tomorrow.getFullYear()
+    const mm = String(tomorrow.getMonth() + 1).padStart(2, '0')
+    const dd = String(tomorrow.getDate()).padStart(2, '0')
+
+    debutDateTime.value = `${yyyy}-${mm}-${dd}T09:00`
+    finDateTime.value = `${yyyy}-${mm}-${dd}T12:00`
+
+    isDispoModalOpen.value = true
+}
+
+const closeDisponibiliteModal = () => {
+    isDispoModalOpen.value = false
+    selectedSalleForDispo.value = null
+    dispoResult.value = null
+    dispoError.value = null
+}
+
+const checkCreneau = async () => {
+    if (!debutDateTime.value || !finDateTime.value) {
+        dispoError.value = 'Veuillez renseigner une date de début et une date de fin.'
+        return
+    }
+    if (new Date(debutDateTime.value) >= new Date(finDateTime.value)) {
+        dispoError.value = 'La date de fin doit être postérieure à la date de début.'
+        return
+    }
+
+    checkingDispo.value = true
+    dispoError.value = null
+    dispoResult.value = null
+
+    try {
+        const formattedDebut = debutDateTime.value.replace('T', ' ') + ':00'
+        const formattedFin = finDateTime.value.replace('T', ' ') + ':00'
+        const res = await sallesStore.checkDisponibilite(
+            selectedSalleForDispo.value.id,
+            formattedDebut,
+            formattedFin
+        )
+        dispoResult.value = res
+    } catch (err) {
+        dispoError.value = err.message || 'Erreur lors de la vérification de disponibilité.'
+    } finally {
+        checkingDispo.value = false
+    }
+}
+
+const proceedToReservation = () => {
+    const room = selectedSalleForDispo.value
+    closeDisponibiliteModal()
+    router.push({
+        name: 'create-reservation',
+        query: {
+            salle_id: room.id,
+            debut: debutDateTime.value,
+            fin: finDateTime.value,
+        },
+    })
+}
 </script>
 
 <template>
@@ -132,6 +236,7 @@ const rooms = [
 
                 <button
                     type="button"
+                    @click="handleVoirToutes"
                     class="hidden shrink-0 items-center gap-2
                            rounded-full
                            border border-[#E2E8F0]
@@ -145,7 +250,8 @@ const rooms = [
                            hover:border-[#4F46E5]
                            hover:bg-[#EEF2FF]
                            hover:text-[#3730A3]
-                           sm:flex"
+                           sm:flex
+                           cursor-pointer"
                 >
                     Voir toutes les salles
 
@@ -155,6 +261,58 @@ const rooms = [
                     />
                 </button>
 
+            </div>
+
+            <!-- ================================================= -->
+            <!-- BARRE DE FILTRE PAR STATUT (Visible uniquement quand connecté) -->
+            <!-- ================================================= -->
+
+            <div v-if="isConnected" class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-white p-1.5 border border-[#E2E8F0] shadow-sm">
+                    <button
+                        type="button"
+                        @click="activeStatusFilter = 'disponible'"
+                        :class="[
+                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                            activeStatusFilter === 'disponible'
+                                ? 'bg-[#4F46E5] text-white shadow-sm'
+                                : 'text-[#64748B] hover:text-[#4F46E5] hover:bg-[#EEF2FF]/60'
+                        ]"
+                    >
+                        Disponibles ({{ countDisponibles }})
+                    </button>
+
+                    <button
+                        type="button"
+                        @click="activeStatusFilter = 'all'"
+                        :class="[
+                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                            activeStatusFilter === 'all'
+                                ? 'bg-[#0F172A] text-white shadow-sm'
+                                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100/70'
+                        ]"
+                    >
+                        Toutes ({{ countAll }})
+                    </button>
+
+                    <button
+                        type="button"
+                        @click="activeStatusFilter = 'indisponible'"
+                        :class="[
+                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                            activeStatusFilter === 'indisponible'
+                                ? 'bg-rose-600 text-white shadow-sm'
+                                : 'text-[#64748B] hover:text-rose-600 hover:bg-rose-50/70'
+                        ]"
+                    >
+                        Occupées ({{ countOccupes }})
+                    </button>
+                </div>
+
+                <div v-if="isConnected" class="flex items-center gap-2 text-xs text-[#4F46E5] font-medium bg-[#EEF2FF] px-3.5 py-1.5 rounded-full border border-indigo-100">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Connecté : vérification de disponibilité en temps réel active</span>
+                </div>
             </div>
 
 
@@ -250,6 +408,7 @@ const rooms = [
                             <!-- PLUS -->
                             <button
                                 type="button"
+                                @click="handlePlus(room)"
                                 class="flex h-10 w-10
                                        items-center justify-center
                                        rounded-full
@@ -259,17 +418,14 @@ const rooms = [
                                        transition-all duration-200
                                        cursor-pointer
                                        active:scale-[0.95]"
-                                aria-label="Voir les détails"
+                                :aria-label="isConnected ? 'Vérifier la disponibilité et réserver' : 'Se connecter pour réserver'"
+                                :title="isConnected ? 'Vérifier la disponibilité' : 'Se connecter pour réserver'"
                             >
                                 <Plus
                                     :size="19"
                                     :stroke-width="1.8"
-                                    :xlink-title="Reserver"
                                 />
                             </button>
-
-
-
 
                         </div>
 
@@ -416,42 +572,44 @@ const rooms = [
                                 </span>
 
                                 <button
-                                type="button"
-                                class="group flex items-center
-                                       gap-2
-                                       rounded-full
-                                       bg-[#0F172A]
-                                       py-2 pl-4 pr-2
-                                       text-[11px]
-                                       font-semibold
-                                       text-white
-                                       transition-all duration-200
-                                       hover:bg-[#020617]
-                                       active:scale-[0.97]"
-                            >
-
-                                <span>
-                                    Voir
-                                </span>
-
-                                <span
-                                    class="flex h-8 w-8
-                                           items-center
-                                           justify-center
+                                    type="button"
+                                    @click="handleVoir(room)"
+                                    class="group flex items-center
+                                           gap-2
                                            rounded-full
-                                           bg-white
-                                           text-[#0F172A]
-                                           transition-transform
-                                           duration-200
-                                           group-hover:translate-x-0.5"
+                                           bg-[#0F172A]
+                                           py-2 pl-4 pr-2
+                                           text-[11px]
+                                           font-semibold
+                                           text-white
+                                           transition-all duration-200
+                                           hover:bg-[#020617]
+                                           active:scale-[0.97]
+                                           cursor-pointer"
                                 >
-                                    <ArrowUpRight
-                                        :size="15"
-                                        :stroke-width="1.8"
-                                    />
-                                </span>
 
-                            </button>
+                                    <span>
+                                        Voir
+                                    </span>
+
+                                    <span
+                                        class="flex h-8 w-8
+                                               items-center
+                                               justify-center
+                                               rounded-full
+                                               bg-white
+                                               text-[#0F172A]
+                                               transition-transform
+                                               duration-200
+                                               group-hover:translate-x-0.5"
+                                    >
+                                        <ArrowUpRight
+                                            :size="15"
+                                            :stroke-width="1.8"
+                                        />
+                                    </span>
+
+                                </button>
 
                             </div>
 
@@ -462,109 +620,30 @@ const rooms = [
                         <!-- INFOS BAS -->
                         <!-- ================================================= -->
 
-                        <div
-                            class="my-5 h-px
-                                   bg-[#E2E8F0]"
-                        ></div>
 
-
-                        <div
-                            class="grid grid-cols-2
-                                   gap-3"
-                        >
-
-                            <!-- NOM / TYPE -->
-                            <div
-                                class="flex items-center
-                                       gap-3"
-                            >
-                                <div
-                                    class="flex h-9 w-9
-                                           items-center
-                                           justify-center
-                                           rounded-[9px]
-                                           bg-[#EEF2FF]
-                                           text-[#4F46E5]"
-                                >
-                                    <Users
-                                        :size="16"
-                                        :stroke-width="1.8"
-                                    />
-                                </div>
-
-                                <div>
-                                    <p
-                                        class="text-[11px]
-                                               font-medium
-                                               text-[#0F172A]"
-                                    >
-                                        Capacité
-                                    </p>
-
-                                    <p
-                                        class="mt-0.5
-                                               text-[11px]
-                                               text-[#64748B]"
-                                    >
-                                        {{ room.capacity }} personnes
-                                    </p>
-                                </div>
-                            </div>
-
-
-                            <!-- PRIX -->
-                            <div
-                                class="flex items-center
-                                       gap-3"
-                            >
-                                <div
-                                    class="flex h-9 w-9
-                                           items-center
-                                           justify-center
-                                           rounded-[9px]
-                                           bg-[#EEF2FF]
-                                           text-[#4F46E5]"
-                                >
-                                    <Banknote
-                                        :size="16"
-                                        :stroke-width="1.8"
-                                    />
-                                </div>
-
-                                <div>
-                                    <p
-                                        class="text-[11px]
-                                               font-medium
-                                               text-[#0F172A]"
-                                    >
-                                        Tarif
-                                    </p>
-
-                                    <p
-                                        class="mt-0.5
-                                               text-[11px]
-                                               text-[#64748B]"
-                                    >
-                                        Par réservation
-                                    </p>
-                                </div>
-                            </div>
-
-                        </div>
+                        
 
 
                         <!-- ================================================= -->
-                        <!-- BAS : RESERVER -->
+                        <!-- BAS : RESERVER / DISPONIBILITE CONNECTE -->
                         <!-- ================================================= -->
 
                         <div
-                            class="mt-5 flex items-center
-                                   justify-end"
+                            v-if="isConnected"
+                            class="mt-4 pt-3 border-t border-[#F1F5F9] flex items-center justify-between text-xs"
                         >
-
-                            <!-- bouton façon image 2 -->
-
-
+                            <span class="text-[#64748B] flex items-center gap-1">
+                                <Calendar :size="13" class="text-[#4F46E5]" />
+                                Disponibilité créneau :
+                            </span>
+                            <button
+                                type="button"
+                                @click="openDisponibiliteModal(room)"
+                                class="text-[#4F46E5] font-semibold hover:underline cursor-pointer flex items-center gap-1"
+                            >
+                                <span>Vérifier en direct</span>
+                                <ArrowUpRight :size="13" />
+                            </button>
                         </div>
 
                     </div>
@@ -572,6 +651,115 @@ const rooms = [
                 </article>
 
             </div>
+
+            <!-- ================================================= -->
+            <!-- MODALE DE VÉRIFICATION DE DISPONIBILITÉ (CONNECTÉ) -->
+            <!-- ================================================= -->
+            <Teleport to="body">
+                <div
+                    v-if="isDispoModalOpen && selectedSalleForDispo"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-all"
+                    @click.self="closeDisponibiliteModal"
+                >
+                    <div class="relative w-full max-w-lg rounded-3xl bg-white p-6 sm:p-8 shadow-2xl transition-all">
+                        <!-- Bouton Fermer -->
+                        <button
+                            type="button"
+                            @click="closeDisponibiliteModal"
+                            class="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition cursor-pointer"
+                        >
+                            <X :size="18" />
+                        </button>
+
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEF2FF] text-[#4F46E5]">
+                                <Calendar :size="22" />
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-[#0F172A]">
+                                    {{ selectedSalleForDispo.name }}
+                                </h3>
+                                <p class="text-xs text-[#64748B]">
+                                    Vérification de disponibilité en temps réel
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Formulaire Créneau -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Date et heure de début
+                                </label>
+                                <input
+                                    v-model="debutDateTime"
+                                    type="datetime-local"
+                                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-2.5 text-xs text-slate-800 focus:border-[#4F46E5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/10"
+                                />
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    Date et heure de fin
+                                </label>
+                                <input
+                                    v-model="finDateTime"
+                                    type="datetime-local"
+                                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-2.5 text-xs text-slate-800 focus:border-[#4F46E5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/10"
+                                />
+                            </div>
+
+                            <button
+                                type="button"
+                                @click="checkCreneau"
+                                :disabled="checkingDispo"
+                                class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F172A] py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 transition cursor-pointer disabled:opacity-50"
+                            >
+                                <Loader2 v-if="checkingDispo" :size="15" class="animate-spin" />
+                                <span>{{ checkingDispo ? 'Vérification en cours...' : 'Vérifier ce créneau' }}</span>
+                            </button>
+
+                            <!-- Message d'erreur -->
+                            <div
+                                v-if="dispoError"
+                                class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700 flex items-start gap-2"
+                            >
+                                <AlertCircle :size="15" class="shrink-0 mt-0.5" />
+                                <span>{{ dispoError }}</span>
+                            </div>
+
+                            <!-- Résultat -->
+                            <div
+                                v-if="dispoResult"
+                                class="rounded-2xl p-4 border transition-all"
+                                :class="dispoResult.disponible ? 'border-emerald-200 bg-emerald-50/60' : 'border-rose-200 bg-rose-50/60'"
+                            >
+                                <div class="flex items-center gap-2 font-semibold text-sm" :class="dispoResult.disponible ? 'text-emerald-800' : 'text-rose-800'">
+                                    <CheckCircle2 v-if="dispoResult.disponible" :size="18" class="text-emerald-600" />
+                                    <AlertCircle v-else :size="18" class="text-rose-600" />
+                                    <span>
+                                        {{ dispoResult.disponible ? 'Salle disponible sur ce créneau !' : 'Salle déjà occupée sur ce créneau' }}
+                                    </span>
+                                </div>
+
+                                <p class="mt-1 text-xs" :class="dispoResult.disponible ? 'text-emerald-700' : 'text-rose-700'">
+                                    {{ dispoResult.disponible ? 'Aucun conflit détecté. Vous pouvez réserver immédiatement ce créneau.' : 'Veuillez sélectionner un autre horaire ou une autre salle.' }}
+                                </p>
+
+                                <button
+                                    v-if="dispoResult.disponible"
+                                    type="button"
+                                    @click="proceedToReservation"
+                                    class="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#4F46E5] py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#4338CA] transition cursor-pointer"
+                                >
+                                    <span>Procéder à la réservation</span>
+                                    <ArrowUpRight :size="14" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Teleport>
 
         </div>
     </section>
