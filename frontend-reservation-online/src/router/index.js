@@ -26,6 +26,7 @@ import UpdateReservation from '@/views/admin/UpdateReservation.vue'
 import InfosReservation from '@/views/admin/InfosReservation.vue'
 import SallesUser from '@/views/SallesUser.vue'
 import EquipementsUser from '@/views/EquipementsUser.vue'
+import UserInfoEquipements from '@/views/UserInfoEquipements.vue'
 
 const routes = [
 
@@ -38,7 +39,13 @@ const routes = [
   {
     path: '/equipements',
     name: 'equipements',
-    component: EquipementsUser ,
+    component: EquipementsUser,
+  },
+
+  {
+    path: '/equipements/:id',
+    name: 'info-user-equipement',
+    component: UserInfoEquipements,
   },
 
 
