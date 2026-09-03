@@ -175,7 +175,7 @@ class ReservationController extends Controller
                 'salle_id' => $validated['salle_id'],
                 'user_id' => $validated['user_id'] ?? null,
                 'nom_client' => $validated['nom_client'] ?? null,
-                'telephone' => $validated['telephone'] ?? null,
+                'telephone_client' => $validated['telephone_client'] ?? null,
                 'date_heure_debut' => $validated['date_heure_debut'],
                 'date_heure_fin' => $validated['date_heure_fin'],
                 'nombre_personnes' => $validated['nombre_personnes'],

@@ -39,6 +39,26 @@ export const useReservationsStore = defineStore('reservations', {
     },
 
     /**
+     * Récupère les détails d'une réservation spécifique
+     * GET /api/reservations/{id}
+     */
+    async fetchReservation(id) {
+      this.loading = true
+      this.clearErrors()
+      try {
+        const response = await axiosClient.get(`/reservations/${id}`)
+        this.currentReservation = response.data.data
+        return this.currentReservation
+      } catch (error) {
+        const errorData = handleError(error)
+        this.errorMessage = errorData.message || 'Erreur lors du chargement de la réservation.'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    /**
      * Crée une réservation
      * POST /api/reservations
      *
@@ -62,6 +82,33 @@ export const useReservationsStore = defineStore('reservations', {
         const errorData = handleError(error)
         this.errorMessage = errorData.message || 'Erreur lors de la création de la réservation.'
         // Expose validation errors (422)
+        if (error.response?.status === 422) {
+          this.validationErrors = error.response.data.errors || {}
+        }
+        throw error
+      } finally {
+        this.submitting = false
+      }
+    },
+
+    /**
+     * Met à jour une réservation existante
+     * PUT /api/reservations/{id}
+     */
+    async updateReservation(id, payload) {
+      this.submitting = true
+      this.clearErrors()
+      try {
+        const response = await axiosClient.put(`/reservations/${id}`, payload)
+        this.currentReservation = response.data.data
+        const index = this.reservations.findIndex((r) => r.id === Number(id))
+        if (index !== -1) {
+          this.reservations[index] = response.data.data
+        }
+        return this.currentReservation
+      } catch (error) {
+        const errorData = handleError(error)
+        this.errorMessage = errorData.message || 'Erreur lors de la mise à jour de la réservation.'
         if (error.response?.status === 422) {
           this.validationErrors = error.response.data.errors || {}
         }

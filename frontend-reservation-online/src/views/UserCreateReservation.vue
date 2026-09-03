@@ -232,6 +232,11 @@ const submitReservation = async () => {
         const result = await reservationsStore.createReservation(payload)
         newReservationId.value = result?.id ?? null
         submitSuccess.value = true
+        if (result?.id) {
+            router.push({ name: 'user-reservation-details', params: { id: result.id } })
+        } else {
+            router.push({ name: 'user-reservations' })
+        }
     } catch (e) {
         // Affiche l'erreur backend (422 validation, 409 conflit, etc.)
         submitError.value =

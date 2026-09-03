@@ -50,8 +50,9 @@ const handleLogout = () => {
           </RouterLink>
 
           <RouterLink
-            to="/"
+            to="/reservations"
             class="flex cursor-pointer items-center gap-1 rounded-full px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-white/70"
+            :class="{ 'bg-white/90 shadow-sm text-indigo-600': $route.path.startsWith('/reservations') }"
           >
             <span>Réservations</span>
           </RouterLink>

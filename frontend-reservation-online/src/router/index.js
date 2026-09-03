@@ -29,6 +29,9 @@ import EquipementsUser from '@/views/EquipementsUser.vue'
 import UserInfoEquipements from '@/views/UserInfoEquipements.vue'
 import UserInfosSalle from '@/views/UserInfosSalle.vue'
 import UserCreateReservation from '@/views/UserCreateReservation.vue'
+import UserReservations from '@/views/UserReservations.vue'
+import InfoReservation from '@/views/InfoReservation.vue'
+import UserUpdateReservation from '@/views/UserUpdateReservation.vue'
 
 const routes = [
 
@@ -60,6 +63,27 @@ const routes = [
     path: '/reserver',
     name: 'user-create-reservation',
     component: UserCreateReservation,
+    meta: { requiresAuth: true },
+  },
+
+  {
+    path: '/reservations',
+    name: 'user-reservations',
+    component: UserReservations,
+    meta: { requiresAuth: true },
+  },
+
+  {
+    path: '/reservations/:id',
+    name: 'user-reservation-details',
+    component: InfoReservation,
+    meta: { requiresAuth: true },
+  },
+
+  {
+    path: '/reservations/:id/modifier',
+    name: 'user-update-reservation',
+    component: UserUpdateReservation,
     meta: { requiresAuth: true },
   },
 

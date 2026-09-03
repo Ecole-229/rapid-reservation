@@ -22,7 +22,7 @@ class ReservationResource extends JsonResource
             'status' => $this->status,
             'terminee_at' => $this->terminee_at ? $this->terminee_at->toIso8601String() : null,
             'nom_client' => $this->nom_client,
-            'telephone' => $this->telephone,
+            'telephone_client' => $this->telephone_client,
             'nom_affiche' => $this->nom_affiche,
             'telephone_affiche' => $this->telephone_affiche,
             'user_id' => $this->user_id,

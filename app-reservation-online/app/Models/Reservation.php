@@ -90,11 +90,11 @@ class Reservation extends Model
 
     public function getTelephoneAfficheAttribute(): ?string
     {
-        if ($this->user && !empty($this->user->telephone_client)) {
-            return $this->user->telephone_client;
+        if ($this->user && !empty($this->user->telephone)) {
+            return $this->user->telephone;
         }
 
-        return $this->telephone;
+        return $this->telephone_client;
     }
 
     /**
@@ -144,7 +144,7 @@ class Reservation extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('nom_client', 'like', "%{$search}%")
-                ->orWhere('telephone', 'like', "%{$search}%")
+                ->orWhere('telephone_client', 'like', "%{$search}%")
                 ->orWhereHas('user', function ($u) use ($search) {
                     $u->where('nom', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")

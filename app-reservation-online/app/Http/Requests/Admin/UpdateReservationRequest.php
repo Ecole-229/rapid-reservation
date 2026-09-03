@@ -25,7 +25,7 @@ class UpdateReservationRequest extends FormRequest
             'salle_id' => ['sometimes', 'required', 'integer', 'exists:salles,id'],
             'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'nom_client' => ['nullable', 'string', 'max:255'],
-            'telephone' => ['nullable', 'string', 'max:50'],
+            'telephone_client' => ['nullable', 'string', 'max:50'],
             'date_heure_debut' => ['sometimes', 'required', 'date'],
             'date_heure_fin' => ['sometimes', 'required', 'date', 'after:date_heure_debut'],
             'nombre_personnes' => ['sometimes', 'required', 'integer', 'min:1'],
