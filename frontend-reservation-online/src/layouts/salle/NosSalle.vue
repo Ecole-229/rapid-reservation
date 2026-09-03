@@ -103,13 +103,7 @@ const handlePlus = (room) => {
 }
 
 const handleVoir = (room) => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-        router.push({ name: 'login', query: { redirect: 'salle', salle_id: room.id } })
-        return
-    }
-    // Si connecté : ouvrir la disponibilité pour cette salle
-    openDisponibiliteModal(room)
+    router.push({ name: 'info-user-salle', params: { id: room.id } })
 }
 
 const handleVoirToutes = () => {

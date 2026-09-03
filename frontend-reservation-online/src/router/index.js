@@ -27,6 +27,7 @@ import InfosReservation from '@/views/admin/InfosReservation.vue'
 import SallesUser from '@/views/SallesUser.vue'
 import EquipementsUser from '@/views/EquipementsUser.vue'
 import UserInfoEquipements from '@/views/UserInfoEquipements.vue'
+import UserInfosSalle from '@/views/UserInfosSalle.vue'
 
 const routes = [
 
@@ -34,6 +35,12 @@ const routes = [
     path: '/salles',
     name: 'salles',
     component: SallesUser,
+  },
+
+  {
+    path: '/salles/:id',
+    name: 'info-user-salle',
+    component: UserInfosSalle,
   },
 
   {
