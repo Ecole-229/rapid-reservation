@@ -28,6 +28,7 @@ import SallesUser from '@/views/SallesUser.vue'
 import EquipementsUser from '@/views/EquipementsUser.vue'
 import UserInfoEquipements from '@/views/UserInfoEquipements.vue'
 import UserInfosSalle from '@/views/UserInfosSalle.vue'
+import UserCreateReservation from '@/views/UserCreateReservation.vue'
 
 const routes = [
 
@@ -53,6 +54,13 @@ const routes = [
     path: '/equipements/:id',
     name: 'info-user-equipement',
     component: UserInfoEquipements,
+  },
+
+  {
+    path: '/reserver',
+    name: 'user-create-reservation',
+    component: UserCreateReservation,
+    meta: { requiresAuth: true },
   },
 
 

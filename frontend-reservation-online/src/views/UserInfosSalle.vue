@@ -116,33 +116,19 @@ const handleReserver = () => {
     if (!token) {
         router.push({
             name: 'login',
-            query: { redirect: 'reservation', salle_id: salleId, debut: debutDateTime.value, fin: finDateTime.value },
+            query: { redirect: '/reserver', salle_id: salleId, debut: debutDateTime.value, fin: finDateTime.value },
         })
         return
     }
 
-    const rawUser = localStorage.getItem('user')
-    const user = rawUser ? JSON.parse(rawUser) : null
-
-    if (user?.role === 'admin') {
-        router.push({
-            name: 'create-reservation',
-            query: {
-                salle_id: salleId,
-                debut: debutDateTime.value,
-                fin: finDateTime.value,
-            },
-        })
-    } else {
-        router.push({
-            name: 'create-reservation',
-            query: {
-                salle_id: salleId,
-                debut: debutDateTime.value,
-                fin: finDateTime.value,
-            },
-        })
-    }
+    router.push({
+        name: 'user-create-reservation',
+        query: {
+            salle_id: salleId,
+            debut: debutDateTime.value,
+            fin: finDateTime.value,
+        },
+    })
 }
 </script>
 
