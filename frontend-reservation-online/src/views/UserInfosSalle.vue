@@ -1,9 +1,15 @@
 <script setup>
+
 import { ref, computed, onMounted } from 'vue'
+
 import { useRoute, useRouter, RouterLink } from 'vue-router'
+
 import NavBar from '@/layouts/NavBar.vue'
+
 import Footer from '@/layouts/Footer.vue'
+
 import { useSallesStore } from '@/store/salles'
+
 import {
     ArrowLeft,
     MapPin,
@@ -21,12 +27,17 @@ import {
 } from 'lucide-vue-next'
 
 const route = useRoute()
+
 const router = useRouter()
+
 const sallesStore = useSallesStore()
 
 const salleId = route.params.id
+
 const salle = ref(null)
+
 const isFetching = ref(true)
+
 const fetchError = ref(null)
 
 // Index de la photo sélectionnée dans la galerie
@@ -34,9 +45,13 @@ const selectedPhotoIndex = ref(0)
 
 // Test de disponibilité
 const debutDateTime = ref('')
+
 const finDateTime = ref('')
+
 const checkingDispo = ref(false)
+
 const dispoResult = ref(null)
+
 const dispoError = ref(null)
 
 const isConnected = computed(() => !!localStorage.getItem('token'))
@@ -61,6 +76,7 @@ onMounted(async () => {
     const yyyy = tomorrow.getFullYear()
     const mm = String(tomorrow.getMonth() + 1).padStart(2, '0')
     const dd = String(tomorrow.getDate()).padStart(2, '0')
+
     debutDateTime.value = `${yyyy}-${mm}-${dd}T09:00`
     finDateTime.value = `${yyyy}-${mm}-${dd}T12:00`
 })
@@ -69,6 +85,7 @@ const imagesList = computed(() => {
     if (salle.value && salle.value.images && salle.value.images.length > 0) {
         return salle.value.images.map((img) => img.url || img.path || defaultPlaceholder)
     }
+
     return [defaultPlaceholder]
 })
 
@@ -80,16 +97,13 @@ const isDisponible = computed(() => {
     return salle.value && (!salle.value.status || salle.value.status.toLowerCase() === 'disponible')
 })
 
-const formatPrice = (price) => {
-    if (!price && price !== 0) return '0'
-    return new Intl.NumberFormat('fr-FR').format(price)
-}
 
 const checkCreneau = async () => {
     if (!debutDateTime.value || !finDateTime.value) {
         dispoError.value = 'Veuillez renseigner une date de début et une date de fin.'
         return
     }
+
     if (new Date(debutDateTime.value) >= new Date(finDateTime.value)) {
         dispoError.value = 'La date de fin doit être postérieure à la date de début.'
         return
@@ -102,6 +116,7 @@ const checkCreneau = async () => {
     try {
         const formattedDebut = debutDateTime.value.replace('T', ' ') + ':00'
         const formattedFin = finDateTime.value.replace('T', ' ') + ':00'
+
         const res = await sallesStore.checkDisponibilite(salleId, formattedDebut, formattedFin)
         dispoResult.value = res
     } catch (err) {
@@ -113,6 +128,7 @@ const checkCreneau = async () => {
 
 const handleReserver = () => {
     const token = localStorage.getItem('token')
+
     if (!token) {
         router.push({
             name: 'login',
@@ -130,265 +146,263 @@ const handleReserver = () => {
         },
     })
 }
+
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#F8FAFC] flex flex-col justify-between">
+    <div class="min-h-[80vh] bg-[#f6f6f4] text-[#151515]">
         <NavBar />
 
-        <main class="flex-1 px-4 py-10 sm:px-6 lg:px-8">
-            <div class="mx-auto max-w-6xl">
-
-                <!-- Navigation retour -->
-                <div class="mb-8">
+        <main class="px-4 py-10 sm:px-6 lg:px-10">
+            <div class="mx-auto max-w-[1180px]">
+                <div class="mb-7">
                     <RouterLink
                         :to="{ name: 'salles' }"
-                        class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300"
+                        class="inline-flex items-center gap-2 text-[12px] font-medium text-[#777] transition hover:text-[#222]"
                     >
-                        <ArrowLeft :size="15" />
+                        <ArrowLeft :size="14" />
                         <span>Retour aux salles</span>
                     </RouterLink>
                 </div>
 
-                <!-- Chargement -->
-                <div v-if="isFetching" class="flex flex-col items-center justify-center py-20">
-                    <Loader2 :size="40" class="animate-spin text-[#4F46E5] mb-3" />
-                    <p class="text-sm font-medium text-slate-600">Chargement des détails de la salle...</p>
+                <div
+                    v-if="isFetching"
+                    class="flex min-h-[420px] items-center justify-center rounded-[14px] bg-white"
+                >
+                    <div class="flex flex-col items-center gap-3">
+                        <Loader2 :size="34" class="animate-spin text-slate-800" />
+                        <p class="text-sm text-[#777]">Chargement des détails de la salle...</p>
+                    </div>
                 </div>
 
-                <!-- Erreur -->
                 <div
                     v-else-if="fetchError"
-                    class="rounded-3xl border border-rose-200 bg-rose-50/70 p-10 text-center"
+                    class="rounded-[14px] border border-[#eaded9] bg-white p-10 text-center"
                 >
-                    <AlertCircle :size="44" class="mx-auto mb-3 text-rose-500" />
-                    <h2 class="text-lg font-bold text-rose-900">Salle introuvable</h2>
-                    <p class="mt-1 text-sm text-rose-700">{{ fetchError }}</p>
+                    <AlertCircle :size="42" class="mx-auto mb-3 text-slate-800" />
+                    <h2 class="text-xl font-semibold text-[#191919]">Salle introuvable</h2>
+                    <p class="mt-2 text-sm text-[#777]">{{ fetchError }}</p>
                     <RouterLink
                         :to="{ name: 'salles' }"
-                        class="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#0F172A] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 transition"
+                        class="mt-6 inline-flex items-center gap-2 rounded-[9px] bg-[#191919] px-5 py-3 text-xs font-semibold text-white transition hover:bg-black"
                     >
-                        <span>Retourner au catalogue des salles</span>
+                        Retourner au catalogue
                     </RouterLink>
                 </div>
 
-                <!-- Contenu Fiche Salle -->
-                <div v-else-if="salle" class="space-y-8">
+                <div v-else-if="salle">
+                    <section class="overflow-hidden rounded-[15px] border border-[#ecebe7] bg-white">
+                        <div class="grid min-h-[465px] grid-cols-1 lg:grid-cols-[1.06fr_0.98fr_1fr]">
+                            <!-- IMAGE : même rôle visuel que dans la référence -->
+                            <div class="relative min-h-[390px] overflow-hidden bg-[#e9e8e4] lg:min-h-0">
+                                <img
+                                    :src="activeImage"
+                                    :alt="salle.nom"
+                                    class="absolute inset-0 h-full w-full object-cover"
+                                />
 
-                    <!-- En-tête : Titre, Localisation & Prix -->
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200/80 pb-6">
-                        <div>
-                            <div class="inline-flex items-center gap-1.5 rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-[#4F46E5] mb-3">
-                                <Sparkles :size="13" />
-                                <span>Espace Événementiel</span>
-                            </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/0 to-black/5"></div>
 
-                            <h1 class="text-3xl font-extrabold tracking-tight text-[#0F172A] sm:text-4xl">
-                                {{ salle.nom }}
-                            </h1>
-
-                            <div class="mt-2 flex items-center gap-2 text-sm text-[#64748B]">
-                                <MapPin :size="16" class="text-[#4F46E5] shrink-0" />
-                                <span>{{ salle.localisation || 'Localisation non renseignée' }}</span>
-                            </div>
-                        </div>
-
-                        <div class="sm:text-right">
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tarif par réservation</span>
-                            <p class="text-3xl sm:text-4xl font-black text-[#4F46E5]">
-                                {{ formatPrice(salle.prix) }}
-                                <span class="text-base font-semibold text-slate-500">FCFA</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Galerie Photos -->
-                    <div class="space-y-3">
-                        <div class="relative aspect-[16/9] md:aspect-[21/9] w-full overflow-hidden rounded-3xl bg-slate-200 shadow-md">
-                            <img
-                                :src="activeImage"
-                                :alt="salle.nom"
-                                class="h-full w-full object-cover transition-all duration-500"
-                            />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10"></div>
-
-                            <!-- Statut Badge -->
-                            <div
-                                class="absolute left-5 top-5 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-md"
-                                :class="isDisponible ? 'bg-emerald-600/90' : 'bg-rose-600/90'"
-                            >
-                                <CheckCircle2 v-if="isDisponible" :size="14" />
-                                <AlertCircle v-else :size="14" />
-                                <span>{{ isDisponible ? 'Disponible' : 'Actuellement Occupée' }}</span>
-                            </div>
-                        </div>
-
-                        <!-- Miniatures si multiples images -->
-                        <div
-                            v-if="imagesList.length > 1"
-                            class="flex items-center gap-3 overflow-x-auto py-2"
-                        >
-                            <button
-                                v-for="(img, idx) in imagesList"
-                                :key="'thumb-' + idx"
-                                type="button"
-                                @click="selectedPhotoIndex = idx"
-                                class="h-16 w-24 shrink-0 overflow-hidden rounded-xl border-2 transition-all cursor-pointer"
-                                :class="selectedPhotoIndex === idx ? 'border-[#4F46E5] scale-105 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'"
-                            >
-                                <img :src="img" class="h-full w-full object-cover" />
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Grille Informations & Réservation -->
-                    <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-
-                        <!-- Colonne gauche : Description & Caractéristiques (7 cols) -->
-                        <div class="lg:col-span-7 space-y-6">
-
-                            <!-- Carte Caractéristiques -->
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
-                                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-[#4F46E5] mb-2">
-                                        <Users :size="18" />
+                                <div class="absolute left-5 top-5">
+                                    <div
+                                        class="inline-flex items-center gap-1.5 rounded-full border border-white/35 bg-white/15 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur-md"
+                                    >
+                                        <Sparkles :size="12" />
+                                        <span>Espace Événementiel</span>
                                     </div>
-                                    <p class="text-xs text-slate-500 font-medium">Capacité</p>
-                                    <p class="text-base font-bold text-[#0F172A]">{{ salle.capacite }} personnes</p>
                                 </div>
 
-                                <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
-                                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 mb-2">
-                                        <CheckCircle2 :size="18" />
+                                <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
+                                    <div>
+                                        <p class="text-[11px] font-medium uppercase tracking-[0.12em] text-white/70">
+                                            {{ isDisponible ? 'Disponible' : 'Actuellement occupée' }}
+                                        </p>
+                                        <p class="mt-1 text-xl font-semibold leading-tight text-white">
+                                            {{ salle.nom }}
+                                        </p>
                                     </div>
-                                    <p class="text-xs text-slate-500 font-medium">Disponibilité</p>
-                                    <p class="text-base font-bold capitalize" :class="isDisponible ? 'text-emerald-600' : 'text-rose-600'">
-                                        {{ salle.status }}
+
+                                    <div
+                                        class="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-semibold text-white backdrop-blur-md"
+                                        :class="isDisponible ? 'bg-emerald-500/90' : 'bg-rose-500/90'"
+                                    >
+                                        {{ isDisponible ? 'Disponible' : 'Indisponible' }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CENTRE : hiérarchie prix / positionnement de la référence -->
+                            <div class="flex flex-col justify-between border-b border-[#ecebe7] px-7 py-9 sm:px-10 lg:border-b-0 lg:border-r lg:border-[#ecebe7]">
+                                <div>
+                                    <p class="text-[13px] font-medium text-[#7b7b7b]">Votre espace</p>
+
+                                    <h1 class="mt-5 max-w-[320px] font-serif text-[42px] leading-[0.98] tracking-[-0.04em] text-[#191919]">
+                                        {{ salle.nom }}
+                                    </h1>
+
+                                    <div class="mt-4 flex items-start gap-2 text-[13px] leading-5 text-[#777]">
+                                        <MapPin :size="15" class="mt-0.5 shrink-0 text-slate-800" />
+                                        <span>{{ salle.localisation || 'Localisation non renseignée' }}</span>
+                                    </div>
+
+                                    <div class="mt-10 flex items-end gap-2">
+                                        <span class="font-serif text-[44px] leading-none tracking-[-0.04em] text-[#000000]">
+                                            Description
+                                        </span>
+                                    </div>
+
+                                    <p class="mt-3 max-w-[280px] text-[13px] leading-6 text-[#777]">
+                                      {{ salle.description || 'Cette salle moderne et fonctionnelle est prête à accueillir vos événements professionnels.' }}
+
                                     </p>
                                 </div>
 
-                                <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm col-span-2 sm:col-span-1">
-                                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-600 mb-2">
-                                        <ShieldCheck :size="18" />
-                                    </div>
-                                    <p class="text-xs text-slate-500 font-medium">Confort</p>
-                                    <p class="text-base font-bold text-[#0F172A]">Climatisée & équipée</p>
+                                <div class="mt-10">
+                                    <button
+                                        type="button"
+                                        @click="handleReserver"
+                                        class="group inline-flex w-full items-center justify-between rounded-[9px] border border-[#1d293d] px-4 py-3 text-[12px] font-medium text-slate-800 transition hover:bg-[#181818] hover:text-white"
+                                    >
+                                        <span>{{ isConnected ? 'Réserver cette salle' : 'Se connecter pour réserver' }}</span>
+                                        <ArrowUpRight :size="16" class="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                                    </button>
+
+
                                 </div>
                             </div>
 
-                            <!-- Description détaillée -->
-                            <div class="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm">
-                                <h2 class="text-base font-bold uppercase tracking-wider text-[#0F172A] mb-4">
-                                    À propos de cet espace
-                                </h2>
-                                <p class="text-sm sm:text-base leading-relaxed text-slate-600 whitespace-pre-line">
-                                    {{ salle.description || 'Cette salle moderne et fonctionnelle est prête à accueillir vos réunions, séminaires, conférences et formations professionnelles avec tout le confort nécessaire.' }}
-                                </p>
-                            </div>
+                            <!-- DROITE : contenu proche de la liste de features de la référence -->
+                            <div class="flex flex-col justify-between px-7 py-9 sm:px-10">
+                                <div>
+                                    <p class="text-[12px] font-medium text-slate-800">Ce qui est inclus</p>
 
-                        </div>
+                                    <div class="mt-6 space-y-5">
+                                        <div class="flex gap-3 border-b border-[#efeee9] pb-4">
+                                            <CheckCircle2 :size="17" class="mt-0.5 shrink-0 text-slate-800" />
+                                            <div>
+                                                <p class="text-[13px] font-medium text-[#5d5d5d]">Capacité</p>
+                                                <p class="mt-1 text-[15px] font-medium text-[#222]">
+                                                    {{ salle.capacite }} personnes
+                                                </p>
+                                            </div>
+                                        </div>
 
-                        <!-- Colonne droite : Vérification de créneau & Réservation (5 cols) -->
-                        <div class="lg:col-span-5">
-                            <div class="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-md sticky top-6 space-y-6">
+                                        <div class="flex gap-3 border-b border-[#efeee9] pb-4">
+                                            <CheckCircle2 :size="17" class="mt-0.5 shrink-0 text-slate-800" />
+                                            <div>
+                                                <p class="text-[13px] font-medium text-[#5d5d5d]">Disponibilité</p>
+                                                <p
+                                                    class="mt-1 text-[15px] font-medium capitalize"
+                                                    :class="isDisponible ? 'text-[#2f9967]' : 'text-[#c65757]'"
+                                                >
+                                                    {{ salle.status || (isDisponible ? 'Disponible' : 'Occupée') }}
+                                                </p>
+                                            </div>
+                                        </div>
 
-                                <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
-                                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEF2FF] text-[#4F46E5]">
-                                        <Calendar :size="22" />
-                                    </div>
-                                    <div>
-                                        <h3 class="text-base font-bold text-[#0F172A]">
-                                            Vérifier & Réserver
-                                        </h3>
-                                        <p class="text-xs text-slate-500">
-                                            Testez un créneau avant confirmation
-                                        </p>
+
+
+
+
+                                        <div class="flex gap-3">
+                                            <CheckCircle2 :size="17" class="mt-0.5 shrink-0 text-slate-800" />
+                                            <div>
+                                                <p class="text-[13px] font-medium text-[#5d5d5d]">Prix</p>
+                                                <p class="mt-1 line-clamp-4 text-[13px] leading-5 text-[#777]">
+                                                    {{ salle.prix }}                                         <span class="pb-1 text-[12px] font-medium text-[#8a8a8a]">FCFA</span>
+
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Formulaire de test de créneau -->
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">
-                                            Date et heure de début
-                                        </label>
-                                        <input
-                                            v-model="debutDateTime"
-                                            type="datetime-local"
-                                            class="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-2.5 text-xs text-slate-800 focus:border-[#4F46E5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/10"
-                                        />
+                                <!-- Vérification de disponibilité : conserve exactement la logique backend existante -->
+                                <div class="mt-9 border-t border-[#ecebe7] pt-6">
+                                    <div class="flex items-center gap-2">
+                                        <Calendar :size="16" class="text-slate-800" />
+                                        <h2 class="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#222]">
+                                            Vérifier un créneau
+                                        </h2>
                                     </div>
 
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">
-                                            Date et heure de fin
+                                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                                        <label class="block">
+                                            <span class="mb-1.5 block text-[10px] font-medium text-[#777]">Début</span>
+                                            <input
+                                                v-model="debutDateTime"
+                                                type="datetime-local"
+                                                class="w-full rounded-[8px] border border-[#deddd9] bg-[#fafaf8] px-3 py-2.5 text-[11px] text-[#333] outline-none transition focus:border-[#181818] focus:bg-white"
+                                            />
                                         </label>
-                                        <input
-                                            v-model="finDateTime"
-                                            type="datetime-local"
-                                            class="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-2.5 text-xs text-slate-800 focus:border-[#4F46E5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/10"
-                                        />
+
+                                        <label class="block">
+                                            <span class="mb-1.5 block text-[10px] font-medium text-[#777]">Fin</span>
+                                            <input
+                                                v-model="finDateTime"
+                                                type="datetime-local"
+                                                class="w-full rounded-[8px] border border-[#deddd9] bg-[#fafaf8] px-3 py-2.5 text-[11px] text-[#333] outline-none transition focus:border-[#181818] focus:bg-white"
+                                            />
+                                        </label>
                                     </div>
 
                                     <button
                                         type="button"
                                         @click="checkCreneau"
                                         :disabled="checkingDispo"
-                                        class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 py-2.5 text-xs font-semibold text-slate-800 transition cursor-pointer disabled:opacity-50"
+                                        class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-[8px] bg-[#181818] py-2.5 text-[11px] font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
                                     >
-                                        <Loader2 v-if="checkingDispo" :size="15" class="animate-spin text-[#4F46E5]" />
+                                        <Loader2 v-if="checkingDispo" :size="14" class="animate-spin" />
                                         <span>{{ checkingDispo ? 'Vérification...' : 'Vérifier la disponibilité' }}</span>
                                     </button>
 
-                                    <!-- Message d'erreur vérification -->
                                     <div
                                         v-if="dispoError"
-                                        class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700 flex items-start gap-2"
+                                        class="mt-3 rounded-[8px] border border-rose-200 bg-rose-50 px-3 py-2.5 text-[11px] text-rose-700"
                                     >
-                                        <AlertCircle :size="15" class="shrink-0 mt-0.5" />
-                                        <span>{{ dispoError }}</span>
+                                        <div class="flex items-start gap-2">
+                                            <AlertCircle :size="14" class="mt-0.5 shrink-0" />
+                                            <span>{{ dispoError }}</span>
+                                        </div>
                                     </div>
 
-                                    <!-- Résultat du test -->
                                     <div
                                         v-if="dispoResult"
-                                        class="rounded-2xl p-4 border transition-all"
-                                        :class="dispoResult.disponible ? 'border-emerald-200 bg-emerald-50/70' : 'border-rose-200 bg-rose-50/70'"
+                                        class="mt-3 rounded-[8px] border px-3 py-2.5"
+                                        :class="dispoResult.disponible ? 'border-emerald-200 bg-emerald-50' : 'border-rose-200 bg-rose-50'"
                                     >
                                         <div
-                                            class="flex items-center gap-2 font-semibold text-xs"
+                                            class="flex items-center gap-2 text-[11px] font-semibold"
                                             :class="dispoResult.disponible ? 'text-emerald-800' : 'text-rose-800'"
                                         >
-                                            <CheckCircle2 v-if="dispoResult.disponible" :size="16" class="text-emerald-600 shrink-0" />
-                                            <AlertCircle v-else :size="16" class="text-rose-600 shrink-0" />
+                                            <CheckCircle2 v-if="dispoResult.disponible" :size="14" />
+                                            <AlertCircle v-else :size="14" />
                                             <span>
                                                 {{ dispoResult.disponible ? 'Créneau 100% disponible !' : 'Créneau déjà réservé' }}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Bouton Réserver -->
-                                <button
-                                    type="button"
-                                    @click="handleReserver"
-                                    class="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#4F46E5] py-3.5 px-6 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 hover:bg-[#4338CA] active:scale-[0.98] transition cursor-pointer"
-                                >
-                                    <span>{{ isConnected ? 'Réserver cette salle' : 'Se connecter pour réserver' }}</span>
-                                    <ArrowUpRight :size="18" />
-                                </button>
-
-                                <p class="text-center text-[11px] text-slate-400">
-                                    Réservation instantanée sécurisée
-                                </p>
-
                             </div>
                         </div>
 
-                    </div>
-
+                        <div
+                            v-if="imagesList.length > 1"
+                            class="flex gap-3 border-t border-[#ecebe7] bg-[#fafaf8] px-5 py-4"
+                        >
+                            <button
+                                v-for="(img, idx) in imagesList"
+                                :key="'thumb-' + idx"
+                                type="button"
+                                @click="selectedPhotoIndex = idx"
+                                class="h-14 w-20 shrink-0 overflow-hidden rounded-[7px] border transition-all"
+                                :class="selectedPhotoIndex === idx ? 'border-[#181818] opacity-100' : 'border-transparent opacity-55 hover:opacity-100'"
+                            >
+                                <img :src="img" :alt="`${salle.nom} – image ${idx + 1}`" class="h-full w-full object-cover" />
+                            </button>
+                        </div>
+                    </section>
                 </div>
-
             </div>
         </main>
 

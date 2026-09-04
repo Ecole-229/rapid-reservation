@@ -34,7 +34,7 @@ const faqs = [
 </script>
 
 <template>
-  <section class="min-h-screen bg-white text-gray-900 px-6 py-20 flex items-center justify-center">
+  <section class="min-h-[80vh] bg-white text-gray-900 px-6 py-20 flex items-center justify-center">
     <div class="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
       <!-- Colonne Gauche : Titre & Sous-titre -->

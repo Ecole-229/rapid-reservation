@@ -26,7 +26,7 @@ const handleLogout = () => {
       <!-- Logo -->
       <RouterLink
         to="/"
-        class="text-[24px] font-black tracking-[-1.5px] text-black"
+        class="font-bricolage text-[24px] font-black tracking-[-1.5px] text-black"
       >
         Lodgify
       </RouterLink>
@@ -91,7 +91,7 @@ const handleLogout = () => {
           <!-- Raccourci Dashboard Admin -->
           <RouterLink
             v-if="authStore.isAdmin"
-            to="/admin/home"
+            to="/admin/dashboard"
             class="rounded-full bg-[#EEF2FF]/80 px-4 py-2 text-[13px] font-bold text-[#3730A3] transition hover:bg-[#E0E7FF]"
           >
             Dashboard Admin

@@ -6,7 +6,8 @@ import {
     Server,
     Image as ImageIcon,
     File,
-    LogIn
+    LogIn,
+    Calendar as CalendarIcon,
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/store/auth'
 import { useRouter } from 'vue-router'
@@ -50,7 +51,7 @@ const router = useRouter()
                     ></span>
                 </div>
 
-                <span class="text-[22px] font-bold tracking-[-0.5px] text-[#0F172A]">
+                <span class="font-bricolage text-[22px] font-bold tracking-[-0.5px] text-[#0F172A]">
                     Reserver
                 </span>
             </div>
@@ -97,23 +98,43 @@ const router = useRouter()
                     <!-- Blank Page -->
 
 
-                    <!-- Login -->
+                    <!-- Dashboard -->
                     <RouterLink :to="{name : 'admin-dashboard'}"
                         class="group flex h-[50px] w-full items-center gap-4
                                rounded-[10px] px-3 text-left
-                               transition-colors duration-200 hover:bg-[#F8FAFC] active:scale-[0.98]"
+                               transition-colors duration-200 active:scale-[0.98]"
+                        :class="$route.name === 'admin-dashboard' ? 'bg-[#EEF2FF]' : 'hover:bg-[#F8FAFC]'"
                     >
-                        <LogIn
+                        <LayoutDashboard
                             :size="20"
-                            :stroke-width="1.6"
-                            class="text-[#64748B] transition-colors duration-200 group-hover:text-[#0F172A]"
+                            :stroke-width="1.8"
+                            :class="$route.name === 'admin-dashboard' ? 'text-[#4F46E5]' : 'text-[#64748B] transition-colors duration-200 group-hover:text-[#0F172A]'"
                         />
 
                         <span
-                            class="text-[15px] font-medium text-[#64748B]
-                                   transition-colors duration-200 group-hover:text-[#0F172A]"
+                            :class="$route.name === 'admin-dashboard' ? 'text-[15px] font-semibold text-[#3730A3]' : 'text-[15px] font-medium text-[#64748B] transition-colors duration-200 group-hover:text-[#0F172A]'"
                         >
                             Dashboard
+                        </span>
+                    </RouterLink>
+
+                    <!-- Calendar / Agenda -->
+                    <RouterLink :to="{name : 'admin-calendar'}"
+                        class="group flex h-[50px] w-full items-center gap-4
+                               rounded-[10px] px-3 text-left
+                               transition-colors duration-200 active:scale-[0.98]"
+                        :class="$route.name === 'admin-calendar' ? 'bg-[#EEF2FF]' : 'hover:bg-[#F8FAFC]'"
+                    >
+                        <CalendarIcon
+                            :size="20"
+                            :stroke-width="1.8"
+                            :class="$route.name === 'admin-calendar' ? 'text-[#4F46E5]' : 'text-[#64748B] transition-colors duration-200 group-hover:text-[#0F172A]'"
+                        />
+
+                        <span
+                            :class="$route.name === 'admin-calendar' ? 'text-[15px] font-semibold text-[#3730A3]' : 'text-[15px] font-medium text-[#64748B] transition-colors duration-200 group-hover:text-[#0F172A]'"
+                        >
+                            Agenda des Salles
                         </span>
                     </RouterLink>
                 </nav>

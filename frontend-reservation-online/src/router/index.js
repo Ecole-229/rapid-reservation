@@ -5,6 +5,7 @@ import InfosUser from '@/views/admin/InfosUser.vue'
 import UpdateSalle from '@/views/admin/UpdateSalle.vue'
 import UpdateUser from '@/views/admin/UpdateUser.vue'
 import Dashbord from '@/views/admin/layouts/Dashbord.vue'
+import Calendar from '@/views/admin/layouts/Calendar.vue'
 import Equipements from '@/views/admin/layouts/Equipements.vue'
 import Galeries from '@/views/admin/layouts/Galeries.vue'
 import Reservations from '@/views/admin/layouts/Reservations.vue'
@@ -158,6 +159,12 @@ const routes = [
     path: '/admin/dashboard',
     name: 'admin-dashboard',
     component: Dashbord,
+    meta: { requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: '/admin/calendar',
+    name: 'admin-calendar',
+    component: Calendar,
     meta: { requiresAuth: true, role: 'admin' },
   },
 

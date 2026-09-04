@@ -167,395 +167,690 @@ const confirmCancelReservation = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F8FAFC] flex flex-col justify-between">
+  <div class="reservations-page min-h-screen bg-[#080909] text-white">
+    <!-- NAVBAR EXISTANTE : aucune donnée modifiée -->
     <NavBar />
 
-    <main class="flex-1 pt-28 pb-16 px-4 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-6xl">
-        <!-- EN-TÊTE DE LA PAGE -->
-        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-          <div>
+    <main class="pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-[1180px]">
+
+        <!-- =====================================================
+             HERO
+        ====================================================== -->
+        <section class="hero-grid">
+
+          <!-- GRANDE CARTE IMAGE -->
+          <div class="hero-image-card">
+
             <div
-              class="inline-flex items-center gap-1.5 rounded-full bg-[#EEF2FF] px-3.5 py-1 text-xs font-semibold text-[#4F46E5] mb-3"
+              v-if="filteredReservations.length"
+              class="absolute inset-0"
             >
-              <Sparkles :size="13" />
-              <span>Espace Client</span>
+              <img
+                :src="getSalleImage(filteredReservations[0])"
+                :alt="filteredReservations[0]?.salle?.nom || 'Salle'"
+                class="hero-main-image"
+              />
             </div>
-            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-[#0F172A]">
-              Mes Réservations
-            </h1>
-            <p class="mt-1 text-sm text-slate-500">
-              Consultez l'historique et le statut en temps réel de vos réservations de salles.
-            </p>
+
+            <div
+              v-else
+              class="absolute inset-0 hero-empty-image"
+            ></div>
+
+            <div class="hero-image-overlay"></div>
+
+            <!-- petit menu -->
+            <div class="absolute top-5 left-5 z-10">
+              <div class="hero-menu-button">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <!-- numéro -->
+            <div
+              v-if="filteredReservations.length"
+              class="absolute top-5 right-5 z-10 hero-number"
+            >
+              #{{ filteredReservations[0].id }}
+            </div>
+
+            <!-- contenu -->
+            <div
+              v-if="filteredReservations.length"
+              class="absolute bottom-7 left-6 right-6 z-10"
+            >
+              <!-- statut -->
+              <div class="mb-4">
+                <span
+                  v-if="filteredReservations[0].status === 'confirmee'"
+                  class="hero-status confirmed"
+                >
+                  <CheckCircle2 :size="12" />
+                  Confirmée
+                </span>
+
+                <span
+                  v-else-if="filteredReservations[0].status === 'en_attente'"
+                  class="hero-status pending"
+                >
+                  <Clock3 :size="12" />
+                  En attente
+                </span>
+
+                <span
+                  v-else-if="filteredReservations[0].status === 'terminee'"
+                  class="hero-status finished"
+                >
+                  <Check :size="12" />
+                  Terminée
+                </span>
+
+                <span
+                  v-else-if="filteredReservations[0].status === 'rejetee'"
+                  class="hero-status rejected"
+                >
+                  <XCircle :size="12" />
+                  Rejetée
+                </span>
+
+                <span
+                  v-else
+                  class="hero-status finished"
+                >
+                  <Ban :size="12" />
+                  Annulée
+                </span>
+              </div>
+
+              <p class="eyebrow">
+                Votre réservation
+              </p>
+
+              <h1 class="hero-title">
+                {{ filteredReservations[0].salle?.nom || 'Salle #' + filteredReservations[0].salle_id }}
+              </h1>
+
+              <div class="hero-details">
+                <span>
+                  <MapPin :size="13" />
+                  {{ filteredReservations[0].salle?.localisation || 'Localisation standard' }}
+                </span>
+
+                <span>
+                  <Calendar :size="13" />
+                  {{ formatDate(filteredReservations[0].date_heure_debut) }}
+                </span>
+
+                <span>
+                  <Clock :size="13" />
+                  {{
+                    formatTimeRange(
+                      filteredReservations[0].date_heure_debut,
+                      filteredReservations[0].date_heure_fin
+                    )
+                  }}
+                </span>
+              </div>
+            </div>
+
           </div>
 
-          <RouterLink
-            to="/reserver"
-            class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#4F46E5] px-5 py-3 text-sm font-bold text-white shadow-md shadow-indigo-300/40 hover:bg-[#4338CA] active:scale-[0.98] transition cursor-pointer self-start md:self-auto"
-          >
-            <Plus :size="16" />
-            <span>Nouvelle réservation</span>
-          </RouterLink>
-        </div>
+          <!-- COLONNE DROITE -->
+          <div class="hero-right">
 
-        <!-- STATISTIQUES RAPIDES -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          <div class="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-xs">
-            <p class="text-xs font-medium uppercase tracking-wider text-slate-400">Total</p>
-            <p class="mt-1 text-2xl font-black text-[#0F172A]">{{ counts.all }}</p>
-          </div>
-          <div class="rounded-2xl border border-amber-200/60 bg-amber-50/50 p-4 sm:p-5 shadow-xs">
-            <p class="text-xs font-medium uppercase tracking-wider text-amber-700">En attente</p>
-            <p class="mt-1 text-2xl font-black text-amber-600">{{ counts.en_attente }}</p>
-          </div>
-          <div class="rounded-2xl border border-emerald-200/60 bg-emerald-50/50 p-4 sm:p-5 shadow-xs">
-            <p class="text-xs font-medium uppercase tracking-wider text-emerald-700">Confirmées</p>
-            <p class="mt-1 text-2xl font-black text-emerald-600">{{ counts.confirmee }}</p>
-          </div>
-          <div class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 sm:p-5 shadow-xs">
-            <p class="text-xs font-medium uppercase tracking-wider text-slate-500">Terminées</p>
-            <p class="mt-1 text-2xl font-black text-slate-700">{{ counts.terminee }}</p>
-          </div>
-        </div>
+            <!-- TITRE -->
+            <div class="editorial-card editorial-intro">
 
-        <!-- BARRE D'ACTION : ONGLETS & RECHERCHE -->
-        <div
-          class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-8 bg-white p-2 sm:p-3 rounded-2xl border border-slate-200/80 shadow-xs"
-        >
-          <!-- Onglets de filtre -->
-          <div class="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+              <p class="eyebrow">
+                Lodgify — Private spaces
+              </p>
+
+              <h2>
+                VOS RÉSERVATIONS
+                <br />
+                <span>REVISITÉES.</span>
+              </h2>
+
+              <p>
+                Consultez l'historique et le statut en temps réel
+                de vos réservations de salles.
+              </p>
+
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-grid">
+
+              <div class="stat-card">
+                <div class="stat-symbol">✦</div>
+
+                <div class="stat-number">
+                  {{ counts.all }}
+                </div>
+
+                <div class="stat-label">
+                  Total
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-symbol green">
+                  ✧
+                </div>
+
+                <div class="stat-number green-text">
+                  {{ counts.confirmee }}
+                </div>
+
+                <div class="stat-label">
+                  Confirmées
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-symbol">
+                  ✦
+                </div>
+
+                <div class="stat-number">
+                  {{ counts.terminee }}
+                </div>
+
+                <div class="stat-label">
+                  Terminées
+                </div>
+              </div>
+
+            </div>
+
+            <!-- STORY -->
+            <div class="editorial-card editorial-story">
+
+              <div
+                v-if="filteredReservations.length"
+                class="story-background"
+              >
+                <img
+                  :src="getSalleImage(filteredReservations[0])"
+                  alt=""
+                />
+              </div>
+
+              <div class="story-overlay"></div>
+
+              <div class="story-content">
+
+                <p class="eyebrow">
+                  Your experience
+                </p>
+
+                <h3>
+                  Réserver.
+                  <br />
+                  <span>Profiter.</span>
+                </h3>
+
+                <p>
+                  Retrouvez toutes vos réservations et contrôlez
+                  chaque détail de vos événements en quelques clics.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- =====================================================
+             FILTRES
+        ====================================================== -->
+        <section class="filters-card">
+
+          <div class="filters-scroll">
+
             <button
               type="button"
               @click="activeTab = 'all'"
-              class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
-              :class="
-                activeTab === 'all'
-                  ? 'bg-[#4F46E5] text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
-              "
+              class="filter-button"
+              :class="{ selected: activeTab === 'all' }"
             >
-              Toutes ({{ counts.all }})
+              Toutes
+              <span>{{ counts.all }}</span>
             </button>
+
             <button
               type="button"
               @click="activeTab = 'en_attente'"
-              class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
-              :class="
-                activeTab === 'en_attente'
-                  ? 'bg-amber-500 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
-              "
+              class="filter-button"
+              :class="{ selected: activeTab === 'en_attente' }"
             >
-              En attente ({{ counts.en_attente }})
+              En attente
+              <span>{{ counts.en_attente }}</span>
             </button>
+
             <button
               type="button"
               @click="activeTab = 'confirmee'"
-              class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
-              :class="
-                activeTab === 'confirmee'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
-              "
+              class="filter-button"
+              :class="{ selected: activeTab === 'confirmee' }"
             >
-              Confirmées ({{ counts.confirmee }})
+              Confirmées
+              <span>{{ counts.confirmee }}</span>
             </button>
+
             <button
               type="button"
               @click="activeTab = 'terminee'"
-              class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
-              :class="
-                activeTab === 'terminee'
-                  ? 'bg-slate-700 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
-              "
+              class="filter-button"
+              :class="{ selected: activeTab === 'terminee' }"
             >
-              Terminées ({{ counts.terminee }})
+              Terminées
+              <span>{{ counts.terminee }}</span>
             </button>
+
             <button
               type="button"
               @click="activeTab = 'annulee'"
-              class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
-              :class="
-                activeTab === 'annulee'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
-              "
+              class="filter-button"
+              :class="{ selected: activeTab === 'annulee' }"
             >
-              Annulées ({{ counts.annulee }})
+              Annulées
+              <span>{{ counts.annulee }}</span>
             </button>
+
           </div>
 
-          <!-- Champ recherche -->
-          <div class="relative min-w-[240px]">
-            <Search :size="15" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <!-- recherche -->
+          <div class="search-container">
+
+            <Search
+              :size="14"
+              class="search-icon"
+            />
+
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Rechercher une salle..."
-              class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-9 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#4F46E5] focus:bg-white focus:outline-hidden"
+              class="search-input"
             />
-          </div>
-        </div>
 
-        <!-- CHARGEMENT -->
+          </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             LOADING
+        ====================================================== -->
         <div
           v-if="isLoading"
-          class="flex flex-col items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-16 shadow-xs"
+          class="state-card"
         >
-          <Loader2 :size="32" class="animate-spin text-[#4F46E5]" />
-          <p class="mt-3 text-sm font-medium text-slate-500">Chargement de vos réservations...</p>
+          <Loader2
+            :size="30"
+            class="animate-spin text-[#d7ff57]"
+          />
+
+          <p>
+            Chargement de vos réservations...
+          </p>
         </div>
 
-        <!-- ERREUR -->
+
+        <!-- =====================================================
+             ERREUR
+        ====================================================== -->
         <div
           v-else-if="errorMessage && reservations.length === 0"
-          class="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center"
+          class="state-card error-state"
         >
-          <AlertCircle :size="32" class="mx-auto mb-2 text-rose-500" />
-          <p class="text-sm font-bold text-rose-800">Impossible de charger vos réservations</p>
-          <p class="mt-1 text-xs text-rose-600">{{ errorMessage }}</p>
+          <AlertCircle
+            :size="32"
+            class="text-red-400"
+          />
+
+          <h3>
+            Impossible de charger vos réservations
+          </h3>
+
+          <p>
+            {{ errorMessage }}
+          </p>
+
           <button
             type="button"
             @click="loadReservations"
-            class="mt-4 inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 transition cursor-pointer"
+            class="white-button"
           >
-            <RefreshCw :size="14" />
-            <span>Réessayer</span>
+            <RefreshCw :size="13" />
+            Réessayer
           </button>
         </div>
 
-        <!-- ÉTAT VIDE : AUCUNE RÉSERVATION AU TOTAL -->
+
+        <!-- =====================================================
+             AUCUNE RESERVATION
+        ====================================================== -->
         <div
           v-else-if="reservations.length === 0"
-          class="flex flex-col items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-12 sm:p-16 text-center shadow-xs"
+          class="state-card empty-state"
         >
-          <div
-            class="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-[#4F46E5] mb-4"
-          >
-            <Building2 :size="32" />
-          </div>
-          <h3 class="text-lg font-bold text-[#0F172A]">Vous n'avez aucune réservation</h3>
-          <p class="mt-1.5 max-w-md text-sm text-slate-500">
-            Découvrez nos espaces modulables et modernes pour vos réunions, séminaires ou
-            conférences.
+          <Building2
+            :size="36"
+            class="text-white/20"
+          />
+
+          <h3>
+            Vous n'avez aucune réservation
+          </h3>
+
+          <p>
+            Découvrez nos espaces modulables et modernes pour vos réunions,
+            séminaires ou conférences.
           </p>
-          <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+
+          <div class="empty-actions">
+
             <RouterLink
               to="/salles"
-              class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+              class="dark-outline-button"
             >
-              <span>Explorer les salles</span>
+              Explorer les salles
             </RouterLink>
+
             <RouterLink
               to="/reserver"
-              class="inline-flex items-center gap-2 rounded-2xl bg-[#4F46E5] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#4338CA] transition"
+              class="white-button"
             >
               <Plus :size="14" />
-              <span>Créer une réservation</span>
+              Créer une réservation
             </RouterLink>
+
           </div>
         </div>
 
-        <!-- ÉTAT VIDE : AUCUN RÉSULTAT POUR LE FILTRE -->
+
+        <!-- =====================================================
+             AUCUN RESULTAT FILTRE
+        ====================================================== -->
         <div
           v-else-if="filteredReservations.length === 0"
-          class="flex flex-col items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-12 text-center shadow-xs"
+          class="state-card empty-state"
         >
-          <Search :size="32" class="text-slate-300 mb-3" />
-          <h3 class="text-base font-bold text-[#0F172A]">Aucune réservation correspondante</h3>
-          <p class="mt-1 text-xs text-slate-500">
+          <Search
+            :size="32"
+            class="text-white/20"
+          />
+
+          <h3>
+            Aucune réservation correspondante
+          </h3>
+
+          <p>
             Aucun événement ne correspond à vos filtres actuels.
           </p>
+
           <button
             type="button"
             @click=";(activeTab = 'all'), (searchQuery = '')"
-            class="mt-4 rounded-xl bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition cursor-pointer"
+            class="lime-button"
           >
             Réinitialiser les filtres
           </button>
         </div>
 
-        <!-- LISTE DES RÉSERVATIONS -->
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div
+
+        <!-- =====================================================
+             LISTE RESERVATIONS
+        ====================================================== -->
+        <section
+          v-else
+          class="reservation-grid"
+        >
+
+          <article
             v-for="item in filteredReservations"
             :key="item.id"
-            class="group flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white overflow-hidden shadow-xs hover:shadow-md hover:border-indigo-200 transition-all duration-200"
+            class="reservation-card"
           >
-            <!-- Partie supérieure : Image & Badge statut -->
-            <div class="relative h-44 w-full bg-slate-100 overflow-hidden">
+
+            <!-- IMAGE -->
+            <div class="reservation-image">
+
               <img
                 :src="getSalleImage(item)"
                 :alt="item.salle?.nom || 'Salle'"
-                class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
 
-              <!-- Badge statut -->
-              <div class="absolute top-3 left-3">
+              <div class="reservation-image-overlay"></div>
+
+              <!-- statut -->
+              <div class="absolute top-4 left-4">
+
                 <span
                   v-if="item.status === 'confirmee'"
-                  class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-xs"
+                  class="hero-status confirmed"
                 >
-                  <CheckCircle2 :size="13" />
-                  <span>Confirmée</span>
+                  <CheckCircle2 :size="12" />
+                  Confirmée
                 </span>
+
                 <span
                   v-else-if="item.status === 'en_attente'"
-                  class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-xs"
+                  class="hero-status pending"
                 >
-                  <Clock3 :size="13" />
-                  <span>En attente</span>
+                  <Clock3 :size="12" />
+                  En attente
                 </span>
+
                 <span
                   v-else-if="item.status === 'terminee'"
-                  class="inline-flex items-center gap-1.5 rounded-full bg-slate-800/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-xs"
+                  class="hero-status finished"
                 >
-                  <Check :size="13" />
-                  <span>Terminée</span>
+                  <Check :size="12" />
+                  Terminée
                 </span>
+
                 <span
                   v-else-if="item.status === 'rejetee'"
-                  class="inline-flex items-center gap-1.5 rounded-full bg-rose-500/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-xs"
+                  class="hero-status rejected"
                 >
-                  <XCircle :size="13" />
-                  <span>Rejetée</span>
+                  <XCircle :size="12" />
+                  Rejetée
                 </span>
+
                 <span
                   v-else
-                  class="inline-flex items-center gap-1.5 rounded-full bg-slate-600/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-xs"
+                  class="hero-status finished"
                 >
-                  <Ban :size="13" />
-                  <span>Annulée</span>
+                  <Ban :size="12" />
+                  Annulée
                 </span>
+
               </div>
 
-              <!-- Numéro dossier -->
-              <div class="absolute top-3 right-3">
-                <span
-                  class="rounded-full bg-black/40 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold text-white tracking-wider"
-                >
-                  #{{ item.id }}
-                </span>
+              <!-- ID -->
+              <div class="reservation-number">
+                #{{ item.id }}
               </div>
 
-              <!-- Nom salle sur l'image -->
-              <div class="absolute bottom-3 left-4 right-4 text-white">
-                <h3 class="text-lg font-bold drop-shadow-xs line-clamp-1">
+              <!-- titre -->
+              <div class="reservation-title">
+
+                <p class="eyebrow">
+                  Réservation #{{ item.id }}
+                </p>
+
+                <h3>
                   {{ item.salle?.nom || 'Salle #' + item.salle_id }}
                 </h3>
-                <p class="text-xs text-white/80 flex items-center gap-1 line-clamp-1">
+
+                <p class="location">
                   <MapPin :size="12" />
-                  <span>{{ item.salle?.localisation || 'Localisation standard' }}</span>
+                  {{ item.salle?.localisation || 'Localisation standard' }}
                 </p>
+
               </div>
+
             </div>
 
-            <!-- Corps de la carte -->
-            <div class="p-5 flex-1 flex flex-col justify-between">
-              <!-- Détails du créneau -->
-              <div class="space-y-2.5 text-xs text-slate-600">
-                <div class="flex items-center gap-2">
-                  <Calendar :size="15" class="text-[#4F46E5] shrink-0" />
-                  <span class="font-semibold text-slate-800 capitalize">
-                    {{ formatDate(item.date_heure_debut) }}
+
+            <!-- CONTENU -->
+            <div class="reservation-content">
+
+              <div class="reservation-info-grid">
+
+                <div class="reservation-info">
+
+                  <span>
+                    Date
                   </span>
+
+                  <strong>
+                    {{ formatDate(item.date_heure_debut) }}
+                  </strong>
+
                 </div>
 
-                <div class="flex items-center gap-2">
-                  <Clock :size="15" class="text-slate-400 shrink-0" />
-                  <span>{{ formatTimeRange(item.date_heure_debut, item.date_heure_fin) }}</span>
+                <div class="reservation-info">
+
+                  <span>
+                    Horaires
+                  </span>
+
+                  <strong>
+                    {{ formatTimeRange(item.date_heure_debut, item.date_heure_fin) }}
+                  </strong>
+
                 </div>
 
-                <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                  <div class="flex items-center gap-1.5 text-slate-500">
-                    <Users :size="14" class="text-slate-400" />
-                    <span>{{ item.nombre_personnes }} personne(s)</span>
-                  </div>
+                <div class="reservation-info">
 
-                  <div
-                    v-if="item.equipements && item.equipements.length > 0"
-                    class="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-[#4F46E5]"
-                  >
-                    <Package :size="12" />
-                    <span>{{ item.equipements.length }} équipement(s)</span>
-                  </div>
+                  <span>
+                    Participants
+                  </span>
+
+                  <strong class="with-icon">
+                    <Users :size="13" />
+                    {{ item.nombre_personnes }}
+                  </strong>
+
                 </div>
+
+                <div class="reservation-info">
+
+                  <span>
+                    Équipements
+                  </span>
+
+                  <strong class="with-icon">
+                    <Package :size="13" />
+                    {{ item.equipements?.length || 0 }}
+                  </strong>
+
+                </div>
+
               </div>
 
-              <!-- Actions -->
-              <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                <!-- Actions gauche : Annuler et Modifier si possible -->
-                <div class="flex items-center gap-3">
+
+              <!-- ACTIONS -->
+              <div class="reservation-actions">
+
+                <div class="left-actions">
+
                   <button
                     v-if="item.status === 'en_attente' || item.status === 'confirmee'"
                     type="button"
                     @click="openCancelModal(item)"
-                    class="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                    class="cancel-link"
                   >
                     Annuler
                   </button>
 
                   <RouterLink
                     v-if="item.status === 'en_attente' || item.status === 'confirmee'"
-                    :to="{ name: 'user-update-reservation', params: { id: item.id } }"
-                    class="text-xs font-semibold text-[#4F46E5] hover:text-[#4338CA] hover:underline cursor-pointer"
+                    :to="{
+                      name: 'user-update-reservation',
+                      params: { id: item.id }
+                    }"
+                    class="modify-link"
                   >
                     Modifier
                   </RouterLink>
+
                 </div>
 
-                <!-- Bouton détails -->
                 <RouterLink
-                  :to="{ name: 'user-reservation-details', params: { id: item.id } }"
-                  class="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-[#4F46E5] transition cursor-pointer"
+                  :to="{
+                    name: 'user-reservation-details',
+                    params: { id: item.id }
+                  }"
+                  class="details-button"
                 >
-                  <span>Détails</span>
-                  <ArrowRight :size="14" />
+                  Détails
+                  <ArrowRight :size="13" />
                 </RouterLink>
+
               </div>
+
             </div>
-          </div>
-        </div>
+
+          </article>
+
+        </section>
+
       </div>
     </main>
 
-    <!-- MODAL DE CONFIRMATION D'ANNULATION -->
+
+    <!-- =====================================================
+         MODAL ANNULATION
+    ====================================================== -->
     <div
       v-if="isCancelModalOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+      class="modal-background"
     >
-      <div
-        class="w-full max-w-md rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200"
-      >
-        <div
-          class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 mb-4"
-        >
+
+      <div class="cancel-modal">
+
+        <div class="modal-icon">
           <AlertCircle :size="24" />
         </div>
 
-        <h3 class="text-lg font-black text-[#0F172A]">Annuler cette réservation ?</h3>
-        <p class="mt-2 text-xs text-slate-500 leading-relaxed">
-          Êtes-vous sûr de vouloir annuler la réservation #{{ reservationToCancel?.id }} pour
-          l'événement prévu à la salle
-          <strong>{{ reservationToCancel?.salle?.nom }}</strong> ? Cette action est irréversible.
+        <h3>
+          Annuler cette réservation ?
+        </h3>
+
+        <p>
+          Êtes-vous sûr de vouloir annuler la réservation
+          #{{ reservationToCancel?.id }} pour l'événement prévu
+          à la salle
+          <strong>
+            {{ reservationToCancel?.salle?.nom }}
+          </strong>
+          ? Cette action est irréversible.
         </p>
 
-        <!-- Message d'erreur éventuel -->
         <div
           v-if="cancelError"
-          class="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700"
+          class="modal-error"
         >
           {{ cancelError }}
         </div>
 
-        <div class="mt-6 flex justify-end gap-3">
+        <div class="modal-actions">
+
           <button
             type="button"
             @click="closeCancelModal"
             :disabled="isCancelling"
-            class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
+            class="modal-keep-button"
           >
             Non, conserver
           </button>
@@ -564,15 +859,1188 @@ const confirmCancelReservation = async () => {
             type="button"
             @click="confirmCancelReservation"
             :disabled="isCancelling"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-rose-700 active:scale-95 transition cursor-pointer disabled:opacity-60"
+            class="modal-cancel-button"
           >
-            <Loader2 v-if="isCancelling" :size="14" class="animate-spin" />
-            <span>{{ isCancelling ? 'Annulation...' : 'Oui, annuler' }}</span>
+            <Loader2
+              v-if="isCancelling"
+              :size="14"
+              class="animate-spin"
+            />
+
+            <span>
+              {{ isCancelling ? 'Annulation...' : 'Oui, annuler' }}
+            </span>
           </button>
+
         </div>
+
       </div>
+
     </div>
 
+    <!-- FOOTER EXISTANT -->
     <Footer />
+
   </div>
 </template>
+
+<style scoped>
+/* =========================================================
+   BASE
+========================================================= */
+
+.reservations-page {
+  min-height: 100vh;
+  background: #080909;
+  color: #f4f1e9;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+/* =========================================================
+   OVERRIDE NAVBAR POUR LE FOND SOMBRE
+========================================================= */
+
+.reservations-page :deep(nav) {
+  color: white;
+}
+
+/* =========================================================
+   TYPOGRAPHIE
+========================================================= */
+
+.eyebrow {
+  margin: 0 0 10px;
+
+  color: rgba(255, 255, 255, 0.42);
+
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+}
+
+.hero-title,
+.editorial-card h2,
+.editorial-story h3,
+.reservation-title h3,
+.state-card h3,
+.cancel-modal h3 {
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.03fr 0.97fr;
+  gap: 12px;
+}
+
+.hero-image-card {
+  position: relative;
+  min-height: 610px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+
+  background: #111212;
+}
+
+.hero-main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  filter: saturate(0.8);
+
+  transition: transform 0.8s ease;
+}
+
+.hero-image-card:hover .hero-main-image {
+  transform: scale(1.035);
+}
+
+.hero-empty-image {
+  background:
+    radial-gradient(circle at 30% 30%, #292b2a 0%, transparent 40%),
+    linear-gradient(135deg, #222524, #090a0a);
+}
+
+.hero-image-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.28),
+      transparent 30%,
+      rgba(0, 0, 0, 0.85) 100%
+    );
+}
+
+.hero-menu-button {
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  backdrop-filter: blur(12px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.hero-menu-button span {
+  display: block;
+  width: 14px;
+  height: 1px;
+  background: white;
+  opacity: 0.8;
+}
+
+.hero-number {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  padding: 7px 11px;
+
+  color: white;
+
+  font-size: 8px;
+  letter-spacing: 0.15em;
+
+  backdrop-filter: blur(10px);
+}
+
+.hero-title {
+  max-width: 650px;
+
+  margin: 0;
+
+  font-size: clamp(42px, 5vw, 68px);
+  line-height: 0.9;
+  font-weight: 400;
+
+  letter-spacing: -0.055em;
+}
+
+.hero-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 8px 20px;
+
+  margin-top: 20px;
+
+  color: rgba(255, 255, 255, 0.65);
+
+  font-size: 10px;
+}
+
+.hero-details span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.hero-status.confirmed {
+  color: #090a09;
+  background: #d7ff57;
+}
+
+.hero-status.pending {
+  color: #090a09;
+  background: #f2b84b;
+}
+
+.hero-status.finished {
+  color: white;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.hero-status.rejected {
+  color: white;
+  background: rgba(185, 28, 28, 0.8);
+}
+
+/* =========================================================
+   HERO DROITE
+========================================================= */
+
+.hero-right {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 12px;
+}
+
+.editorial-card {
+  position: relative;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+
+  background: #101111;
+}
+
+.editorial-intro {
+  min-height: 205px;
+
+  padding: 30px;
+}
+
+.editorial-card h2 {
+  margin: 0;
+
+  color: #f3efe7;
+
+  font-size: clamp(30px, 3vw, 43px);
+  line-height: 0.94;
+  font-weight: 400;
+
+  letter-spacing: -0.045em;
+}
+
+.editorial-card h2 span {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.editorial-intro > p:last-child {
+  max-width: 380px;
+
+  margin-top: 23px;
+
+  color: rgba(255, 255, 255, 0.4);
+
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat-card {
+  min-height: 140px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+
+  background: #101111;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.stat-symbol {
+  margin-bottom: 8px;
+
+  color: rgba(255, 255, 255, 0.8);
+
+  font-size: 18px;
+}
+
+.stat-symbol.green {
+  color: #d7ff57;
+}
+
+.stat-number {
+  color: #f3efe7;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 27px;
+  line-height: 1;
+}
+
+.stat-number.green-text {
+  color: #d7ff57;
+}
+
+.stat-label {
+  margin-top: 7px;
+
+  color: rgba(255, 255, 255, 0.3);
+
+  font-size: 7px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* =========================================================
+   STORY
+========================================================= */
+
+.editorial-story {
+  min-height: 250px;
+}
+
+.story-background,
+.story-background img,
+.story-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.story-background img {
+  object-fit: cover;
+  filter: grayscale(1);
+  opacity: 0.35;
+}
+
+.story-overlay {
+  background:
+    linear-gradient(
+      to top,
+      #101111 0%,
+      rgba(16, 17, 17, 0.85) 30%,
+      rgba(16, 17, 17, 0.2) 100%
+    );
+}
+
+.story-content {
+  position: absolute;
+  inset: auto 30px 28px;
+  z-index: 2;
+}
+
+.story-content h3 {
+  margin: 0;
+
+  font-size: 38px;
+  line-height: 0.92;
+  font-weight: 400;
+
+  letter-spacing: -0.04em;
+}
+
+.story-content h3 span {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.story-content > p:last-child {
+  max-width: 370px;
+
+  margin-top: 14px;
+
+  color: rgba(255, 255, 255, 0.42);
+
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   FILTRES
+========================================================= */
+
+.filters-card {
+  margin-top: 12px;
+
+  min-height: 70px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 10px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+
+  background: #101111;
+}
+
+.filters-scroll {
+  display: flex;
+  align-items: center;
+
+  gap: 3px;
+
+  overflow-x: auto;
+
+  scrollbar-width: none;
+}
+
+.filters-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-button {
+  height: 42px;
+
+  padding: 0 15px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  white-space: nowrap;
+
+  border: 0;
+  border-radius: 11px;
+
+  background: transparent;
+
+  color: rgba(255, 255, 255, 0.42);
+
+  font-size: 8px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.filter-button span {
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.filter-button:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.filter-button.selected {
+  color: #080909;
+  background: white;
+}
+
+.filter-button.selected span {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.search-container {
+  position: relative;
+
+  width: 270px;
+  flex-shrink: 0;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.search-input {
+  width: 100%;
+  height: 42px;
+
+  padding: 0 14px 0 38px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+
+  outline: none;
+
+  background: rgba(0, 0, 0, 0.25);
+
+  color: white;
+
+  font-size: 10px;
+
+  transition: border 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.search-input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* =========================================================
+   RESERVATIONS GRID
+========================================================= */
+
+.reservation-grid {
+  margin-top: 12px;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.reservation-card {
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+
+  background: #101111;
+
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.reservation-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* =========================================================
+   IMAGE RESERVATION
+========================================================= */
+
+.reservation-image {
+  position: relative;
+
+  height: 280px;
+
+  overflow: hidden;
+
+  background: #181919;
+}
+
+.reservation-image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition: transform 0.7s ease;
+}
+
+.reservation-card:hover .reservation-image img {
+  transform: scale(1.045);
+}
+
+.reservation-image-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.25),
+      transparent 35%,
+      rgba(0, 0, 0, 0.9) 100%
+    );
+}
+
+.reservation-number {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+
+  padding: 7px 10px;
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  color: white;
+
+  font-size: 8px;
+  letter-spacing: 0.14em;
+
+  backdrop-filter: blur(8px);
+}
+
+.reservation-title {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+}
+
+.reservation-title h3 {
+  margin: 0;
+
+  color: white;
+
+  font-size: 31px;
+  line-height: 0.95;
+  font-weight: 400;
+
+  letter-spacing: -0.04em;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-top: 9px;
+
+  color: rgba(255, 255, 255, 0.58);
+
+  font-size: 9px;
+}
+
+/* =========================================================
+   CONTENU RESERVATION
+========================================================= */
+
+.reservation-content {
+  padding: 18px;
+}
+
+.reservation-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 7px;
+}
+
+.reservation-info {
+  min-height: 68px;
+
+  padding: 11px 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 13px;
+
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.reservation-info span {
+  display: block;
+
+  color: rgba(255, 255, 255, 0.27);
+
+  font-size: 7px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.reservation-info strong {
+  display: block;
+
+  margin-top: 6px;
+
+  color: rgba(255, 255, 255, 0.82);
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  line-height: 1.15;
+}
+
+.reservation-info strong.with-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.reservation-actions {
+  margin-top: 16px;
+  padding-top: 14px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+}
+
+.left-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.cancel-link,
+.modify-link {
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+
+  cursor: pointer;
+}
+
+.cancel-link {
+  color: #f87171;
+}
+
+.cancel-link:hover {
+  color: #fca5a5;
+}
+
+.modify-link {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.modify-link:hover {
+  color: white;
+}
+
+.details-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 10px 14px;
+
+  border-radius: 11px;
+
+  background: white;
+
+  color: #080909;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+
+  transition: all 0.2s ease;
+}
+
+.details-button:hover {
+  background: #d7ff57;
+}
+
+/* =========================================================
+   ETATS
+========================================================= */
+
+.state-card {
+  min-height: 350px;
+
+  margin-top: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+
+  background: #101111;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 40px;
+}
+
+.state-card p {
+  margin-top: 13px;
+
+  color: rgba(255, 255, 255, 0.38);
+
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.empty-state h3,
+.error-state h3 {
+  margin-top: 18px;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.empty-state > p {
+  max-width: 450px;
+}
+
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  margin-top: 24px;
+}
+
+.white-button,
+.dark-outline-button,
+.lime-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 40px;
+
+  padding: 0 16px;
+
+  border-radius: 11px;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.white-button {
+  border: 0;
+  background: white;
+  color: #080909;
+}
+
+.white-button:hover {
+  background: #d7ff57;
+}
+
+.dark-outline-button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dark-outline-button:hover {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.lime-button {
+  margin-top: 22px;
+
+  border: 0;
+
+  background: #d7ff57;
+  color: #080909;
+}
+
+.lime-button:hover {
+  background: white;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal-background {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 16px;
+
+  background: rgba(0, 0, 0, 0.82);
+
+  backdrop-filter: blur(12px);
+}
+
+.cancel-modal {
+  width: 100%;
+  max-width: 440px;
+
+  padding: 28px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+
+  background: #111212;
+
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.modal-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background: rgba(239, 68, 68, 0.1);
+
+  color: #f87171;
+}
+
+.cancel-modal h3 {
+  margin-top: 18px;
+
+  font-size: 31px;
+  line-height: 1;
+
+  font-weight: 400;
+}
+
+.cancel-modal > p {
+  margin-top: 13px;
+
+  color: rgba(255, 255, 255, 0.4);
+
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.cancel-modal > p strong {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.modal-error {
+  margin-top: 15px;
+
+  padding: 12px;
+
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 11px;
+
+  background: rgba(239, 68, 68, 0.08);
+
+  color: #fca5a5;
+
+  font-size: 9px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  margin-top: 24px;
+}
+
+.modal-keep-button,
+.modal-cancel-button {
+  min-height: 40px;
+
+  padding: 0 15px;
+
+  border-radius: 11px;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  cursor: pointer;
+}
+
+.modal-keep-button {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  background: transparent;
+
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.modal-keep-button:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.modal-cancel-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  border: 0;
+
+  background: #ef4444;
+
+  color: white;
+}
+
+.modal-cancel-button:hover {
+  background: #dc2626;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-image-card {
+    min-height: 500px;
+  }
+
+  .hero-right {
+    grid-template-rows: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-container {
+    width: 100%;
+  }
+
+  .reservation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    gap: 7px;
+  }
+
+  .stat-card {
+    min-height: 115px;
+  }
+
+  .stat-number {
+    font-size: 23px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-image-card {
+    min-height: 450px;
+  }
+
+  .hero-title {
+    font-size: 42px;
+  }
+
+  .hero-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+  }
+
+  .editorial-intro {
+    padding: 24px;
+  }
+
+  .editorial-card h2 {
+    font-size: 32px;
+  }
+
+  .story-content {
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+  }
+
+  .story-content h3 {
+    font-size: 32px;
+  }
+
+  .reservation-image {
+    height: 250px;
+  }
+
+  .reservation-title h3 {
+    font-size: 27px;
+  }
+
+  .reservation-info-grid {
+    gap: 5px;
+  }
+
+  .reservation-info {
+    padding: 10px;
+  }
+
+  .reservation-actions {
+    align-items: flex-start;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-keep-button,
+  .modal-cancel-button {
+    width: 100%;
+  }
+}
+</style>

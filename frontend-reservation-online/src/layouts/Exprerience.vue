@@ -1,9 +1,15 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+
 import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-vue-next'
+
+
+/* =====================================================
+   DONNÉES
+===================================================== */
 
 const experiences = [
     {
@@ -26,7 +32,6 @@ const experiences = [
         location: 'Cotonou, Bénin',
         image: '/images/experiences/salle-4.png',
     },
-
     {
         title: 'Salle événementielle',
         location: 'Cotonou, Bénin',
@@ -36,135 +41,306 @@ const experiences = [
         title: 'Salle événementielle',
         location: 'Cotonou, Bénin',
         image: '/images/experiences/salle-6.png',
-    }
-
+    },
 ]
+
+
+/* =====================================================
+   RÉFÉRENCE DU CAROUSEL
+===================================================== */
+
+const carouselRef = ref(null)
+
+
+/* =====================================================
+   INDEX ACTUEL
+===================================================== */
 
 const currentIndex = ref(0)
 
-let interval = null
 
-/*
-|--------------------------------------------------------------------------
-| Nombre de cartes visibles
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   LARGEUR D'UNE CARTE
+===================================================== */
 
-const visibleCount = 3
+const cardWidth = ref(0)
 
-/*
-|--------------------------------------------------------------------------
-| Défilement suivant
-|--------------------------------------------------------------------------
-*/
+const gap = 20
+
+
+/* =====================================================
+   CALCUL DE LA LARGEUR
+===================================================== */
+
+const calculateCardWidth = () => {
+    if (!carouselRef.value) return
+
+    const width = carouselRef.value.clientWidth
+
+    // 3 cartes + 2 espaces de 20px
+    cardWidth.value = (width - gap * 2) / 3
+}
+
+
+/* =====================================================
+   NOMBRE MAXIMUM DE DÉPLACEMENTS
+===================================================== */
+
+const maxIndex = () => {
+    return Math.max(0, experiences.length - 3)
+}
+
+
+/* =====================================================
+   SUIVANT
+===================================================== */
 
 const next = () => {
-    currentIndex.value =
-        (currentIndex.value + 1) % experiences.length
+    if (currentIndex.value >= maxIndex()) {
+        currentIndex.value = 0
+        return
+    }
+
+    currentIndex.value++
 }
 
-/*
-|--------------------------------------------------------------------------
-| Défilement précédent
-|--------------------------------------------------------------------------
-*/
+
+/* =====================================================
+   PRÉCÉDENT
+===================================================== */
 
 const previous = () => {
-    currentIndex.value =
-        currentIndex.value === 0
-            ? experiences.length - 1
-            : currentIndex.value - 1
+    if (currentIndex.value <= 0) {
+        currentIndex.value = maxIndex()
+        return
+    }
+
+    currentIndex.value--
 }
 
-/*
-|--------------------------------------------------------------------------
-| Défilement automatique
-|--------------------------------------------------------------------------
-*/
 
-onMounted(() => {
+/* =====================================================
+   DÉFILEMENT AUTOMATIQUE
+===================================================== */
+
+let interval = null
+
+const startAutoPlay = () => {
+    stopAutoPlay()
+
     interval = setInterval(() => {
         next()
-    }, 3000)
+    }, 3500)
+}
+
+const stopAutoPlay = () => {
+    if (interval) {
+        clearInterval(interval)
+        interval = null
+    }
+}
+
+
+/* =====================================================
+   SOURIS / DRAG
+===================================================== */
+
+const isDragging = ref(false)
+
+const startX = ref(0)
+
+const currentTranslate = ref(0)
+
+const previousTranslate = ref(0)
+
+
+const startDrag = (event) => {
+    isDragging.value = true
+
+    startX.value = event.clientX
+
+    previousTranslate.value =
+        -(currentIndex.value * (cardWidth.value + gap))
+
+    stopAutoPlay()
+
+    if (carouselRef.value) {
+        carouselRef.value.setPointerCapture(event.pointerId)
+    }
+}
+
+
+const drag = (event) => {
+    if (!isDragging.value) return
+
+    const currentX = event.clientX
+
+    const difference = currentX - startX.value
+
+    currentTranslate.value =
+        previousTranslate.value + difference
+}
+
+
+const endDrag = (event) => {
+    if (!isDragging.value) return
+
+    isDragging.value = false
+
+    const difference =
+        event.clientX - startX.value
+
+    if (Math.abs(difference) > 60) {
+        if (difference < 0) {
+            next()
+        } else {
+            previous()
+        }
+    }
+
+    currentTranslate.value =
+        -(currentIndex.value * (cardWidth.value + gap))
+
+    startAutoPlay()
+}
+
+
+/* =====================================================
+   CALCUL DE LA POSITION
+===================================================== */
+
+const getTranslate = () => {
+    if (isDragging.value) {
+        return currentTranslate.value
+    }
+
+    return -(currentIndex.value * (cardWidth.value + gap))
+}
+
+
+/* =====================================================
+   REDIMENSIONNEMENT
+===================================================== */
+
+const handleResize = () => {
+    calculateCardWidth()
+
+    currentTranslate.value =
+        -(currentIndex.value * (cardWidth.value + gap))
+}
+
+
+/* =====================================================
+   MOUNT
+===================================================== */
+
+onMounted(async () => {
+    await nextTick()
+
+    calculateCardWidth()
+
+    currentTranslate.value =
+        -(currentIndex.value * (cardWidth.value + gap))
+
+    startAutoPlay()
+
+    window.addEventListener(
+        'resize',
+        handleResize
+    )
 })
 
+
+/* =====================================================
+   UNMOUNT
+===================================================== */
+
 onBeforeUnmount(() => {
-    clearInterval(interval)
+    stopAutoPlay()
+
+    window.removeEventListener(
+        'resize',
+        handleResize
+    )
 })
 </script>
 
+
 <template>
+
     <section
-        class="relative overflow-hidden
-               bg-[#F8FAFC]
-               px-6 py-16
-               lg:px-10 lg:py-10"
+        class="
+            relative
+            overflow-hidden
+            bg-[#F8FAFC]
+            px-6
+            py-8
+            lg:px-10
+            lg:py-6
+        "
     >
 
-        <!-- ===================================================== -->
-        <!-- CONTENEUR -->
-        <!-- ===================================================== -->
-
-        <div
-            class="mx-auto max-w-[1400px]"
-        >
+        <div class="mx-auto max-w-[1400px]">
 
             <div
-                class="grid grid-cols-1
-                       items-center
-                       gap-12
-                       lg:grid-cols-[310px_1fr]
-                       lg:gap-12"
+                class="
+                    grid
+                    grid-cols-1
+                    items-center
+                    gap-8
+                    lg:grid-cols-[310px_1fr]
+                    lg:gap-8
+                "
             >
 
                 <!-- ================================================= -->
                 <!-- COLONNE GAUCHE -->
                 <!-- ================================================= -->
 
-                <div
-                    class="relative z-10"
-                >
+                <div class="relative z-10">
 
-                    <!-- PETIT TITRE -->
                     <p
-                        class="mb-7
-                               text-[12px]
-                               font-bold
-                               uppercase
-                               tracking-[4px]
-                               text-[#0F172A]"
+                        class="
+                            mb-4
+                            text-[12px]
+                            font-bold
+                            uppercase
+                            tracking-[4px]
+                            text-[#0F172A]
+                        "
                     >
                         EXPÉRIENCES
                     </p>
 
 
-                    <!-- GRAND TITRE -->
                     <h2
-                        class="max-w-[320px]
-                               font-serif
-                               text-[42px]
-                               font-normal
-                               leading-[1.08]
-                               tracking-[-1.5px]
-                               text-[#0F172A]
-                               sm:text-[48px]"
+                        class="
+                            max-w-[320px]
+                            font-serif
+                            text-[42px]
+                            font-normal
+                            leading-[1.08]
+                            tracking-[-1.5px]
+                            text-[#0F172A]
+                            sm:text-[48px]
+                        "
                     >
                         Découvrez
-                        <span
-                            class="italic"
-                        >
+
+                        <span class="italic">
                             nos espaces
                         </span>
                     </h2>
 
 
-                    <!-- DESCRIPTION -->
                     <p
-                        class="mt-6
-                               max-w-[300px]
-                               text-[14px]
-                               leading-[1.6]
-                               text-[#475569]"
+                        class="
+                            mt-4
+                            max-w-[300px]
+                            text-[14px]
+                            leading-[1.6]
+                            text-[#475569]
+                        "
                     >
                         Explorez nos salles et espaces soigneusement
                         sélectionnés pour répondre à vos besoins
@@ -176,26 +352,32 @@ onBeforeUnmount(() => {
                     <!-- NAVIGATION -->
                     <!-- ================================================= -->
 
-                    <div
-                        class="mt-8 flex items-center gap-3"
-                    >
+                    <div class="mt-5 flex items-center gap-3">
 
                         <!-- PREVIOUS -->
+
                         <button
                             type="button"
                             aria-label="Expérience précédente"
-                            class="flex h-[42px] w-[42px]
-                                   items-center justify-center
-                                   rounded-full
-                                   border border-[#E2E8F0]
-                                   bg-white
-                                   text-[#0F172A]
-                                   shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]
-                                   transition-all duration-200
-                                   hover:border-[#4F46E5]
-                                   hover:bg-[#EEF2FF]
-                                   hover:text-[#4F46E5]
-                                   active:scale-[0.96]"
+                            class="
+                                flex
+                                h-[42px]
+                                w-[42px]
+                                items-center
+                                justify-center
+                                rounded-full
+                                border
+                                border-[#E2E8F0]
+                                bg-white
+                                text-[#0F172A]
+                                shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]
+                                transition-all
+                                duration-200
+                                hover:border-[#4F46E5]
+                                hover:bg-[#EEF2FF]
+                                hover:text-[#4F46E5]
+                                active:scale-[0.96]
+                            "
                             @click="previous"
                         >
                             <ChevronLeft
@@ -206,21 +388,29 @@ onBeforeUnmount(() => {
 
 
                         <!-- NEXT -->
+
                         <button
                             type="button"
                             aria-label="Expérience suivante"
-                            class="flex h-[42px] w-[42px]
-                                   items-center justify-center
-                                   rounded-full
-                                   border border-[#E2E8F0]
-                                   bg-white
-                                   text-[#0F172A]
-                                   shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]
-                                   transition-all duration-200
-                                   hover:border-[#4F46E5]
-                                   hover:bg-[#EEF2FF]
-                                   hover:text-[#4F46E5]
-                                   active:scale-[0.96]"
+                            class="
+                                flex
+                                h-[42px]
+                                w-[42px]
+                                items-center
+                                justify-center
+                                rounded-full
+                                border
+                                border-[#E2E8F0]
+                                bg-white
+                                text-[#0F172A]
+                                shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]
+                                transition-all
+                                duration-200
+                                hover:border-[#4F46E5]
+                                hover:bg-[#EEF2FF]
+                                hover:text-[#4F46E5]
+                                active:scale-[0.96]
+                            "
                             @click="next"
                         >
                             <ChevronRight
@@ -235,93 +425,134 @@ onBeforeUnmount(() => {
 
 
                 <!-- ================================================= -->
-                <!-- CARROUSEL -->
+                <!-- CAROUSEL -->
                 <!-- ================================================= -->
 
                 <div
-                    class="relative min-w-0 overflow-hidden"
+                    ref="carouselRef"
+                    class="
+                        relative
+                        min-w-0
+                        overflow-hidden
+                        cursor-grab
+                        select-none
+                    "
+                    :class="{
+                        'cursor-grabbing': isDragging
+                    }"
+                    @pointerdown="startDrag"
+                    @pointermove="drag"
+                    @pointerup="endDrag"
+                    @pointercancel="endDrag"
+                    @pointerleave="
+                        isDragging && endDrag($event)
+                    "
                 >
 
                     <!-- PISTE -->
+
                     <div
-                        class="flex gap-5
-                               transition-transform
-                               duration-700
-                               ease-in-out"
+                        class="
+                            flex
+                            gap-5
+                            will-change-transform
+                        "
                         :style="{
-                            transform: `translateX(calc(-${currentIndex} * (33.333% + 6.66px)))`
+                            transform: `translate3d(${getTranslate()}px, 0, 0)`,
+                            transition: isDragging
+                                ? 'none'
+                                : 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)'
                         }"
                     >
 
-                        <!-- CARTE -->
+                        <!-- CARTES -->
+
                         <article
                             v-for="(experience, index) in experiences"
                             :key="index"
-                            class="group
-                                   w-[calc((100%-40px)/3)]
-                                   min-w-[calc((100%-40px)/3)]
-                                   shrink-0"
+                            class="
+                                group
+                                shrink-0
+                            "
+                            :style="{
+                                width: `${cardWidth}px`
+                            }"
                         >
 
                             <!-- IMAGE -->
+
                             <div
-                                class="relative
-                                       aspect-[0.72]
-                                       overflow-hidden
-                                       bg-[#E2E8F0]"
+                                class="
+                                    relative
+                                    aspect-[0.82]
+                                    overflow-hidden
+                                    bg-[#E2E8F0]
+                                "
                             >
 
                                 <img
                                     :src="experience.image"
                                     :alt="experience.title"
-                                    class="h-full w-full
-                                           object-cover
-                                           transition-transform
-                                           duration-700
-                                           ease-out
-                                           group-hover:scale-[1.03]"
+                                    draggable="false"
+                                    class="
+                                        h-full
+                                        w-full
+                                        object-cover
+                                        transition-transform
+                                        duration-700
+                                        ease-out
+                                        group-hover:scale-[1.03]
+                                    "
                                 />
 
                             </div>
 
 
                             <!-- INFORMATIONS -->
-                            <div
-                                class="pt-5"
-                            >
+
+                            <div class="pt-3">
 
                                 <h3
-                                    class="font-serif
-                                           text-[19px]
-                                           leading-tight
-                                           text-[#0F172A]"
+                                    class="
+                                        font-serif
+                                        text-[19px]
+                                        leading-tight
+                                        text-[#0F172A]
+                                    "
                                 >
                                     {{ experience.title }}
                                 </h3>
 
+
                                 <p
-                                    class="mt-1
-                                           text-[12px]
-                                           text-[#64748B]"
+                                    class="
+                                        mt-1
+                                        text-[12px]
+                                        text-[#64748B]
+                                    "
                                 >
                                     {{ experience.location }}
                                 </p>
 
 
                                 <!-- BOUTON -->
+
                                 <button
                                     type="button"
-                                    class="mt-5
-                                           bg-[#0F172A]
-                                           px-5 py-3
-                                           text-[10px]
-                                           font-bold
-                                           tracking-[2px]
-                                           text-white
-                                           transition-colors
-                                           duration-200
-                                           hover:bg-[#020617]
-                                           active:scale-[0.98]"
+                                    class="
+                                        mt-3
+                                        bg-[#0F172A]
+                                        px-5
+                                        py-3
+                                        text-[10px]
+                                        font-bold
+                                        tracking-[2px]
+                                        text-white
+                                        transition-colors
+                                        duration-200
+                                        hover:bg-[#020617]
+                                        active:scale-[0.98]
+                                    "
                                 >
                                     DÉCOUVRIR
                                 </button>
@@ -336,52 +567,63 @@ onBeforeUnmount(() => {
 
             </div>
 
-        </div>
 
-
-        <!-- ===================================================== -->
-        <!-- INDICATEURS -->
-        <!-- ===================================================== -->
-
-        <div
-            class="mx-auto mt-10
-                   flex max-w-[1400px]
-                   justify-end
-                   lg:pr-2"
-        >
+            <!-- ================================================= -->
+            <!-- INDICATEURS -->
+            <!-- ================================================= -->
 
             <div
-                class="flex items-center gap-2"
+                class="
+                    mx-auto
+                    mt-6
+                    flex
+                    max-w-[1400px]
+                    justify-end
+                    lg:pr-2
+                "
             >
 
-                <button
-                    v-for="(_, index) in experiences"
-                    :key="index"
-                    type="button"
-                    class="h-[3px]
-                           rounded-full
-                           transition-all duration-300"
-                    :class="
-                        currentIndex === index
-                            ? 'w-8 bg-[#0F172A]'
-                            : 'w-3 bg-[#CBD5E1]'
-                    "
-                    @click="currentIndex = index"
-                ></button>
+                <div class="flex items-center gap-2">
+
+                    <button
+                        v-for="(_, index) in experiences.slice(
+                            0,
+                            maxIndex() + 1
+                        )"
+                        :key="index"
+                        type="button"
+                        class="
+                            h-[3px]
+                            rounded-full
+                            transition-all
+                            duration-300
+                        "
+                        :class="
+                            currentIndex === index
+                                ? 'w-8 bg-[#0F172A]'
+                                : 'w-3 bg-[#CBD5E1]'
+                        "
+                        @click="currentIndex = index"
+                    ></button>
+
+                </div>
 
             </div>
 
         </div>
 
     </section>
+
 </template>
 
 
 <style scoped>
+
 .font-serif {
     font-family:
         Georgia,
         'Times New Roman',
         serif;
 }
+
 </style>

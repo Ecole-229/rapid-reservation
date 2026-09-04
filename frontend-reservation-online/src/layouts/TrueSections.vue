@@ -1,184 +1,193 @@
 <script setup>
-const partners = [
+const logos = [
     {
-        name: 'Partenaire 1',
-        logo: '/images/partners/partner-1.png',
+        src: '/images/partners/partner-1.png',
+        name: 'BLOLAB',
     },
     {
-        name: 'Partenaire 2',
-        logo: '/images/partners/partner-2.png',
-
+        src: '/images/partners/partner-2.png',
+        name: 'Ecole229',
     },
 ]
+
+// Répétition pour éviter les espaces vides
+const repeatedLogos = Array.from({ length: 8 }, () => logos).flat()
 </script>
 
 <template>
-    <section
-        class="relative overflow-hidden bg-[#F8FAFC]
-                py-20  lg:px-20 lg:py-16"
-    >
+    <section class="w-full bg-white overflow-hidden">
 
-        <div
-            class="mx-auto max-w-[1200px]"
-        >
+        <!-- =========================
+             TITRE
+        ========================== -->
+        <div class="mx-auto max-w-7xl px-6 lg:px-10 py-12">
 
-            <!-- CONTENU -->
-            <div
-                class="grid grid-cols-1
-                       items-center
-                       gap-16
-                       lg:grid-cols-2
-                       lg:gap-20"
-            >
+            <div class="text-center">
 
-                <!-- ========================================= -->
-                <!-- GAUCHE -->
-                <!-- ========================================= -->
+                <h2
+                    class="text-3xl md:text-4xl font-semibold tracking-tight text-slate-950"
+                >
+                    Ils nous font confiance
+                </h2>
+            </div>
 
-                <div>
-
-                    <!-- PETIT LABEL -->
+        </div>
 
 
+        <!-- =========================
+             LIGNE DES PARTENAIRES
+        ========================== -->
 
-                    <!-- TITRE -->
-                    <h2
-                        class="max-w-[540px]
-                               text-[42px]
-                               font-semibold
-                               leading-[1.08]
-                               tracking-[-1.8px]
-                               text-[#0F172A]
-                               sm:text-[50px]
-                               lg:text-[56px]"
-                    >
-                        Développé au
-                        <span class="text-[#4F46E5]">
-                            Bénin.
-                        </span>
+        <div class="w-full border-t border-slate-100">
 
-                        <br />
+            <div class="relative w-full overflow-hidden">
 
-                        Fiable
-                        <span class="italic">
-                            partout.
-                        </span>
-                    </h2>
+                <div class="flex w-max animate-marquee">
 
-
-                    <!-- DESCRIPTION -->
-                    <p
-                        class="mt-7
-                               max-w-[510px]
-                               text-[15px]
-                               leading-[1.7]
-                               text-[#475569]"
-                    >
-                        Notre plateforme est pensée et développée
-                        au Bénin pour simplifier la réservation
-                        de salles et d'équipements.
-                        <br />
-
-                        Une solution simple, moderne et fiable pour
-                        les entreprises, établissements et organisations.
-                    </p>
-
-                </div>
-
-
-                <!-- ========================================= -->
-                <!-- DROITE : PARTENAIRES -->
-                <!-- ========================================= -->
-
-                <div>
-
-                    <!-- LABEL -->
-                    <p
-                        class="mb-7
-                               text-[11px]
-                               font-semibold
-                               uppercase
-                               tracking-[2px]
-                               text-[#94A3B8]"
-                    >
-                        Ils nous font confiance
-                    </p>
-
-
-                    <!-- LOGOS -->
-                    <div
-                        class="flex flex-wrap
-                               items-center
-                               justify-center
-                               gap-x-5
-                               gap-y-7
-                               lg:justify-start"
-                    >
+                    <!-- GROUPE 1 -->
+                    <div class="flex shrink-0">
 
                         <div
-                            v-for="partner in partners"
-                            :key="partner.name"
-                            class="flex h-[92px]
-                                   w-[92px]
-                                   items-center
-                                   justify-center
-                                   rounded-full
-                                   border
-                                   border-[#E2E8F0]
-                                   bg-white
-                                   p-4
-                                   shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]
-                                   transition-all
-                                   duration-300
-                                   hover:-translate-y-1
-                                   hover:border-[#4F46E5]
-                                   hover:shadow-[0_8px_25px_-5px_rgba(79,70,229,0.15)]"
+                            v-for="(partner, index) in repeatedLogos"
+                            :key="`first-${index}`"
+                            class="
+                                flex
+                                h-[90px]
+                                w-[270px]
+                                shrink-0
+                                items-center
+                                justify-center
+                                gap-5
+                                border-r
+                                border-slate-100
+                                px-8
+                            "
                         >
 
+                            <!-- LOGO -->
                             <img
-                                :src="partner.logo"
+                                :src="partner.src"
                                 :alt="partner.name"
-                                class="max-h-full
-                                       max-w-full
-                                       object-contain
-                                       grayscale
-                                       opacity-70
-                                       transition-all
-                                       duration-300
-                                       hover:grayscale-0
-                                       hover:opacity-100"
+                                class="
+                                    max-h-[30px]
+                                    max-w-[90px]
+                                    w-auto
+                                    object-contain
+                                    shrink-0
+                                "
                             />
+
+                            <!-- NOM -->
+                            <span
+                                class="
+                                    text-sm
+                                    font-medium
+                                    text-slate-800
+                                    whitespace-nowrap
+                                "
+                            >
+                                {{ partner.name }}
+                            </span>
 
                         </div>
 
                     </div>
 
 
-                    <!-- TEXTE SOUS LES LOGOS -->
-                    <p
-                        class="mt-8
-                               max-w-[430px]
-                               text-[13px]
-                               leading-[1.6]
-                               text-[#64748B]"
-                    >
-                        Des entreprises et organisations nous font
-                        confiance pour simplifier la gestion de leurs
-                        espaces et réservations.
-                    </p>
+                    <!-- GROUPE 2 -->
+                    <div class="flex shrink-0">
+
+                        <div
+                            v-for="(partner, index) in repeatedLogos"
+                            :key="`second-${index}`"
+                            class="
+                                flex
+                                h-[90px]
+                                w-[270px]
+                                shrink-0
+                                items-center
+                                justify-center
+                                gap-5
+                                border-r
+                                border-slate-100
+                                px-8
+                            "
+                        >
+
+                            <!-- LOGO -->
+                            <img
+                                :src="partner.src"
+                                :alt="partner.name"
+                                class="
+                                    max-h-[30px]
+                                    max-w-[90px]
+                                    w-auto
+                                    object-contain
+                                    shrink-0
+                                "
+                            />
+
+                            <!-- NOM -->
+                            <span
+                                class="
+                                    text-sm
+                                    font-medium
+                                    text-slate-800
+                                    whitespace-nowrap
+                                "
+                            >
+                                {{ partner.name }}
+                            </span>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
             </div>
 
-
-            <!-- ========================================= -->
-            <!-- BAS DE SECTION -->
-            <!-- ========================================= -->
-
-
-
         </div>
+
+
+        <!-- Ligne inférieure -->
+        <div class="border-b border-slate-100"></div>
 
     </section>
 </template>
+
+
+<style scoped>
+.animate-marquee {
+    animation: marquee 30s linear infinite;
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-marquee:hover {
+    animation-play-state: paused;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 640px) {
+    .animate-marquee {
+        animation-duration: 20s;
+    }
+
+    .partner-item {
+        width: 220px;
+    }
+}
+</style>

@@ -99,8 +99,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="containerRef" class="relative h-[250vh] bg-white text-slate-900">
-    <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between py-8">
+  <div ref="containerRef" class="relative h-[100vh] bg-white text-slate-900">
+    <div class="sticky top-0 h-[90vh]  w-full overflow-hidden flex flex-col justify-between py-8">
 
       <!-- Lignes de grille verticales -->
       <div class="absolute inset-0 grid grid-cols-6 lg:grid-cols-12 pointer-events-none opacity-30">
@@ -109,13 +109,13 @@ onBeforeUnmount(() => {
 
       <!-- En-tête -->
       <div class="relative z-10 max-w-7xl mx-auto w-full px-8">
-        <h2 class="text-4xl sm:text-6xl font-black text-slate-950 tracking-tight">
+        <h2 class="text-center text-4xl sm:text-6xl font-black text-slate-950 tracking-tight uppercase">
           Vos témoignages
         </h2>
       </div>
 
       <!-- 3 LIGNES DE TÉMOIGNAGES -->
-      <div class="relative z-10 w-full overflow-hidden my-auto space-y-4 py-2">
+      <div class="relative z-10 w-full overflow-hidden  space-y-4 ">
 
         <!-- Ligne 1 -->
         <div

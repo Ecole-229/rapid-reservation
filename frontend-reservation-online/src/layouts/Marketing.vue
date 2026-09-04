@@ -1,4 +1,5 @@
 <script setup>
+
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 import {
@@ -10,13 +11,11 @@ import {
 } from 'lucide-vue-next'
 
 
-
-
-/*
-|--------------------------------------------------------------------------
-| Fonctionnalités
-|--------------------------------------------------------------------------
-*/
+/**
+ * |--------------------------------------------------------------------------
+ * | Fonctionnalités
+ * |--------------------------------------------------------------------------
+ */
 
 const activeFeature = ref(0)
 
@@ -47,16 +46,12 @@ const features = [
     },
 ]
 
-/*
-|--------------------------------------------------------------------------
-| Images du slider
-|--------------------------------------------------------------------------
-|
-| Place tes images dans :
-|
-| public/images/home/
-|
-*/
+
+/**
+ * |--------------------------------------------------------------------------
+ * | Images du slider
+ * |--------------------------------------------------------------------------
+ */
 
 const images = [
     '/images/home/salle-1.png',
@@ -69,11 +64,12 @@ const currentImage = ref(0)
 
 let imageInterval = null
 
-/*
-|--------------------------------------------------------------------------
-| Changement automatique toutes les 3 secondes
-|--------------------------------------------------------------------------
-*/
+
+/**
+ * |--------------------------------------------------------------------------
+ * | Changement automatique toutes les 3 secondes
+ * |--------------------------------------------------------------------------
+ */
 
 onMounted(() => {
     imageInterval = setInterval(() => {
@@ -82,29 +78,33 @@ onMounted(() => {
     }, 3000)
 })
 
-/*
-|--------------------------------------------------------------------------
-| Nettoyage
-|--------------------------------------------------------------------------
-*/
+
+/**
+ * |--------------------------------------------------------------------------
+ * | Nettoyage
+ * |--------------------------------------------------------------------------
+ */
 
 onBeforeUnmount(() => {
     clearInterval(imageInterval)
 })
+
 </script>
 
+
 <template>
+
     <section
-        class="min-h-screen bg-[#F8FAFC] w-full
-               px-6 py-6
-               "
+        class="bg-[#F8FAFC] w-full
+               px-6 py-8"
     >
+
         <div
             class="mx-auto grid max-w-[1280px]
                    grid-cols-1
-                   gap-12
+                   gap-10
                    lg:grid-cols-[0.9fr_1fr]
-                   lg:gap-20"
+                   lg:gap-16"
         >
 
             <!-- ================================================= -->
@@ -113,11 +113,8 @@ onBeforeUnmount(() => {
 
             <div>
 
-                <!-- BADGE -->
-
-
-
                 <!-- TITRE -->
+
                 <h1
                     class="max-w-[580px]
                            text-[42px]
@@ -140,7 +137,7 @@ onBeforeUnmount(() => {
                 <!-- FEATURES -->
                 <!-- ================================================= -->
 
-                <div class="mt-14">
+                <div class="mt-8">
 
                     <div
                         v-for="(feature, index) in features"
@@ -151,15 +148,17 @@ onBeforeUnmount(() => {
                     >
 
                         <div
-                            class="cursor-pointer py-5"
+                            class="cursor-pointer py-4"
                         >
 
                             <!-- LIGNE -->
+
                             <div
                                 class="flex items-center gap-4"
                             >
 
                                 <!-- ICON -->
+
                                 <div
                                     class="flex h-9 w-9
                                            shrink-0
@@ -173,15 +172,18 @@ onBeforeUnmount(() => {
                                             : 'text-[#64748B]'
                                     "
                                 >
+
                                     <component
                                         :is="feature.icon"
                                         :size="21"
                                         :stroke-width="1.7"
                                     />
+
                                 </div>
 
 
                                 <!-- TITRE -->
+
                                 <h2
                                     class="flex-1
                                            text-[16px]
@@ -199,6 +201,7 @@ onBeforeUnmount(() => {
 
 
                                 <!-- ARROW -->
+
                                 <div
                                     class="flex h-9 w-9
                                            shrink-0
@@ -214,10 +217,12 @@ onBeforeUnmount(() => {
                                             : 'border-[#E2E8F0] bg-white text-[#64748B]'
                                     "
                                 >
+
                                     <ArrowUpRight
                                         :size="17"
                                         :stroke-width="1.7"
                                     />
+
                                 </div>
 
                             </div>
@@ -236,6 +241,7 @@ onBeforeUnmount(() => {
                                         : 'grid-rows-[0fr] opacity-0'
                                 "
                             >
+
                                 <div class="overflow-hidden">
 
                                     <p
@@ -250,6 +256,7 @@ onBeforeUnmount(() => {
                                     </p>
 
                                 </div>
+
                             </div>
 
                         </div>
@@ -267,22 +274,19 @@ onBeforeUnmount(() => {
 
             <div
                 class="relative
-                       min-h-[500px]
+                       h-[450px]
                        overflow-hidden
                        rounded-[28px]
                        bg-[#E2E8F0]
-                       lg:min-h-[650px]"
+                       lg:h-[550px]"
             >
 
-                <!--
-                =====================================================
-                IMAGES
-                =====================================================
-                -->
+                <!-- ================================================= -->
+                <!-- IMAGES -->
+                <!-- ================================================= -->
 
-                <Transition
-                    name="image-fade"
-                >
+                <Transition name="image-fade">
+
                     <img
                         :key="currentImage"
                         :src="images[currentImage]"
@@ -291,10 +295,12 @@ onBeforeUnmount(() => {
                                h-full w-full
                                object-cover"
                     />
+
                 </Transition>
 
 
                 <!-- VOILE LEGER -->
+
                 <div
                     class="pointer-events-none
                            absolute inset-0
@@ -335,16 +341,13 @@ onBeforeUnmount(() => {
             </div>
 
         </div>
+
     </section>
+
 </template>
 
 
 <style scoped>
-/*
-|--------------------------------------------------------------------------
-| Animation changement d'image
-|--------------------------------------------------------------------------
-*/
 
 .image-fade-enter-active,
 .image-fade-leave-active {
@@ -360,4 +363,5 @@ onBeforeUnmount(() => {
 .image-fade-leave-from {
     opacity: 1;
 }
+
 </style>
