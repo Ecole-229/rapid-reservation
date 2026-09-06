@@ -265,7 +265,7 @@ const handleUpdateImage = async () => {
             <div class="mt-8 flex items-center justify-end gap-3 border-t border-gray-100 pt-6">
               <RouterLink
                 :to="{ name: 'admin-galeries' }"
-                class="rounded-xl border border-gray-200 px-5 py-3 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+                class="inline-flex items-center justify-center rounded-xl border border-neutral-300 px-5 py-2.5 text-xs font-medium uppercase tracking-widest text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900"
               >
                 Annuler
               </RouterLink>
@@ -273,9 +273,9 @@ const handleUpdateImage = async () => {
               <button
                 type="submit"
                 :disabled="adminImagesStore.loading"
-                class="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                class="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-900 px-5 py-2.5 text-xs font-medium uppercase tracking-widest text-neutral-900 transition hover:bg-neutral-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
               >
-                <Save :size="18" />
+                <Save :size="15" />
                 <span>{{ adminImagesStore.loading ? 'Enregistrement...' : 'Enregistrer les modifications' }}</span>
               </button>
             </div>

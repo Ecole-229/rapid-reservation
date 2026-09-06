@@ -1,6 +1,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { ArrowUpRight, Play, Pause, X } from 'lucide-vue-next'
 
 /*
@@ -34,6 +35,18 @@ const layers = reactive([
     { src: previewImages[1] ?? previewImages[0], opacity: 0 },
 ])
 const activeLayer = ref(0)
+
+/*
+|--------------------------------------------------------------------------
+| Navigation — Bouton "Réserver Maintenant"
+|--------------------------------------------------------------------------
+*/
+
+const router = useRouter()
+
+function handleReserveHero() {
+    router.push({ name: 'user-create-reservation' })
+}
 
 const pad = (n) => String(n).padStart(2, '0')
 
@@ -238,7 +251,7 @@ onBeforeUnmount(() => {
                         type="button"
                         class="egypt-hero__book-btn reveal"
                         style="animation-delay: 1.2s"
-                        @click="openBooking"
+                        @click="handleReserveHero"
                     >
                         Réserver Maintenant
                         <span class="egypt-hero__book-btn-icon">

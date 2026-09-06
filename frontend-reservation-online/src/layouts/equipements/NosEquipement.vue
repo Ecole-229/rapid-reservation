@@ -168,52 +168,41 @@ const handleVoirTous = () => {
             <!-- BARRE DE FILTRE PAR STATUT (Visible uniquement quand connecté) -->
             <!-- ================================================= -->
 
-            <div v-if="isConnected" class="mb-8 flex flex-wrap items-center justify-between gap-4">
-                <div class="inline-flex items-center gap-1.5 rounded-full bg-white p-1.5 border border-[#E2E8F0] shadow-sm">
-                    <button
-                        type="button"
-                        @click="activeStatusFilter = 'disponible'"
-                        :class="[
-                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
-                            activeStatusFilter === 'disponible'
-                                ? 'bg-[#4F46E5] text-white shadow-sm'
-                                : 'text-[#64748B] hover:text-[#4F46E5] hover:bg-[#EEF2FF]/60'
-                        ]"
-                    >
-                        Disponibles ({{ countDisponibles }})
-                    </button>
+            <div v-if="isConnected" class="mb-8 flex flex-row-reverse  flex-wrap items-center justify-between gap-4">
 
-                    <button
-                        type="button"
-                        @click="activeStatusFilter = 'all'"
-                        :class="[
-                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
-                            activeStatusFilter === 'all'
-                                ? 'bg-[#0F172A] text-white shadow-sm'
-                                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100/70'
-                        ]"
-                    >
-                        Tous ({{ countAll }})
-                    </button>
+            <div class="flex items-center justify-between rounded-2xl bg-white p-3 shadow-sm border border-neutral-200">
+                <button
+                    type="button"
+                    @click="activeStatusFilter = 'disponible'"
+                    :class="[
+                        'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer tracking-widest text-neutral-800  hover:text-neutral-500',
+                        activeStatusFilter === 'disponible'
+                            ?  'bg-[#0F172A] text-white shadow-sm'
+                            : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100/70'
+                    ]"
+                >
+                    Disponibles ({{ countDisponibles }})
+                </button>
 
-                    <button
-                        type="button"
-                        @click="activeStatusFilter = 'indisponible'"
-                        :class="[
-                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
-                            activeStatusFilter === 'indisponible'
-                                ? 'bg-rose-600 text-white shadow-sm'
-                                : 'text-[#64748B] hover:text-rose-600 hover:bg-rose-50/70'
-                        ]"
-                    >
-                        Indisponibles ({{ countIndisponibles }})
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    @click="activeStatusFilter = 'all'"
+                    :class="[
+                        'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer tracking-widest text-neutral-800  hover:text-neutral-500',
+                        activeStatusFilter === 'all'
+                            ? 'bg-[#0F172A] text-white shadow-sm'
+                            : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100/70'
+                    ]"
+                >
+                    Toutes ({{ countAll }})
+                </button>
 
-                <div class="flex items-center gap-2 text-xs text-[#4F46E5] font-medium bg-[#EEF2FF] px-3.5 py-1.5 rounded-full border border-indigo-100">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Connecté : matériel réservable</span>
-                </div>
+                
+            </div>
+
+            <div v-if="isConnected" class="flex items-center gap-2 text-xs  font-medium tracking-widest text-neutral-800  ">
+                Des salles de luxe
+            </div>
             </div>
 
 
@@ -452,24 +441,6 @@ const handleVoirTous = () => {
                             </h3>
 
 
-                            <div
-                                class="mt-2 flex items-center gap-2"
-                            >
-
-                                <MapPin
-                                    :size="15"
-                                    :stroke-width="1.8"
-                                    class="text-[#4F46E5]"
-                                />
-
-                                <span
-                                    class="text-[12px]
-                                           text-[#64748B]"
-                                >
-                                    {{ equipment.location }}
-                                </span>
-
-                            </div>
 
                         </div>
 

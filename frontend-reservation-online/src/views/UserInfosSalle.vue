@@ -1,43 +1,32 @@
 <script setup>
-
 import { ref, computed, onMounted } from 'vue'
-
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-
 import NavBar from '@/layouts/NavBar.vue'
-
 import Footer from '@/layouts/Footer.vue'
-
 import { useSallesStore } from '@/store/salles'
-
 import {
-    ArrowLeft,
-    MapPin,
-    Users,
-    Banknote,
-    Calendar,
-    CheckCircle2,
-    AlertCircle,
-    Loader2,
-    ArrowUpRight,
-    Sparkles,
-    ShieldCheck,
-    Clock,
-    DoorOpen,
+  ArrowLeft,
+  MapPin,
+  Users,
+  Banknote,
+  Calendar,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  ArrowUpRight,
+  Sparkles,
+  ShieldCheck,
+  Clock,
+  DoorOpen,
 } from 'lucide-vue-next'
 
 const route = useRoute()
-
 const router = useRouter()
-
 const sallesStore = useSallesStore()
 
 const salleId = route.params.id
-
 const salle = ref(null)
-
 const isFetching = ref(true)
-
 const fetchError = ref(null)
 
 // Index de la photo sélectionnée dans la galerie
@@ -45,107 +34,107 @@ const selectedPhotoIndex = ref(0)
 
 // Test de disponibilité
 const debutDateTime = ref('')
-
 const finDateTime = ref('')
-
 const checkingDispo = ref(false)
-
 const dispoResult = ref(null)
-
 const dispoError = ref(null)
 
 const isConnected = computed(() => !!localStorage.getItem('token'))
 
 const defaultPlaceholder =
-    'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
+  'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
 
 onMounted(async () => {
-    try {
-        isFetching.value = true
-        salle.value = await sallesStore.fetchSalle(salleId)
-    } catch (err) {
-        fetchError.value = err.message || 'Impossible de charger les détails de cette salle.'
-        console.error('Erreur fetchSalle:', err)
-    } finally {
-        isFetching.value = false
-    }
+  try {
+    isFetching.value = true
+    salle.value = await sallesStore.fetchSalle(salleId)
+  } catch (err) {
+    fetchError.value = err.message || 'Impossible de charger les détails de cette salle.'
+    console.error('Erreur fetchSalle:', err)
+  } finally {
+    isFetching.value = false
+  }
 
-    // Initialiser les dates du créneau par défaut : demain de 09:00 à 12:00
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const yyyy = tomorrow.getFullYear()
-    const mm = String(tomorrow.getMonth() + 1).padStart(2, '0')
-    const dd = String(tomorrow.getDate()).padStart(2, '0')
+  // Initialiser les dates du créneau par défaut : demain de 09:00 à 12:00
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const yyyy = tomorrow.getFullYear()
+  const mm = String(tomorrow.getMonth() + 1).padStart(2, '0')
+  const dd = String(tomorrow.getDate()).padStart(2, '0')
 
-    debutDateTime.value = `${yyyy}-${mm}-${dd}T09:00`
-    finDateTime.value = `${yyyy}-${mm}-${dd}T12:00`
+  debutDateTime.value = `${yyyy}-${mm}-${dd}T09:00`
+  finDateTime.value = `${yyyy}-${mm}-${dd}T12:00`
 })
 
 const imagesList = computed(() => {
-    if (salle.value && salle.value.images && salle.value.images.length > 0) {
-        return salle.value.images.map((img) => img.url || img.path || defaultPlaceholder)
-    }
-
-    return [defaultPlaceholder]
+  if (salle.value && salle.value.images && salle.value.images.length > 0) {
+    return salle.value.images.map((img) => img.url || img.path || defaultPlaceholder)
+  }
+  return [defaultPlaceholder]
 })
 
 const activeImage = computed(() => {
-    return imagesList.value[selectedPhotoIndex.value] || imagesList.value[0]
+  return imagesList.value[selectedPhotoIndex.value] || imagesList.value[0]
 })
 
 const isDisponible = computed(() => {
-    return salle.value && (!salle.value.status || salle.value.status.toLowerCase() === 'disponible')
+  return salle.value && (!salle.value.status || salle.value.status.toLowerCase() === 'disponible')
 })
 
-
 const checkCreneau = async () => {
-    if (!debutDateTime.value || !finDateTime.value) {
-        dispoError.value = 'Veuillez renseigner une date de début et une date de fin.'
-        return
-    }
+  if (!debutDateTime.value || !finDateTime.value) {
+    dispoError.value = 'Veuillez renseigner une date de début et une date de fin.'
+    return
+  }
 
-    if (new Date(debutDateTime.value) >= new Date(finDateTime.value)) {
-        dispoError.value = 'La date de fin doit être postérieure à la date de début.'
-        return
-    }
+  if (new Date(debutDateTime.value) >= new Date(finDateTime.value)) {
+    dispoError.value = 'La date de fin doit être postérieure à la date de début.'
+    return
+  }
 
-    checkingDispo.value = true
-    dispoError.value = null
-    dispoResult.value = null
+  checkingDispo.value = true
+  dispoError.value = null
+  dispoResult.value = null
 
-    try {
-        const formattedDebut = debutDateTime.value.replace('T', ' ') + ':00'
-        const formattedFin = finDateTime.value.replace('T', ' ') + ':00'
+  try {
+    const formattedDebut = debutDateTime.value.replace('T', ' ') + ':00'
+    const formattedFin = finDateTime.value.replace('T', ' ') + ':00'
 
-        const res = await sallesStore.checkDisponibilite(salleId, formattedDebut, formattedFin)
-        dispoResult.value = res
-    } catch (err) {
-        dispoError.value = err.message || 'Erreur lors de la vérification de disponibilité.'
-    } finally {
-        checkingDispo.value = false
-    }
+    const res = await sallesStore.checkDisponibilite(salleId, formattedDebut, formattedFin)
+    dispoResult.value = res
+  } catch (err) {
+    dispoError.value = err.message || 'Erreur lors de la vérification de disponibilité.'
+  } finally {
+    checkingDispo.value = false
+  }
 }
 
 const handleReserver = () => {
-    const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token')
 
-    if (!token) {
-        router.push({
-            name: 'login',
-            query: { redirect: '/reserver', salle_id: salleId, debut: debutDateTime.value, fin: finDateTime.value },
-        })
-        return
-    }
-
+  if (!token) {
     router.push({
-        name: 'user-create-reservation',
-        query: {
-            salle_id: salleId,
-            debut: debutDateTime.value,
-            fin: finDateTime.value,
-        },
+      name: 'login',
+      query: {
+        redirect: '/reserver',
+        salle_id: salleId,
+        debut: debutDateTime.value,
+        fin: finDateTime.value,
+      },
     })
+    return
+  }
+
+  router.push({
+    name: 'user-create-reservation',
+    query: {
+      salle_id: salleId,
+      debut: debutDateTime.value,
+      fin: finDateTime.value,
+    },
+  })
 }
+
 
 </script>
 
@@ -153,17 +142,9 @@ const handleReserver = () => {
     <div class="min-h-[80vh] bg-[#f6f6f4] text-[#151515]">
         <NavBar />
 
-        <main class="px-4 py-10 sm:px-6 lg:px-10">
+        <div class="px-4 py-10 sm:px-6 lg:px-10">
             <div class="mx-auto max-w-[1180px]">
-                <div class="mb-7">
-                    <RouterLink
-                        :to="{ name: 'salles' }"
-                        class="inline-flex items-center gap-2 text-[12px] font-medium text-[#777] transition hover:text-[#222]"
-                    >
-                        <ArrowLeft :size="14" />
-                        <span>Retour aux salles</span>
-                    </RouterLink>
-                </div>
+
 
                 <div
                     v-if="isFetching"
@@ -203,14 +184,15 @@ const handleReserver = () => {
 
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/0 to-black/5"></div>
 
-                                <div class="absolute left-5 top-5">
+                                <!-- <div class="absolute left-5 top-5">
                                     <div
                                         class="inline-flex items-center gap-1.5 rounded-full border border-white/35 bg-white/15 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur-md"
                                     >
                                         <Sparkles :size="12" />
                                         <span>Espace Événementiel</span>
                                     </div>
-                                </div>
+                                </div> -->
+
 
                                 <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
                                     <div>
@@ -266,6 +248,15 @@ const handleReserver = () => {
                                         <span>{{ isConnected ? 'Réserver cette salle' : 'Se connecter pour réserver' }}</span>
                                         <ArrowUpRight :size="16" class="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                                     </button>
+
+                                    <div class="mt-2  pt-4">
+                                    <RouterLink
+                                        :to="{ name: 'salles' }"
+                                        class="inline-flex w-full items-center justify-center rounded-[8px] border border-[#deddd9] bg-[#fafaf8] py-2.5 text-[11px] font-semibold text-[#333] transition hover:bg-white"
+                                    >
+                                        Retour à la liste des salles
+                                    </RouterLink>
+                                    </div>
 
 
                                 </div>
@@ -404,7 +395,7 @@ const handleReserver = () => {
                     </section>
                 </div>
             </div>
-        </main>
+        </div>
 
         <Footer />
     </div>

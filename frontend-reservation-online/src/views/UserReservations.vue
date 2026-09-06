@@ -167,7 +167,7 @@ const confirmCancelReservation = async () => {
 </script>
 
 <template>
-  <div class="reservations-page min-h-screen bg-[#080909] text-white">
+  <div class="reservations-page min-h-screen bg-[#f6f6f4] text-[#151515]">
     <!-- NAVBAR EXISTANTE : aucune donnée modifiée -->
     <NavBar />
 
@@ -494,7 +494,7 @@ const confirmCancelReservation = async () => {
         >
           <Loader2
             :size="30"
-            class="animate-spin text-[#d7ff57]"
+            class="animate-spin text-[#181818]"
           />
 
           <p>
@@ -512,7 +512,7 @@ const confirmCancelReservation = async () => {
         >
           <AlertCircle
             :size="32"
-            class="text-red-400"
+            class="text-red-500"
           />
 
           <h3>
@@ -543,7 +543,7 @@ const confirmCancelReservation = async () => {
         >
           <Building2
             :size="36"
-            class="text-white/20"
+            class="text-gray-300"
           />
 
           <h3>
@@ -585,7 +585,7 @@ const confirmCancelReservation = async () => {
         >
           <Search
             :size="32"
-            class="text-white/20"
+            class="text-gray-300"
           />
 
           <h3>
@@ -676,16 +676,12 @@ const confirmCancelReservation = async () => {
               </div>
 
               <!-- ID -->
-              <div class="reservation-number">
-                #{{ item.id }}
-              </div>
+
 
               <!-- titre -->
               <div class="reservation-title">
 
-                <p class="eyebrow">
-                  Réservation #{{ item.id }}
-                </p>
+
 
                 <h3>
                   {{ item.salle?.nom || 'Salle #' + item.salle_id }}
@@ -891,8 +887,8 @@ const confirmCancelReservation = async () => {
 
 .reservations-page {
   min-height: 100vh;
-  background: #080909;
-  color: #f4f1e9;
+  background: #f6f6f4;
+  color: #151515;
   font-family:
     Inter,
     ui-sans-serif,
@@ -904,21 +900,13 @@ const confirmCancelReservation = async () => {
 }
 
 /* =========================================================
-   OVERRIDE NAVBAR POUR LE FOND SOMBRE
-========================================================= */
-
-.reservations-page :deep(nav) {
-  color: white;
-}
-
-/* =========================================================
    TYPOGRAPHIE
 ========================================================= */
 
 .eyebrow {
   margin: 0 0 10px;
 
-  color: rgba(255, 255, 255, 0.42);
+  color: #888888;
 
   font-size: 8px;
   line-height: 1;
@@ -956,10 +944,10 @@ const confirmCancelReservation = async () => {
 
   overflow: hidden;
 
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ecebe7;
   border-radius: 24px;
 
-  background: #111212;
+  background: #181818;
 }
 
 .hero-main-image {
@@ -967,7 +955,7 @@ const confirmCancelReservation = async () => {
   height: 100%;
   object-fit: cover;
 
-  filter: saturate(0.8);
+  filter: saturate(0.85);
 
   transition: transform 0.8s ease;
 }
@@ -1022,7 +1010,7 @@ const confirmCancelReservation = async () => {
 }
 
 .hero-number {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 999px;
 
   background: rgba(0, 0, 0, 0.45);
@@ -1047,6 +1035,7 @@ const confirmCancelReservation = async () => {
   font-weight: 400;
 
   letter-spacing: -0.055em;
+  color: white;
 }
 
 .hero-details {
@@ -1058,7 +1047,7 @@ const confirmCancelReservation = async () => {
 
   margin-top: 20px;
 
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.75);
 
   font-size: 10px;
 }
@@ -1086,24 +1075,27 @@ const confirmCancelReservation = async () => {
 }
 
 .hero-status.confirmed {
-  color: #090a09;
-  background: #d7ff57;
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
 }
 
 .hero-status.pending {
-  color: #090a09;
-  background: #f2b84b;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
 }
 
 .hero-status.finished {
-  color: white;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
 }
 
 .hero-status.rejected {
-  color: white;
-  background: rgba(185, 28, 28, 0.8);
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
 }
 
 /* =========================================================
@@ -1121,10 +1113,11 @@ const confirmCancelReservation = async () => {
 
   overflow: hidden;
 
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ecebe7;
   border-radius: 24px;
 
-  background: #101111;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .editorial-intro {
@@ -1136,7 +1129,7 @@ const confirmCancelReservation = async () => {
 .editorial-card h2 {
   margin: 0;
 
-  color: #f3efe7;
+  color: #151515;
 
   font-size: clamp(30px, 3vw, 43px);
   line-height: 0.94;
@@ -1146,7 +1139,11 @@ const confirmCancelReservation = async () => {
 }
 
 .editorial-card h2 span {
-  color: rgba(255, 255, 255, 0.4);
+  color: #888888;
+}
+
+.editorial-intro .eyebrow {
+  color: #888888;
 }
 
 .editorial-intro > p:last-child {
@@ -1154,9 +1151,9 @@ const confirmCancelReservation = async () => {
 
   margin-top: 23px;
 
-  color: rgba(255, 255, 255, 0.4);
+  color: #666666;
 
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.7;
 }
 
@@ -1173,10 +1170,11 @@ const confirmCancelReservation = async () => {
 .stat-card {
   min-height: 140px;
 
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ecebe7;
   border-radius: 20px;
 
-  background: #101111;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 
   display: flex;
   flex-direction: column;
@@ -1189,17 +1187,17 @@ const confirmCancelReservation = async () => {
 .stat-symbol {
   margin-bottom: 8px;
 
-  color: rgba(255, 255, 255, 0.8);
+  color: #999999;
 
   font-size: 18px;
 }
 
 .stat-symbol.green {
-  color: #d7ff57;
+  color: #10b981;
 }
 
 .stat-number {
-  color: #f3efe7;
+  color: #151515;
 
   font-family: Georgia, "Times New Roman", serif;
 
@@ -1208,15 +1206,15 @@ const confirmCancelReservation = async () => {
 }
 
 .stat-number.green-text {
-  color: #d7ff57;
+  color: #059669;
 }
 
 .stat-label {
   margin-top: 7px;
 
-  color: rgba(255, 255, 255, 0.3);
+  color: #777777;
 
-  font-size: 7px;
+  font-size: 8px;
   font-weight: 600;
 
   text-transform: uppercase;
@@ -1242,49 +1240,44 @@ const confirmCancelReservation = async () => {
 
 .story-background img {
   object-fit: cover;
-  filter: grayscale(1);
-  opacity: 0.35;
+  opacity: 0.12;
 }
 
 .story-overlay {
-  background:
-    linear-gradient(
-      to top,
-      #101111 0%,
-      rgba(16, 17, 17, 0.85) 30%,
-      rgba(16, 17, 17, 0.2) 100%
-    );
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(246, 246, 244, 0.96) 100%);
 }
 
 .story-content {
   position: absolute;
-  inset: auto 30px 28px;
-  z-index: 2;
+  left: 30px;
+  right: 30px;
+  bottom: 28px;
+  z-index: 1;
+}
+
+.story-content .eyebrow {
+  color: #888888;
 }
 
 .story-content h3 {
   margin: 0;
-
-  font-size: 38px;
-  line-height: 0.92;
+  color: #151515;
+  font-size: clamp(26px, 2.5vw, 36px);
+  line-height: 0.95;
   font-weight: 400;
-
   letter-spacing: -0.04em;
 }
 
 .story-content h3 span {
-  color: rgba(255, 255, 255, 0.38);
+  color: #888888;
 }
 
-.story-content > p:last-child {
-  max-width: 370px;
-
-  margin-top: 14px;
-
-  color: rgba(255, 255, 255, 0.42);
-
-  font-size: 10px;
-  line-height: 1.7;
+.story-content p {
+  max-width: 320px;
+  margin-top: 10px;
+  color: #666666;
+  font-size: 11px;
+  line-height: 1.6;
 }
 
 /* =========================================================
@@ -1293,88 +1286,71 @@ const confirmCancelReservation = async () => {
 
 .filters-card {
   margin-top: 12px;
+  padding: 10px;
 
-  min-height: 70px;
+  border: 1px solid #ecebe7;
+  border-radius: 20px;
+
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 12px;
-
-  padding: 10px;
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 22px;
-
-  background: #101111;
 }
 
 .filters-scroll {
   display: flex;
   align-items: center;
-
-  gap: 3px;
-
+  gap: 6px;
   overflow-x: auto;
-
-  scrollbar-width: none;
-}
-
-.filters-scroll::-webkit-scrollbar {
-  display: none;
 }
 
 .filter-button {
-  height: 42px;
-
-  padding: 0 15px;
-
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 
-  white-space: nowrap;
+  height: 38px;
+  padding: 0 16px;
 
-  border: 0;
-  border-radius: 11px;
+  border: 1px solid transparent;
+  border-radius: 999px;
 
   background: transparent;
 
-  color: rgba(255, 255, 255, 0.42);
+  color: #666666;
 
-  font-size: 8px;
-  font-weight: 600;
-
+  font-size: 9px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.13em;
 
   cursor: pointer;
-
   transition: all 0.2s ease;
 }
 
 .filter-button span {
-  color: rgba(255, 255, 255, 0.22);
+  color: #999999;
 }
 
 .filter-button:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.04);
+  color: #151515;
+  background: #f4f3f0;
 }
 
 .filter-button.selected {
-  color: #080909;
-  background: white;
+  color: #ffffff;
+  background: #181818;
 }
 
 .filter-button.selected span {
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .search-container {
   position: relative;
-
   width: 270px;
   flex-shrink: 0;
 }
@@ -1383,69 +1359,61 @@ const confirmCancelReservation = async () => {
   position: absolute;
   left: 14px;
   top: 50%;
-
   transform: translateY(-50%);
-
-  color: rgba(255, 255, 255, 0.3);
+  color: #888888;
 }
 
 .search-input {
   width: 100%;
-  height: 42px;
-
+  height: 40px;
   padding: 0 14px 0 38px;
 
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid #deddd9;
   border-radius: 12px;
-
   outline: none;
 
-  background: rgba(0, 0, 0, 0.25);
-
-  color: white;
-
-  font-size: 10px;
-
-  transition: border 0.2s ease;
+  background: #fafaf8;
+  color: #151515;
+  font-size: 11px;
+  transition: border-color 0.2s ease;
 }
 
 .search-input::placeholder {
-  color: rgba(255, 255, 255, 0.25);
+  color: #999999;
 }
 
 .search-input:focus {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: #181818;
+  background: #ffffff;
 }
 
 /* =========================================================
-   RESERVATIONS GRID
+   RESERVATIONS GRID & CARDS
 ========================================================= */
 
 .reservation-grid {
   margin-top: 12px;
-
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
 .reservation-card {
   overflow: hidden;
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ecebe7;
   border-radius: 24px;
-
-  background: #101111;
-
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition:
     transform 0.3s ease,
-    border-color 0.3s ease;
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .reservation-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: #deddd9;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
 }
 
 /* =========================================================
@@ -1454,20 +1422,15 @@ const confirmCancelReservation = async () => {
 
 .reservation-image {
   position: relative;
-
   height: 280px;
-
   overflow: hidden;
-
-  background: #181919;
+  background: #eae9e5;
 }
 
 .reservation-image img {
   width: 100%;
   height: 100%;
-
   object-fit: cover;
-
   transition: transform 0.7s ease;
 }
 
@@ -1478,13 +1441,12 @@ const confirmCancelReservation = async () => {
 .reservation-image-overlay {
   position: absolute;
   inset: 0;
-
   background:
     linear-gradient(
       to bottom,
       rgba(0, 0, 0, 0.25),
       transparent 35%,
-      rgba(0, 0, 0, 0.9) 100%
+      rgba(0, 0, 0, 0.85) 100%
     );
 }
 
@@ -1492,19 +1454,13 @@ const confirmCancelReservation = async () => {
   position: absolute;
   top: 17px;
   right: 17px;
-
-  padding: 7px 10px;
-
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 999px;
-
   background: rgba(0, 0, 0, 0.45);
-
   color: white;
-
   font-size: 8px;
   letter-spacing: 0.14em;
-
   backdrop-filter: blur(8px);
 }
 
@@ -1515,15 +1471,16 @@ const confirmCancelReservation = async () => {
   bottom: 20px;
 }
 
+.reservation-title .eyebrow {
+  color: rgba(255, 255, 255, 0.75);
+}
+
 .reservation-title h3 {
   margin: 0;
-
   color: white;
-
   font-size: 31px;
   line-height: 0.95;
   font-weight: 400;
-
   letter-spacing: -0.04em;
 }
 
@@ -1531,12 +1488,9 @@ const confirmCancelReservation = async () => {
   display: flex;
   align-items: center;
   gap: 5px;
-
   margin-top: 9px;
-
-  color: rgba(255, 255, 255, 0.58);
-
-  font-size: 9px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 10px;
 }
 
 /* =========================================================
@@ -1550,45 +1504,33 @@ const confirmCancelReservation = async () => {
 .reservation-info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-
   gap: 7px;
 }
 
 .reservation-info {
   min-height: 68px;
-
   padding: 11px 12px;
-
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid #ecebe7;
   border-radius: 13px;
-
-  background: rgba(255, 255, 255, 0.025);
+  background: #fafaf8;
 }
 
 .reservation-info span {
   display: block;
-
-  color: rgba(255, 255, 255, 0.27);
-
-  font-size: 7px;
+  color: #777777;
+  font-size: 8px;
   font-weight: 600;
-
   text-transform: uppercase;
   letter-spacing: 0.18em;
 }
 
 .reservation-info strong {
   display: block;
-
   margin-top: 6px;
-
-  color: rgba(255, 255, 255, 0.82);
-
+  color: #151515;
   font-family: Georgia, "Times New Roman", serif;
-
   font-size: 14px;
   font-weight: 400;
-
   line-height: 1.15;
 }
 
@@ -1605,13 +1547,10 @@ const confirmCancelReservation = async () => {
 .reservation-actions {
   margin-top: 16px;
   padding-top: 14px;
-
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-
+  border-top: 1px solid #ecebe7;
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 10px;
 }
 
@@ -1624,57 +1563,48 @@ const confirmCancelReservation = async () => {
 .cancel-link,
 .modify-link {
   padding: 0;
-
   border: 0;
   background: transparent;
-
-  font-size: 8px;
+  font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-
   cursor: pointer;
+  font-weight: 600;
 }
 
 .cancel-link {
-  color: #f87171;
+  color: #dc2626;
 }
 
 .cancel-link:hover {
-  color: #fca5a5;
+  color: #b91c1c;
 }
 
 .modify-link {
-  color: rgba(255, 255, 255, 0.45);
+  color: #555555;
 }
 
 .modify-link:hover {
-  color: white;
+  color: #151515;
 }
 
 .details-button {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-
-  padding: 10px 14px;
-
-  border-radius: 11px;
-
-  background: white;
-
-  color: #080909;
-
-  font-size: 8px;
-  font-weight: 800;
-
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #181818;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-
   transition: all 0.2s ease;
 }
 
 .details-button:hover {
-  background: #d7ff57;
+  background: #000000;
 }
 
 /* =========================================================
@@ -1683,41 +1613,33 @@ const confirmCancelReservation = async () => {
 
 .state-card {
   min-height: 350px;
-
   margin-top: 12px;
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ecebe7;
   border-radius: 24px;
-
-  background: #101111;
-
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   text-align: center;
-
   padding: 40px;
 }
 
 .state-card p {
   margin-top: 13px;
-
-  color: rgba(255, 255, 255, 0.38);
-
-  font-size: 10px;
+  color: #666666;
+  font-size: 12px;
   line-height: 1.6;
 }
 
 .empty-state h3,
 .error-state h3 {
   margin-top: 18px;
-
   font-family: Georgia, "Times New Roman", serif;
-
   font-size: 30px;
   font-weight: 400;
+  color: #151515;
 }
 
 .empty-state > p {
@@ -1727,12 +1649,9 @@ const confirmCancelReservation = async () => {
 .empty-actions {
   display: flex;
   flex-wrap: wrap;
-
   align-items: center;
   justify-content: center;
-
   gap: 9px;
-
   margin-top: 24px;
 }
 
@@ -1743,56 +1662,48 @@ const confirmCancelReservation = async () => {
   align-items: center;
   justify-content: center;
   gap: 7px;
-
   min-height: 40px;
-
   padding: 0 16px;
-
-  border-radius: 11px;
-
-  font-size: 8px;
+  border-radius: 10px;
+  font-size: 9px;
   font-weight: 700;
-
   text-transform: uppercase;
   letter-spacing: 0.12em;
-
   cursor: pointer;
-
   transition: all 0.2s ease;
 }
 
 .white-button {
   border: 0;
-  background: white;
-  color: #080909;
+  background: #181818;
+  color: #ffffff;
 }
 
 .white-button:hover {
-  background: #d7ff57;
+  background: #000000;
 }
 
 .dark-outline-button {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid #deddd9;
+  background: #ffffff;
+  color: #444444;
 }
 
 .dark-outline-button:hover {
-  color: white;
-  border-color: rgba(255, 255, 255, 0.25);
+  color: #151515;
+  background: #fafaf8;
+  border-color: #181818;
 }
 
 .lime-button {
   margin-top: 22px;
-
   border: 0;
-
-  background: #d7ff57;
-  color: #080909;
+  background: #181818;
+  color: #ffffff;
 }
 
 .lime-button:hover {
-  background: white;
+  background: #000000;
 }
 
 /* =========================================================
@@ -1803,137 +1714,105 @@ const confirmCancelReservation = async () => {
   position: fixed;
   inset: 0;
   z-index: 100;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 16px;
-
-  background: rgba(0, 0, 0, 0.82);
-
-  backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
 }
 
 .cancel-modal {
   width: 100%;
   max-width: 440px;
-
   padding: 28px;
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ecebe7;
   border-radius: 24px;
-
-  background: #111212;
-
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  background: #ffffff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
 }
 
 .modal-icon {
   width: 48px;
   height: 48px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 13px;
-
-  background: rgba(239, 68, 68, 0.1);
-
-  color: #f87171;
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .cancel-modal h3 {
   margin-top: 18px;
-
-  font-size: 31px;
-  line-height: 1;
-
-  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 500;
+  color: #151515;
 }
 
 .cancel-modal > p {
   margin-top: 13px;
-
-  color: rgba(255, 255, 255, 0.4);
-
-  font-size: 10px;
+  color: #666666;
+  font-size: 12px;
   line-height: 1.7;
 }
 
 .cancel-modal > p strong {
-  color: rgba(255, 255, 255, 0.75);
+  color: #151515;
 }
 
 .modal-error {
   margin-top: 15px;
-
   padding: 12px;
-
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid #fecaca;
   border-radius: 11px;
-
-  background: rgba(239, 68, 68, 0.08);
-
-  color: #fca5a5;
-
-  font-size: 9px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 11px;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-
   gap: 8px;
-
   margin-top: 24px;
 }
 
 .modal-keep-button,
 .modal-cancel-button {
   min-height: 40px;
-
-  padding: 0 15px;
-
-  border-radius: 11px;
-
-  font-size: 8px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 10px;
   font-weight: 700;
-
   text-transform: uppercase;
   letter-spacing: 0.1em;
-
   cursor: pointer;
 }
 
 .modal-keep-button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  background: transparent;
-
-  color: rgba(255, 255, 255, 0.55);
+  border: 1px solid #deddd9;
+  background: #ffffff;
+  color: #555555;
 }
 
 .modal-keep-button:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.04);
+  color: #151515;
+  background: #fafaf8;
 }
 
 .modal-cancel-button {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-
   border: 0;
-
-  background: #ef4444;
-
+  background: #dc2626;
   color: white;
 }
 
 .modal-cancel-button:hover {
-  background: #dc2626;
+  background: #b91c1c;
 }
 
 /* =========================================================

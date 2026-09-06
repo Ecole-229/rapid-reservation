@@ -306,536 +306,518 @@ const submitReservation = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#080909] text-[#eee9dc] flex flex-col justify-between">
-        <!-- VRAIE BARRE DE NAVIGATION COMMUNE DE L'APPLICATION -->
-        <NavBar />
+  <div class="min-h-screen bg-[#f6f6f4] text-[#151515] flex flex-col justify-between">
+    <NavBar />
 
-        <!-- CONTENU PRINCIPAL AVEC ESPACEMENT POUR LA NAVBAR FIXE -->
-        <main class="flex-1 pt-28 pb-16 px-4 sm:px-6 lg:px-8 w-full max-w-[1240px] mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-5 min-h-[640px]">
-                <!-- GAUCHE : HERO / CARTE SALLE SÉLECTIONNÉE -->
-                <section class="relative min-h-[480px] lg:min-h-full overflow-hidden rounded-[20px] border border-white/10 bg-[#141515] flex flex-col justify-between p-6 sm:p-8">
-                    <!-- Image de fond avec overlay dégradé -->
-                    <img
-                        :src="salleCoverUrl"
-                        :alt="selectedSalle?.nom || 'Salle'"
-                        class="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
-                    />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
+    <main class="flex-1 pt-28 pb-16 px-4 sm:px-6 lg:px-8 w-full max-w-[1240px] mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-5 min-h-[640px]">
+        <!-- GAUCHE : HERO / CARTE SALLE SÉLECTIONNÉE -->
+        <section class="relative min-h-[480px] lg:min-h-full overflow-hidden rounded-[20px] border border-[#ecebe7] bg-[#141515] flex flex-col justify-between p-6 sm:p-8">
+          <img
+            :src="salleCoverUrl"
+            :alt="selectedSalle?.nom || 'Salle'"
+            class="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
 
-                    <!-- En-tête de la carte gauche -->
-                    <div class="relative z-10 flex items-center justify-between">
-                        <RouterLink
-                            :to="{ name: 'salles' }"
-                            class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-3.5 py-1.5 text-[11px] uppercase tracking-[0.08em] text-[#dcd6c8] backdrop-blur-md transition hover:bg-white/10"
-                        >
-                            <ArrowLeft :size="13" />
-                            <span>Retour aux salles</span>
-                        </RouterLink>
+          <!-- En-tête gauche -->
+          <div class="relative z-10 flex items-center justify-between">
+            <RouterLink
+              :to="{ name: 'salles' }"
+              class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/40 px-3.5 py-1.5 text-[11px] uppercase tracking-[0.08em] text-white backdrop-blur-md transition hover:bg-white/10"
+            >
+              <ArrowLeft :size="13" />
+              <span>Retour aux salles</span>
+            </RouterLink>
 
-                        <div class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] text-white/90 backdrop-blur-md">
-                            <Sparkles :size="12" />
-                            <span>Espace Professionnel</span>
-                        </div>
-                    </div>
-
-                    <!-- Pied de la carte gauche : Infos de la salle -->
-                    <div class="relative z-10 mt-auto pt-16">
-                        <div class="mb-3 flex flex-wrap items-center gap-2">
-                            <span class="rounded-full border border-white/20 bg-black/30 px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-white/80 backdrop-blur-sm">
-                                Réservation
-                            </span>
-                            <span
-                                v-if="selectedSalle"
-                                class="rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.12em] backdrop-blur-sm"
-                                :class="selectedSalle.status && selectedSalle.status.toLowerCase() !== 'disponible'
-                                    ? 'border-rose-300/35 bg-rose-500/20 text-rose-100'
-                                    : 'border-emerald-300/35 bg-emerald-500/20 text-emerald-100'"
-                            >
-                                {{ selectedSalle.status || 'Disponible' }}
-                            </span>
-                        </div>
-
-                        <h1 class="font-serif text-[42px] sm:text-[54px] leading-[0.95] tracking-[-0.03em] text-[#f0e9da]">
-                            {{ selectedSalle ? selectedSalle.nom : 'RÉSERVER UNE SALLE' }}
-                        </h1>
-
-                        <div v-if="selectedSalle" class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.08em] text-white/80">
-                            <span class="inline-flex items-center gap-1.5">
-                                <MapPin :size="13" class="text-[#d8cbb0]" />
-                                {{ selectedSalle.localisation || 'Sur site' }}
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <Users :size="13" class="text-[#d8cbb0]" />
-                                {{ selectedSalle.capacite }} personnes max
-                            </span>
-                            <span class="text-[#d8cbb0] font-medium">
-                                {{ formatPrice(selectedSalle.prix) }}
-                            </span>
-                        </div>
-                        <p v-else class="mt-4 text-xs text-white/60">
-                            Choisissez une salle dans le formulaire pour configurer votre événement.
-                        </p>
-                    </div>
-                </section>
-
-                <!-- DROITE : STEPPER ET FORMULAIRE -->
-                <section class="flex flex-col justify-between rounded-[20px] border border-white/10 bg-[#0c0d0d] p-6 sm:p-10 shadow-2xl">
-                    <div class="mx-auto w-full max-w-[540px]">
-                        <!-- Stepper de progression -->
-                        <div class="mb-8 flex items-center gap-2">
-                            <template v-for="(step, idx) in STEPS" :key="step.id">
-                                <button
-                                    type="button"
-                                    @click="currentStep >= step.id ? (currentStep = step.id) : null"
-                                    class="flex items-center gap-2 text-[10px] uppercase tracking-[0.1em] transition"
-                                    :class="currentStep === step.id ? 'text-[#ddd3bd]' : 'text-[#76736c] hover:text-[#aaa]'"
-                                >
-                                    <span
-                                        class="flex h-6 w-6 items-center justify-center rounded-full border text-[9px] font-semibold"
-                                        :class="
-                                            currentStep > step.id
-                                                ? 'border-[#8a9b72] bg-[#8a9b72] text-[#101010]'
-                                                : currentStep === step.id
-                                                    ? 'border-[#9c927d] text-[#ddd3bd] bg-white/[0.04]'
-                                                    : 'border-white/15 text-[#77736c]'
-                                        "
-                                    >
-                                        <CheckCircle2 v-if="currentStep > step.id" :size="11" />
-                                        <span v-else>{{ step.id }}</span>
-                                    </span>
-                                    <span class="hidden sm:inline">{{ step.label }}</span>
-                                </button>
-                                <div v-if="idx < STEPS.length - 1" class="h-px flex-1 bg-white/10"></div>
-                            </template>
-                        </div>
-
-                        <!-- ÉTAPE 1 : SALLE & DATES -->
-                        <div v-if="currentStep === 1">
-                            <div class="text-center">
-                                <div class="mb-3 flex items-center justify-center gap-2 text-white/35">
-                                    <span class="h-px w-7 bg-white/20"></span>
-                                    <span class="text-[14px]">◇</span>
-                                    <span class="h-px w-7 bg-white/20"></span>
-                                </div>
-                                <h2 class="font-serif text-[32px] sm:text-[38px] uppercase leading-none tracking-[0.02em] text-[#e7dfcf]">
-                                    Reservation
-                                </h2>
-                              
-                            </div>
-
-                            <div class="mt-8 space-y-5">
-                                <!-- SI SALLE FIXÉE DEPUIS INFOSALLE : PAS D'AUTRE CHOIX -->
-                                <div v-if="isFixedSalle">
-                                    <div class="mb-2 flex items-center justify-between">
-                                        <label class="block font-serif text-[12px] uppercase tracking-[0.04em] text-[#d8cfbe]">
-                                            Salle à réservée
-                                        </label>
-
-                                    </div>
-
-                                    <div v-if="selectedSalle" class="rounded-[11px] border border-[#cdbf9f]/35 bg-[#141515] p-4 shadow-lg">
-                                        <div class="flex items-center gap-3.5 min-w-0">
-                                            <div class="h-12 w-12 shrink-0 overflow-hidden rounded-[8px] border border-white/10 bg-[#181919]">
-                                                <img :src="salleCoverUrl" :alt="selectedSalle.nom" class="h-full w-full object-cover" />
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-500/30 px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold">
-                                                        Salle sélectionnée
-                                                    </span>
-                                                    <span class="text-[11px] text-[#cdbf9f] font-semibold">
-                                                        {{ formatPrice(selectedSalle.prix) }}
-                                                    </span>
-                                                </div>
-                                                <p class="mt-1 text-[14px] font-medium text-[#f0e9da] truncate">
-                                                    {{ selectedSalle.nom }}
-                                                </p>
-                                                <p class="text-[11px] text-[#8e8a82] flex items-center gap-1.5 mt-0.5 truncate">
-                                                    <MapPin :size="11" />
-                                                    <span>{{ selectedSalle.localisation || 'Sur site' }}</span>
-                                                    <span>•</span>
-                                                    <Users :size="11" />
-                                                    <span>{{ selectedSalle.capacite }} pers. max</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div v-else class="flex items-center gap-2 rounded-[11px] border border-white/10 bg-[#141515] p-4 text-xs text-[#8e8a82]">
-                                        <Loader2 :size="14" class="animate-spin text-[#cdbf9f]" />
-                                        <span>Chargement des détails de la salle...</span>
-                                    </div>
-                                </div>
-
-                                <!-- SINON : SÉLECTION LIBRE DE LA SALLE -->
-                                <div v-else>
-                                    <label class="mb-2 block font-serif text-[12px] uppercase tracking-[0.04em] text-[#d8cfbe]">
-                                        Choisir une salle
-                                    </label>
-                                    <select
-                                        v-model="selectedSalleId"
-                                        class="w-full rounded-[9px] border border-white/15 bg-[#121313] px-4 py-3.5 text-[13px] text-[#e0dad0] outline-none transition focus:border-[#cdbf9f]"
-                                    >
-                                        <option :value="null">Sélectionnez une salle</option>
-                                        <option
-                                            v-for="salle in salles"
-                                            :key="salle.id"
-                                            :value="Number(salle.id)"
-                                        >
-                                            {{ salle.nom }} — {{ formatPrice(salle.prix) }}
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <!-- Date début & fin -->
-                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label class="mb-2 block font-serif text-[12px] uppercase tracking-[0.04em] text-[#d8cfbe]">
-                                            Début
-                                        </label>
-                                        <input
-                                            v-model="debutDateTime"
-                                            type="datetime-local"
-                                            class="w-full rounded-[9px] border border-white/15 bg-[#121313] px-4 py-3 text-[13px] text-[#e0dad0] outline-none transition focus:border-[#cdbf9f]"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label class="mb-2 block font-serif text-[12px] uppercase tracking-[0.04em] text-[#d8cfbe]">
-                                            Fin
-                                        </label>
-                                        <input
-                                            v-model="finDateTime"
-                                            type="datetime-local"
-                                            class="w-full rounded-[9px] border border-white/15 bg-[#121313] px-4 py-3 text-[13px] text-[#e0dad0] outline-none transition focus:border-[#cdbf9f]"
-                                        />
-                                    </div>
-                                </div>
-
-                                <!-- Nombre de personnes & Capacité -->
-                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label class="mb-2 block font-serif text-[12px] uppercase tracking-[0.04em] text-[#d8cfbe]">
-                                            Nombre de personnes
-                                        </label>
-                                        <input
-                                            v-model.number="nombrePersonnes"
-                                            type="number"
-                                            min="1"
-                                            :max="selectedSalle?.capacite || 999"
-                                            placeholder="Ex: 5"
-                                            class="w-full rounded-[9px] border border-white/15 bg-[#121313] px-4 py-3 text-[13px] text-[#e0dad0] outline-none transition focus:border-[#cdbf9f]"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label class="mb-2 block font-serif text-[12px] uppercase tracking-[0.04em] text-[#77736c]">
-                                            Capacité max
-                                        </label>
-                                        <div class="flex h-[47px] items-center rounded-[9px] border border-white/10 bg-[#121313] px-4 text-[13px] text-[#cfc7b8]">
-                                            {{ selectedSalle?.capacite ? `${selectedSalle.capacite} places` : '—' }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Bouton Vérification Disponibilité -->
-                                <div>
-                                    <button
-                                        type="button"
-                                        @click="verifierDisponibilite"
-                                        :disabled="checkingDispo"
-                                        class="w-full rounded-[8px] border border-white/15 bg-[#18191a] py-3 text-[11px] uppercase tracking-[0.08em] text-[#c7c1b5] transition hover:bg-[#222324] disabled:opacity-50"
-                                    >
-                                        <span class="inline-flex items-center justify-center gap-2">
-                                            <Loader2 v-if="checkingDispo" :size="14" class="animate-spin" />
-                                            {{ checkingDispo ? 'Vérification en cours...' : 'Vérifier la disponibilité' }}
-                                        </span>
-                                    </button>
-                                </div>
-
-                                <!-- Feedback disponibilité -->
-                                <div
-                                    v-if="dispoResult"
-                                    class="rounded-[9px] border p-3.5 text-[12px]"
-                                    :class="dispoResult.disponible ? 'border-emerald-400/30 bg-emerald-400/[0.08] text-emerald-200' : 'border-rose-400/30 bg-rose-400/[0.08] text-rose-200'"
-                                >
-                                    <div class="flex items-center gap-2">
-                                        <CheckCircle2 v-if="dispoResult.disponible" :size="16" />
-                                        <AlertCircle v-else :size="16" />
-                                        <span>
-                                            {{ dispoResult.disponible ? 'Créneau 100% disponible ! Vous pouvez continuer.' : 'Ce créneau est déjà réservé. Veuillez choisir une autre plage.' }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- Erreur Step 1 -->
-                                <div v-if="step1Error" class="rounded-[9px] border border-rose-400/25 bg-rose-400/[0.08] p-3.5 text-[12px] text-rose-200">
-                                    <div class="flex items-start gap-2">
-                                        <AlertCircle :size="15" class="mt-0.5 shrink-0" />
-                                        <span>{{ step1Error }}</span>
-                                    </div>
-                                </div>
-
-                                <!-- Bouton continuer -->
-                                <button
-                                    type="button"
-                                    @click="goStep2"
-                                    class="mt-2 w-full rounded-[9px] border border-[#cdbf9f] bg-[#d8cbb0] py-3.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#171717] transition hover:bg-[#e4dbca]"
-                                >
-                                    Étape suivante : Équipements
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- ÉTAPE 2 : ÉQUIPEMENTS -->
-                        <div v-else-if="currentStep === 2">
-                            <div class="text-center">
-                                <div class="mb-3 flex items-center justify-center gap-2 text-white/35">
-                                    <span class="h-px w-7 bg-white/20"></span>
-                                    <span class="text-[14px]">◇</span>
-                                    <span class="h-px w-7 bg-white/20"></span>
-                                </div>
-                                <h2 class="font-serif text-[32px] sm:text-[38px] uppercase leading-none tracking-[0.02em] text-[#e7dfcf]">
-                                    Équipements
-                                </h2>
-                                <p class="mx-auto mt-2.5 max-w-[420px] text-[13px] leading-relaxed text-[#96938d]">
-                                    Ajoutez des équipements optionnels selon les besoins de votre événement.
-                                </p>
-                            </div>
-
-                            <div class="mt-8 space-y-3">
-                                <div v-if="equipementsStore.loading" class="rounded-[9px] border border-white/10 bg-[#121313] p-6 text-center text-[12px] text-[#77736c]">
-                                    <Loader2 :size="18" class="mx-auto mb-2 animate-spin text-[#cdbf9f]" />
-                                    Chargement des équipements...
-                                </div>
-
-                                <div
-                                    v-else-if="equipements.length === 0"
-                                    class="rounded-[9px] border border-white/10 bg-[#121313] p-6 text-center text-[12px] text-[#77736c]"
-                                >
-                                    Aucun équipement disponible pour le moment.
-                                </div>
-
-                                <div
-                                    v-else
-                                    v-for="eq in equipements"
-                                    :key="eq.id"
-                                    class="flex items-center gap-3.5 rounded-[9px] border border-white/10 bg-[#121313] p-3.5 transition"
-                                    :class="selectedEquipementIds.includes(eq.id) ? 'border-[#cdbf9f]/40 bg-[#181919]' : ''"
-                                >
-                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[7px] border border-white/10 text-[#bcb3a4]">
-                                        <Package :size="16" />
-                                    </div>
-
-                                    <div class="min-w-0 flex-1">
-                                        <p class="truncate text-[13px] text-[#ddd5c7]">{{ eq.nom }}</p>
-                                        <p class="mt-0.5 text-[10px] uppercase tracking-[0.07em] text-[#736f68]">
-                                            Stock : {{ eq.stock_total || 'Disponible' }}
-                                        </p>
-                                    </div>
-
-                                    <button
-                                        v-if="!selectedEquipementIds.includes(eq.id)"
-                                        type="button"
-                                        @click="addEquipement(eq)"
-                                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-[#d6ccba] transition hover:bg-white/10"
-                                        title="Ajouter cet équipement"
-                                    >
-                                        <Plus :size="14" />
-                                    </button>
-                                    <span v-else class="shrink-0 text-[10px] uppercase tracking-[0.08em] text-[#cdbf9f] font-medium">
-                                        Ajouté
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Liste des équipements choisis -->
-                            <div v-if="selectedEquipements.length > 0" class="mt-6 rounded-[9px] border border-white/10 bg-[#101111] p-4">
-                                <p class="mb-2.5 text-[10px] uppercase tracking-[0.12em] text-[#8f897e]">Équipements retenus</p>
-                                <div class="space-y-2">
-                                    <div
-                                        v-for="item in selectedEquipements"
-                                        :key="item.equipement_id"
-                                        class="flex items-center gap-3 rounded-[7px] border border-white/5 bg-[#161717] px-3 py-2.5"
-                                    >
-                                        <p class="min-w-0 flex-1 truncate text-[12px] text-[#ddd5c7]">{{ item.nom }}</p>
-                                        <div class="flex items-center gap-2">
-                                            <button
-                                                type="button"
-                                                @click="decrementQty(item)"
-                                                class="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 text-[#aaa49b] hover:bg-white/10"
-                                            >
-                                                <Minus :size="11" />
-                                            </button>
-                                            <span class="w-5 text-center text-[11px] font-semibold text-[#ddd5c7]">{{ item.quantity }}</span>
-                                            <button
-                                                type="button"
-                                                @click="incrementQty(item)"
-                                                class="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 text-[#aaa49b] hover:bg-white/10"
-                                            >
-                                                <Plus :size="11" />
-                                            </button>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            @click="removeEquipement(item.equipement_id)"
-                                            class="flex h-6 w-6 items-center justify-center text-[#907770] hover:text-[#d38b7d]"
-                                            title="Retirer"
-                                        >
-                                            <Trash2 :size="12" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mt-7 grid grid-cols-2 gap-3">
-                                <button
-                                    type="button"
-                                    @click="currentStep = 1"
-                                    class="rounded-[8px] border border-white/15 bg-transparent py-3 text-[11px] uppercase tracking-[0.08em] text-[#a39e95] transition hover:bg-white/5"
-                                >
-                                    Retour
-                                </button>
-                                <button
-                                    type="button"
-                                    @click="currentStep = 3"
-                                    class="rounded-[8px] border border-[#cdbf9f] bg-[#d8cbb0] py-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#171717] transition hover:bg-[#e4dbca]"
-                                >
-                                    Continuer
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- ÉTAPE 3 : RÉCAPITULATIF & SOUMISSION -->
-                        <div v-else>
-                            <div v-if="submitSuccess" class="text-center py-6">
-                                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-300/30 bg-emerald-400/10">
-                                    <BadgeCheck :size="34" class="text-emerald-300" />
-                                </div>
-                                <h2 class="mt-5 font-serif text-[32px] uppercase tracking-[0.02em] text-[#e7dfcf]">
-                                    Réservation envoyée
-                                </h2>
-                                <p class="mx-auto mt-3 max-w-[400px] text-[13px] leading-relaxed text-[#96938d]">
-                                    Votre demande a été enregistrée avec succès. Notre équipe va examiner votre créneau.
-                                </p>
-                                <RouterLink
-                                    :to="{ name: 'user-reservations' }"
-                                    class="mt-7 inline-flex rounded-[8px] border border-white/15 px-6 py-3 text-[11px] uppercase tracking-[0.08em] text-[#d6cebf] transition hover:bg-white/10"
-                                >
-                                    Consulter mes réservations
-                                </RouterLink>
-                            </div>
-
-                            <div v-else>
-                                <div class="text-center">
-                                    <div class="mb-3 flex items-center justify-center gap-2 text-white/35">
-                                        <span class="h-px w-7 bg-white/20"></span>
-                                        <span class="text-[14px]">◇</span>
-                                        <span class="h-px w-7 bg-white/20"></span>
-                                    </div>
-                                    <h2 class="font-serif text-[32px] sm:text-[38px] uppercase leading-none tracking-[0.02em] text-[#e7dfcf]">
-                                        Confirmation
-                                    </h2>
-                                    <p class="mx-auto mt-2.5 max-w-[420px] text-[13px] leading-relaxed text-[#96938d]">
-                                        Vérifiez le récapitulatif de votre réservation avant de valider.
-                                    </p>
-                                </div>
-
-                                <div class="mt-7 overflow-hidden rounded-[10px] border border-white/10 bg-[#121313]">
-                                    <div class="flex items-stretch border-b border-white/10">
-                                        <div class="h-[96px] w-[96px] shrink-0 overflow-hidden">
-                                            <img :src="salleCoverUrl" :alt="selectedSalle?.nom" class="h-full w-full object-cover" />
-                                        </div>
-                                        <div class="min-w-0 flex-1 p-3.5">
-                                            <p class="text-[9px] uppercase tracking-[0.1em] text-[#8d877c]">Salle choisie</p>
-                                            <p class="mt-1 truncate text-[14px] font-medium text-[#e2dacd]">{{ selectedSalle?.nom || '—' }}</p>
-                                            <p class="mt-1.5 flex items-center gap-1.5 truncate text-[11px] text-[#77736c]">
-                                                <MapPin :size="12" />
-                                                {{ selectedSalle?.localisation || 'Sur site' }}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div class="p-4">
-                                        <dl class="space-y-2.5 text-[11px]">
-                                            <div class="flex items-center justify-between gap-4">
-                                                <dt class="inline-flex items-center gap-1.5 uppercase tracking-[0.07em] text-[#77736c]">
-                                                    <Calendar :size="12" /> Début
-                                                </dt>
-                                                <dd class="text-right text-[#c8c0b2]">{{ formatDateTime(debutDateTime) }}</dd>
-                                            </div>
-                                            <div class="flex items-center justify-between gap-4">
-                                                <dt class="inline-flex items-center gap-1.5 uppercase tracking-[0.07em] text-[#77736c]">
-                                                    <Calendar :size="12" /> Fin
-                                                </dt>
-                                                <dd class="text-right text-[#c8c0b2]">{{ formatDateTime(finDateTime) }}</dd>
-                                            </div>
-                                            <div class="flex items-center justify-between gap-4">
-                                                <dt class="inline-flex items-center gap-1.5 uppercase tracking-[0.07em] text-[#77736c]">
-                                                    <Users :size="12" /> Personnes
-                                                </dt>
-                                                <dd class="text-right text-[#c8c0b2]">{{ nombrePersonnes }}</dd>
-                                            </div>
-                                            <div class="flex items-center justify-between gap-4">
-                                                <dt class="inline-flex items-center gap-1.5 uppercase tracking-[0.07em] text-[#77736c]">
-                                                    <Clock :size="12" /> Durée
-                                                </dt>
-                                                <dd class="text-right text-[#c8c0b2]">{{ dureHeures.toFixed(1) }} heure(s)</dd>
-                                            </div>
-                                        </dl>
-
-                                        <div v-if="selectedEquipements.length > 0" class="mt-4 border-t border-white/10 pt-3">
-                                            <p class="mb-2 text-[10px] uppercase tracking-[0.1em] text-[#77736c]">Équipements inclus</p>
-                                            <div class="space-y-1.5">
-                                                <div
-                                                    v-for="item in selectedEquipements"
-                                                    :key="item.equipement_id"
-                                                    class="flex items-center justify-between gap-3 rounded-[6px] border border-white/5 bg-[#171818] px-2.5 py-1.5 text-[11px]"
-                                                >
-                                                    <span class="truncate text-[#c8c0b2]">{{ item.nom }}</span>
-                                                    <span class="shrink-0 text-[#cdbf9f] font-medium">× {{ item.quantity }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div v-if="submitError" class="mt-4 rounded-[8px] border border-rose-400/25 bg-rose-400/[0.08] p-3.5 text-[12px] text-rose-200">
-                                    <div class="flex items-start gap-2">
-                                        <AlertCircle :size="15" class="mt-0.5 shrink-0" />
-                                        <span>{{ submitError }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-6 grid grid-cols-2 gap-3">
-                                    <button
-                                        type="button"
-                                        @click="currentStep = 2"
-                                        class="rounded-[8px] border border-white/15 bg-transparent py-3 text-[11px] uppercase tracking-[0.08em] text-[#a39e95] transition hover:bg-white/5"
-                                    >
-                                        Retour
-                                    </button>
-                                    <button
-                                        type="button"
-                                        @click="submitReservation"
-                                        :disabled="submitting"
-                                        class="rounded-[8px] border border-[#cdbf9f] bg-[#d8cbb0] py-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#171717] transition hover:bg-[#e4dbca] disabled:opacity-55"
-                                    >
-                                        <span class="inline-flex items-center justify-center gap-2">
-                                            <Loader2 v-if="submitting" :size="14" class="animate-spin" />
-                                            {{ submitting ? 'Envoi...' : 'Confirmer la réservation' }}
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+            <div class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] text-white/90 backdrop-blur-md">
+              <Sparkles :size="12" />
+              <span>Espace Professionnel</span>
             </div>
-        </main>
+          </div>
 
-        <!-- FOOTER COMMUNE DE L'APPLICATION -->
-        <Footer />
-    </div>
+          <!-- Pied gauche -->
+          <div class="relative z-10 mt-auto pt-16">
+            <div class="mb-3 flex flex-wrap items-center gap-2">
+              <span class="rounded-full border border-white/20 bg-black/30 px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-white/80 backdrop-blur-sm">
+                Réservation
+              </span>
+              <span
+                v-if="selectedSalle"
+                class="rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.12em] backdrop-blur-sm"
+                :class="selectedSalle.status && selectedSalle.status.toLowerCase() !== 'disponible'
+                  ? 'border-rose-300/35 bg-rose-500/20 text-rose-100'
+                  : 'border-emerald-300/35 bg-emerald-500/20 text-emerald-100'"
+              >
+                {{ selectedSalle.status || 'Disponible' }}
+              </span>
+            </div>
+
+            <h1 class="font-serif text-[42px] sm:text-[54px] leading-[0.95] tracking-[-0.03em] text-white">
+              {{ selectedSalle ? selectedSalle.nom : 'RÉSERVER UNE SALLE' }}
+            </h1>
+
+            <div v-if="selectedSalle" class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.08em] text-white/80">
+              <span class="inline-flex items-center gap-1.5">
+                <MapPin :size="13" class="text-white/70" />
+                {{ selectedSalle.localisation || 'Sur site' }}
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <Users :size="13" class="text-white/70" />
+                {{ selectedSalle.capacite }} personnes max
+              </span>
+              <span class="text-white font-semibold">
+                {{ formatPrice(selectedSalle.prix) }}
+              </span>
+            </div>
+            <p v-else class="mt-4 text-xs text-white/60">
+              Choisissez une salle dans le formulaire pour configurer votre événement.
+            </p>
+          </div>
+        </section>
+
+        <!-- DROITE : STEPPER ET FORMULAIRE (FOND BLANC) -->
+        <section class="flex flex-col justify-between rounded-[20px] border border-[#ecebe7] bg-white p-6 sm:p-10 shadow-sm">
+          <div class="mx-auto w-full max-w-[540px]">
+            <!-- Stepper -->
+            <div class="mb-8 flex items-center gap-2">
+              <template v-for="(step, idx) in STEPS" :key="step.id">
+                <button
+                  type="button"
+                  @click="currentStep >= step.id ? (currentStep = step.id) : null"
+                  class="flex items-center gap-2 text-[10px] uppercase tracking-[0.1em] transition"
+                  :class="currentStep === step.id ? 'text-[#191919] font-bold' : 'text-[#888] hover:text-[#222]'"
+                >
+                  <span
+                    class="flex h-6 w-6 items-center justify-center rounded-full border text-[9px] font-semibold"
+                    :class="
+                      currentStep > step.id
+                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                        : currentStep === step.id
+                          ? 'border-[#181818] bg-[#181818] text-white'
+                          : 'border-gray-300 text-gray-400 bg-gray-50'
+                    "
+                  >
+                    <CheckCircle2 v-if="currentStep > step.id" :size="11" />
+                    <span v-else>{{ step.id }}</span>
+                  </span>
+                  <span class="hidden sm:inline">{{ step.label }}</span>
+                </button>
+                <div v-if="idx < STEPS.length - 1" class="h-px flex-1 bg-gray-200"></div>
+              </template>
+            </div>
+
+            <!-- ÉTAPE 1 : SALLE & DATES -->
+            <div v-if="currentStep === 1">
+              <div class="text-center">
+                <h2 class="font-serif text-[30px] sm:text-[36px] tracking-[-0.03em] text-[#191919]">
+                  Réservation
+                </h2>
+                <p class="mt-1 text-xs text-[#777]">
+                  Sélectionnez vos dates et le nombre de participants.
+                </p>
+              </div>
+
+              <div class="mt-8 space-y-5">
+                <!-- Salle fixée -->
+                <div v-if="isFixedSalle">
+                  <div class="mb-2 flex items-center justify-between">
+                    <label class="block text-[12px] font-medium text-[#444]">
+                      Salle sélectionnée
+                    </label>
+                  </div>
+
+                  <div v-if="selectedSalle" class="rounded-[11px] border border-[#ecebe7] bg-[#fafaf8] p-4">
+                    <div class="flex items-center gap-3.5 min-w-0">
+                      <div class="h-12 w-12 shrink-0 overflow-hidden rounded-[8px] border border-gray-200 bg-gray-100">
+                        <img :src="salleCoverUrl" :alt="selectedSalle.nom" class="h-full w-full object-cover" />
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                          <span class="rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold">
+                            Sélectionnée
+                          </span>
+                          <span class="text-[11px] text-[#191919] font-bold">
+                            {{ formatPrice(selectedSalle.prix) }}
+                          </span>
+                        </div>
+                        <p class="mt-1 text-[14px] font-semibold text-[#191919] truncate">
+                          {{ selectedSalle.nom }}
+                        </p>
+                        <p class="text-[11px] text-[#777] flex items-center gap-1.5 mt-0.5 truncate">
+                          <MapPin :size="11" />
+                          <span>{{ selectedSalle.localisation || 'Sur site' }}</span>
+                          <span>•</span>
+                          <Users :size="11" />
+                          <span>{{ selectedSalle.capacite }} pers. max</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-else class="flex items-center gap-2 rounded-[11px] border border-gray-200 bg-gray-50 p-4 text-xs text-gray-500">
+                    <Loader2 :size="14" class="animate-spin text-gray-800" />
+                    <span>Chargement des détails de la salle...</span>
+                  </div>
+                </div>
+
+                <!-- Sélection libre -->
+                <div v-else>
+                  <label class="mb-1.5 block text-[12px] font-medium text-[#444]">
+                    Choisir une salle
+                  </label>
+                  <select
+                    v-model="selectedSalleId"
+                    class="w-full rounded-[9px] border border-[#deddd9] bg-[#fafaf8] px-4 py-3 text-[13px] text-[#222] outline-none transition focus:border-[#181818] focus:bg-white"
+                  >
+                    <option :value="null">Sélectionnez une salle</option>
+                    <option
+                      v-for="salle in salles"
+                      :key="salle.id"
+                      :value="Number(salle.id)"
+                    >
+                      {{ salle.nom }} — {{ formatPrice(salle.prix) }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Début & Fin -->
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="mb-1.5 block text-[12px] font-medium text-[#444]">
+                      Début
+                    </label>
+                    <input
+                      v-model="debutDateTime"
+                      type="datetime-local"
+                      class="w-full rounded-[9px] border border-[#deddd9] bg-[#fafaf8] px-3.5 py-2.5 text-[12px] text-[#222] outline-none transition focus:border-[#181818] focus:bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="mb-1.5 block text-[12px] font-medium text-[#444]">
+                      Fin
+                    </label>
+                    <input
+                      v-model="finDateTime"
+                      type="datetime-local"
+                      class="w-full rounded-[9px] border border-[#deddd9] bg-[#fafaf8] px-3.5 py-2.5 text-[12px] text-[#222] outline-none transition focus:border-[#181818] focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <!-- Personnes & Capacité -->
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="mb-1.5 block text-[12px] font-medium text-[#444]">
+                      Nombre de personnes
+                    </label>
+                    <input
+                      v-model.number="nombrePersonnes"
+                      type="number"
+                      min="1"
+                      :max="selectedSalle?.capacite || 999"
+                      placeholder="Ex: 5"
+                      class="w-full rounded-[9px] border border-[#deddd9] bg-[#fafaf8] px-3.5 py-2.5 text-[12px] text-[#222] outline-none transition focus:border-[#181818] focus:bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="mb-1.5 block text-[12px] font-medium text-[#777]">
+                      Capacité max
+                    </label>
+                    <div class="flex h-[43px] items-center rounded-[9px] border border-gray-200 bg-gray-50 px-3.5 text-[12px] text-[#555]">
+                      {{ selectedSalle?.capacite ? `${selectedSalle.capacite} places` : '—' }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Vérifier disponibilité -->
+                <div>
+                  <button
+                    type="button"
+                    @click="verifierDisponibilite"
+                    :disabled="checkingDispo"
+                    class="w-full rounded-[9px] border border-gray-300 bg-white py-2.5 text-[12px] font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
+                  >
+                    <span class="inline-flex items-center justify-center gap-2">
+                      <Loader2 v-if="checkingDispo" :size="14" class="animate-spin" />
+                      {{ checkingDispo ? 'Vérification en cours...' : 'Vérifier la disponibilité du créneau' }}
+                    </span>
+                  </button>
+                </div>
+
+                <!-- Feedback disponibilité -->
+                <div
+                  v-if="dispoResult"
+                  class="rounded-[9px] border p-3 text-[12px]"
+                  :class="dispoResult.disponible ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'"
+                >
+                  <div class="flex items-center gap-2">
+                    <CheckCircle2 v-if="dispoResult.disponible" :size="16" />
+                    <AlertCircle v-else :size="16" />
+                    <span>
+                      {{ dispoResult.disponible ? 'Créneau 100% disponible ! Vous pouvez continuer.' : 'Ce créneau est déjà réservé. Veuillez choisir une autre plage.' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Erreur Step 1 -->
+                <div v-if="step1Error" class="rounded-[9px] border border-rose-200 bg-rose-50 p-3 text-[12px] text-rose-700">
+                  <div class="flex items-start gap-2">
+                    <AlertCircle :size="15" class="mt-0.5 shrink-0" />
+                    <span>{{ step1Error }}</span>
+                  </div>
+                </div>
+
+                <!-- Bouton continuer -->
+                <button
+                  type="button"
+                  @click="goStep2"
+                  class="mt-2 w-full rounded-[9px] bg-[#181818] py-3.5 text-[12px] font-semibold text-white transition hover:bg-black cursor-pointer"
+                >
+                  Étape suivante : Équipements
+                </button>
+              </div>
+            </div>
+
+            <!-- ÉTAPE 2 : ÉQUIPEMENTS -->
+            <div v-else-if="currentStep === 2">
+              <div class="text-center">
+                <h2 class="font-serif text-[30px] sm:text-[36px] tracking-[-0.03em] text-[#191919]">
+                  Équipements
+                </h2>
+                <p class="mx-auto mt-1 max-w-[420px] text-[12px] text-[#777]">
+                  Ajoutez des équipements optionnels selon les besoins de votre événement.
+                </p>
+              </div>
+
+              <div class="mt-8 space-y-3">
+                <div v-if="equipementsStore.loading" class="rounded-[9px] border border-gray-200 bg-gray-50 p-6 text-center text-[12px] text-gray-500">
+                  <Loader2 :size="18" class="mx-auto mb-2 animate-spin text-gray-800" />
+                  Chargement des équipements...
+                </div>
+
+                <div
+                  v-else-if="equipements.length === 0"
+                  class="rounded-[9px] border border-gray-200 bg-gray-50 p-6 text-center text-[12px] text-gray-500"
+                >
+                  Aucun équipement disponible pour le moment.
+                </div>
+
+                <div
+                  v-else
+                  v-for="eq in equipements"
+                  :key="eq.id"
+                  class="flex items-center gap-3.5 rounded-[9px] border p-3.5 transition"
+                  :class="selectedEquipementIds.includes(eq.id) ? 'border-[#181818] bg-gray-50' : 'border-[#ecebe7] bg-[#fafaf8]'"
+                >
+                  <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[7px] border border-gray-200 bg-white text-gray-700">
+                    <Package :size="16" />
+                  </div>
+
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate text-[13px] font-medium text-[#222]">{{ eq.nom }}</p>
+                    <p class="mt-0.5 text-[10px] text-[#777]">
+                      Stock disponible : {{ eq.stock_total || 'Disponible' }}
+                    </p>
+                  </div>
+
+                  <button
+                    v-if="!selectedEquipementIds.includes(eq.id)"
+                    type="button"
+                    @click="addEquipement(eq)"
+                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                    title="Ajouter cet équipement"
+                  >
+                    <Plus :size="14" />
+                  </button>
+                  <span v-else class="shrink-0 text-[10px] uppercase font-bold text-emerald-700">
+                    Ajouté
+                  </span>
+                </div>
+              </div>
+
+              <!-- Liste des équipements choisis -->
+              <div v-if="selectedEquipements.length > 0" class="mt-6 rounded-[9px] border border-[#ecebe7] bg-[#fafaf8] p-4">
+                <p class="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-[#777]">Équipements sélectionnés</p>
+                <div class="space-y-2">
+                  <div
+                    v-for="item in selectedEquipements"
+                    :key="item.equipement_id"
+                    class="flex items-center gap-3 rounded-[7px] border border-gray-200 bg-white px-3 py-2.5"
+                  >
+                    <p class="min-w-0 flex-1 truncate text-[12px] font-medium text-[#222]">{{ item.nom }}</p>
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        @click="decrementQty(item)"
+                        class="flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-100 cursor-pointer"
+                      >
+                        <Minus :size="11" />
+                      </button>
+                      <span class="w-5 text-center text-[12px] font-bold text-[#222]">{{ item.quantity }}</span>
+                      <button
+                        type="button"
+                        @click="incrementQty(item)"
+                        class="flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 text-gray-600 hover:bg-gray-100 cursor-pointer"
+                      >
+                        <Plus :size="11" />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      @click="removeEquipement(item.equipement_id)"
+                      class="flex h-6 w-6 items-center justify-center text-rose-500 hover:text-rose-700 cursor-pointer"
+                      title="Retirer"
+                    >
+                      <Trash2 :size="13" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-7 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  @click="currentStep = 1"
+                  class="rounded-[9px] border border-gray-300 bg-white py-3 text-[12px] font-semibold text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+                >
+                  Retour
+                </button>
+                <button
+                  type="button"
+                  @click="currentStep = 3"
+                  class="rounded-[9px] bg-[#181818] py-3 text-[12px] font-semibold text-white hover:bg-black transition cursor-pointer"
+                >
+                  Continuer
+                </button>
+              </div>
+            </div>
+
+            <!-- ÉTAPE 3 : RÉCAPITULATIF & SOUMISSION -->
+            <div v-else>
+              <div v-if="submitSuccess" class="text-center py-6">
+                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                  <BadgeCheck :size="34" />
+                </div>
+                <h2 class="mt-5 font-serif text-[30px] sm:text-[36px] tracking-[-0.03em] text-[#191919]">
+                  Réservation envoyée !
+                </h2>
+                <p class="mx-auto mt-3 max-w-[400px] text-[13px] text-[#777] leading-relaxed">
+                  Votre demande a été enregistrée avec succès. Notre équipe va examiner votre créneau.
+                </p>
+                <RouterLink
+                  :to="{ name: 'user-reservations' }"
+                  class="mt-7 inline-flex rounded-[9px] bg-[#181818] px-6 py-3 text-[12px] font-semibold text-white hover:bg-black transition"
+                >
+                  Consulter mes réservations
+                </RouterLink>
+              </div>
+
+              <div v-else>
+                <div class="text-center">
+                  <h2 class="font-serif text-[30px] sm:text-[36px] tracking-[-0.03em] text-[#191919]">
+                    Confirmation
+                  </h2>
+                  <p class="mx-auto mt-1 max-w-[420px] text-[12px] text-[#777]">
+                    Vérifiez le récapitulatif de votre réservation avant de valider.
+                  </p>
+                </div>
+
+                <div class="mt-7 overflow-hidden rounded-[12px] border border-[#ecebe7] bg-[#fafaf8]">
+                  <div class="flex items-stretch border-b border-[#ecebe7]">
+                    <div class="h-[96px] w-[96px] shrink-0 overflow-hidden">
+                      <img :src="salleCoverUrl" :alt="selectedSalle?.nom" class="h-full w-full object-cover" />
+                    </div>
+                    <div class="min-w-0 flex-1 p-3.5">
+                      <p class="text-[10px] uppercase tracking-wide font-medium text-[#777]">Salle sélectionnée</p>
+                      <p class="mt-1 truncate text-[15px] font-semibold text-[#191919]">{{ selectedSalle?.nom || '—' }}</p>
+                      <p class="mt-1 flex items-center gap-1.5 truncate text-[11px] text-[#777]">
+                        <MapPin :size="12" />
+                        {{ selectedSalle?.localisation || 'Sur site' }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="p-4">
+                    <dl class="space-y-2.5 text-[12px]">
+                      <div class="flex items-center justify-between gap-4">
+                        <dt class="inline-flex items-center gap-1.5 text-[#777]">
+                          <Calendar :size="13" /> Début
+                        </dt>
+                        <dd class="text-right font-medium text-[#222]">{{ formatDateTime(debutDateTime) }}</dd>
+                      </div>
+                      <div class="flex items-center justify-between gap-4">
+                        <dt class="inline-flex items-center gap-1.5 text-[#777]">
+                          <Calendar :size="13" /> Fin
+                        </dt>
+                        <dd class="text-right font-medium text-[#222]">{{ formatDateTime(finDateTime) }}</dd>
+                      </div>
+                      <div class="flex items-center justify-between gap-4">
+                        <dt class="inline-flex items-center gap-1.5 text-[#777]">
+                          <Users :size="13" /> Personnes
+                        </dt>
+                        <dd class="text-right font-medium text-[#222]">{{ nombrePersonnes }} personnes</dd>
+                      </div>
+                      <div class="flex items-center justify-between gap-4">
+                        <dt class="inline-flex items-center gap-1.5 text-[#777]">
+                          <Clock :size="13" /> Durée
+                        </dt>
+                        <dd class="text-right font-medium text-[#222]">{{ dureHeures.toFixed(1) }} heure(s)</dd>
+                      </div>
+                    </dl>
+
+                    <div v-if="selectedEquipements.length > 0" class="mt-4 border-t border-[#ecebe7] pt-3">
+                      <p class="mb-2 text-[10px] uppercase font-bold tracking-wide text-[#777]">Équipements inclus</p>
+                      <div class="space-y-1.5">
+                        <div
+                          v-for="item in selectedEquipements"
+                          :key="item.equipement_id"
+                          class="flex items-center justify-between gap-3 rounded-[6px] border border-gray-200 bg-white px-3 py-1.5 text-[12px]"
+                        >
+                          <span class="truncate text-[#333]">{{ item.nom }}</span>
+                          <span class="shrink-0 font-bold text-[#191919]">× {{ item.quantity }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="submitError" class="mt-4 rounded-[9px] border border-rose-200 bg-rose-50 p-3.5 text-[12px] text-rose-700">
+                  <div class="flex items-start gap-2">
+                    <AlertCircle :size="15" class="mt-0.5 shrink-0" />
+                    <span>{{ submitError }}</span>
+                  </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    @click="currentStep = 2"
+                    class="rounded-[9px] border border-gray-300 bg-white py-3 text-[12px] font-semibold text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+                  >
+                    Retour
+                  </button>
+                  <button
+                    type="button"
+                    @click="submitReservation"
+                    :disabled="submitting"
+                    class="rounded-[9px] bg-[#181818] py-3 text-[12px] font-semibold text-white hover:bg-black transition cursor-pointer disabled:opacity-55"
+                  >
+                    <span class="inline-flex items-center justify-center gap-2">
+                      <Loader2 v-if="submitting" :size="14" class="animate-spin" />
+                      {{ submitting ? 'Envoi en cours...' : 'Confirmer la réservation' }}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <Footer />
+  </div>
 </template>

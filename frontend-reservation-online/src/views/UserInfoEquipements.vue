@@ -75,15 +75,7 @@ const handleReserver = () => {
 
         <main class="px-4 py-10 sm:px-6 lg:px-10">
             <div class="mx-auto max-w-[1180px]">
-                <div class="mb-7">
-                    <RouterLink
-                        :to="{ name: 'equipements' }"
-                        class="inline-flex items-center gap-2 text-[12px] font-medium text-[#777] transition hover:text-[#222]"
-                    >
-                        <ArrowLeft :size="14" />
-                        <span>Retour aux équipements</span>
-                    </RouterLink>
-                </div>
+
 
                 <div
                     v-if="isFetching"
@@ -130,6 +122,8 @@ const handleReserver = () => {
                                         <Sparkles :size="12" />
                                         <span>Fiche Matériel</span>
                                     </div>
+
+                                  
                                 </div>
 
                                 <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">

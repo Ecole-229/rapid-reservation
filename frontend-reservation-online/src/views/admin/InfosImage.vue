@@ -1,18 +1,21 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import AppAdmin from '@/components/admin/AppAdmin.vue'
 import { useAdminImagesStore } from '@/store/adminImages'
 import {
   ArrowLeft,
   Pencil,
-  Image as ImageIcon,
   DoorOpen,
   Calendar,
-  Info,
+  AlertCircle,
   Loader2,
   ExternalLink,
-  XCircle,
+  ArrowUpRight,
+  Sparkles,
+  CheckCircle2,
+  HardDrive,
+  ImageIcon,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -22,14 +25,22 @@ const imageId = route.params.id
 const image = ref(null)
 const isFetching = ref(true)
 
+const defaultPlaceholder =
+  'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
+
 onMounted(async () => {
   try {
+    isFetching.value = true
     image.value = await adminImagesStore.fetchImage(imageId)
   } catch (error) {
     console.error('Erreur chargement image :', error)
   } finally {
     isFetching.value = false
   }
+})
+
+const activeImage = computed(() => {
+  return image.value?.url || defaultPlaceholder
 })
 
 const formatDate = (dateString) => {
@@ -50,33 +61,23 @@ const formatDate = (dateString) => {
 
 <template>
   <AppAdmin>
-    <div class="mx-auto max-w-5xl">
+    <div class="mx-auto max-w-[1180px] text-[#151515]">
       <!-- EN-TÊTE & RETOUR -->
-      <div class="mb-6">
+      <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <RouterLink
           :to="{ name: 'admin-galeries' }"
-          class="mb-3 inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-800"
+          class="inline-flex items-center gap-2 text-xs font-semibold text-[#777] transition hover:text-[#191919]"
         >
           <ArrowLeft :size="16" />
           <span>Retour à la galerie</span>
         </RouterLink>
 
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-800">
-              Détails du média
-            </h1>
-            <p class="mt-1 text-sm text-gray-500">
-              Visualisation haute résolution et métadonnées de la photo.
-            </p>
-          </div>
-
+        <div v-if="image" class="flex items-center gap-3">
           <RouterLink
-            v-if="image"
             :to="{ name: 'update-image', params: { id: imageId } }"
-            class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+            class="inline-flex items-center gap-2 rounded-xl border border-neutral-900 px-5 py-2.5 text-xs font-medium uppercase tracking-widest text-neutral-900 transition hover:bg-neutral-900 hover:text-white"
           >
-            <Pencil :size="16" />
+            <Pencil :size="13" />
             <span>Modifier</span>
           </RouterLink>
         </div>
@@ -85,106 +86,194 @@ const formatDate = (dateString) => {
       <!-- CHARGEMENT -->
       <div
         v-if="isFetching"
-        class="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-16 shadow-sm"
+        class="flex min-h-[420px] items-center justify-center rounded-[15px] border border-[#ecebe7] bg-white"
       >
-        <Loader2 :size="32" class="animate-spin text-blue-600" />
-        <p class="mt-3 text-sm text-gray-500">Chargement de la photo...</p>
+        <div class="flex flex-col items-center gap-3">
+          <Loader2 :size="34" class="animate-spin text-slate-800" />
+          <p class="text-sm text-[#777]">Chargement des détails de la photo...</p>
+        </div>
       </div>
 
       <!-- ERREUR -->
       <div
         v-else-if="adminImagesStore.errorMessage && !image"
-        class="rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-sm text-red-700"
+        class="rounded-[15px] border border-[#eaded9] bg-white p-10 text-center"
       >
-        <XCircle :size="32" class="mx-auto mb-3 text-red-400" />
-        <p class="font-semibold">Photo introuvable</p>
-        <p class="mt-1">{{ adminImagesStore.errorMessage }}</p>
+        <AlertCircle :size="42" class="mx-auto mb-3 text-slate-800" />
+        <h2 class="text-xl font-semibold text-[#191919]">Photo introuvable</h2>
+        <p class="mt-2 text-sm text-[#777]">{{ adminImagesStore.errorMessage }}</p>
+        <RouterLink
+          :to="{ name: 'admin-galeries' }"
+          class="mt-6 inline-flex items-center gap-2 rounded-[9px] bg-[#191919] px-5 py-3 text-xs font-semibold text-white transition hover:bg-black"
+        >
+          Retourner à la galerie
+        </RouterLink>
       </div>
 
-      <!-- CONTENU -->
-      <div v-else-if="image" class="space-y-6">
-        <!-- GRANDE IMAGE -->
-        <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div class="relative max-h-[500px] w-full overflow-hidden bg-gray-900 flex items-center justify-center">
-            <img
-              v-if="image.url"
-              :src="image.url"
-              :alt="image.nom"
-              class="max-h-[500px] w-full object-contain"
-            />
-            <div v-else class="flex h-64 items-center justify-center text-gray-400">
-              <ImageIcon :size="48" />
+      <!-- FICHE IMAGE : STYLE SALLEINFOSUSER -->
+      <div v-else-if="image">
+        <section class="overflow-hidden rounded-[15px] border border-[#ecebe7] bg-white shadow-sm">
+          <div class="grid min-h-[465px] grid-cols-1 lg:grid-cols-[1.06fr_0.98fr_1fr]">
+            <!-- IMAGE GAUCHE -->
+            <div class="relative min-h-[390px] overflow-hidden bg-[#181818] lg:min-h-0 flex items-center justify-center">
+              <img
+                :src="activeImage"
+                :alt="image.nom"
+                class="absolute inset-0 h-full w-full object-cover"
+              />
+
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/10"></div>
+
+              <div class="absolute left-5 top-5">
+                <div
+                  class="inline-flex items-center gap-1.5 rounded-full border border-white/35 bg-white/15 px-3 py-1.5 text-[11px] font-medium text-white backdrop-blur-md"
+                >
+                  <Sparkles :size="12" />
+                  <span>Média de Galerie</span>
+                </div>
+              </div>
+
+              <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
+                <div>
+                  <p class="text-[11px] font-medium uppercase tracking-[0.12em] text-white/70">
+                    {{ image.salle?.nom || 'Salle #' + image.salle_id }}
+                  </p>
+                  <p class="mt-1 text-xl font-semibold leading-tight text-white line-clamp-1">
+                    {{ image.nom }}
+                  </p>
+                </div>
+
+                <a
+                  v-if="image.url"
+                  :href="image.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-[10px] font-semibold text-white backdrop-blur-md transition hover:bg-white/30"
+                >
+                  <ExternalLink :size="12" />
+                  <span>Plein écran</span>
+                </a>
+              </div>
             </div>
 
-            <!-- BOUTON OUVRIR EN GRAND -->
-            <a
-              v-if="image.url"
-              :href="image.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="absolute bottom-4 right-4 flex items-center gap-2 rounded-xl bg-black/60 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/80"
-            >
-              <ExternalLink :size="14" />
-              <span>Ouvrir en plein écran</span>
-            </a>
-          </div>
-
-          <!-- DÉTAILS DE L'IMAGE -->
-          <div class="p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <!-- CENTRE : HIÉRARCHIE ÉDITORIALE -->
+            <div class="flex flex-col justify-between border-b border-[#ecebe7] px-7 py-9 sm:px-10 lg:border-b-0 lg:border-r lg:border-[#ecebe7]">
               <div>
-                <h2 class="text-xl font-bold text-gray-900">
+                <p class="text-[13px] font-medium text-[#7b7b7b]">Média photographique</p>
+
+                <h1 class="mt-5 max-w-[320px] font-serif text-[42px] leading-[0.98] tracking-[-0.04em] text-[#191919]">
                   {{ image.nom }}
-                </h2>
-                <p class="mt-1 text-sm text-gray-500">
-                  {{ image.designation || 'Aucune désignation spécifique fournie.' }}
+                </h1>
+
+                <div class="mt-4 flex items-start gap-2 text-[13px] leading-5 text-[#777]">
+                  <DoorOpen :size="15" class="mt-0.5 shrink-0 text-slate-800" />
+                  <span>Rattachée à : {{ image.salle?.nom || 'Salle #' + image.salle_id }}</span>
+                </div>
+
+                <div class="mt-10 flex items-end gap-2">
+                  <span class="font-serif text-[44px] leading-none tracking-[-0.04em] text-[#000000]">
+                    Désignation
+                  </span>
+                </div>
+
+                <p class="mt-3 max-w-[280px] text-[13px] leading-6 text-[#777]">
+                  {{ image.designation || 'Aucune désignation spécifique fournie pour cette photo.' }}
                 </p>
               </div>
 
-              <!-- Salle associée -->
-              <div class="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-2.5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
-                  <DoorOpen :size="18" />
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-gray-400">Salle associée</p>
-                  <p class="text-sm font-bold text-gray-900">
-                    {{ image.salle?.nom || 'Salle #' + image.salle_id }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+              <div class="mt-10 space-y-2.5">
+                <RouterLink
+                  :to="{ name: 'update-image', params: { id: imageId } }"
+                  class="inline-flex w-full items-center justify-between rounded-xl border border-neutral-900 px-5 py-2.5 text-xs font-medium uppercase tracking-widest text-neutral-900 transition hover:bg-neutral-900 hover:text-white"
+                >
+                  <span>Modifier le média</span>
+                  <ArrowUpRight :size="15" />
+                </RouterLink>
 
-        <!-- MÉTADONNÉES TECHNIQUES & HISTORIQUE -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <!-- FICHIER / SOURCE -->
-          <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <div class="mb-4 flex items-center gap-2">
-              <Info :size="18" class="text-blue-600" />
-              <h3 class="text-base font-semibold text-gray-800">Source du fichier</h3>
+                <RouterLink
+                  :to="{ name: 'admin-galeries' }"
+                  class="inline-flex w-full items-center justify-center rounded-xl border border-neutral-300 px-5 py-2.5 text-xs font-medium uppercase tracking-widest text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900"
+                >
+                  Annuler / Retour
+                </RouterLink>
+              </div>
             </div>
-            <p class="break-all rounded-xl bg-gray-50 p-3 font-mono text-xs text-gray-700">
-              {{ image.path || 'Non spécifié' }}
-            </p>
-          </div>
 
-          <!-- HISTORIQUE -->
-          <div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h3 class="mb-4 text-base font-semibold text-gray-800">Historique</h3>
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div class="rounded-xl bg-gray-50 p-3">
-                <p class="text-[11px] font-semibold uppercase text-gray-400">Date d'ajout</p>
-                <p class="mt-1 text-xs font-medium text-gray-700">{{ formatDate(image.created_at) }}</p>
+            <!-- DROITE : CARACTÉRISTIQUES & ADMIN SPECS -->
+            <div class="flex flex-col justify-between px-7 py-9 sm:px-10">
+              <div>
+                <p class="text-[12px] font-medium text-slate-800">Ce qui est inclus</p>
+
+                <div class="mt-6 space-y-5">
+                  <div class="flex gap-3 border-b border-[#efeee9] pb-4">
+                    <CheckCircle2 :size="17" class="mt-0.5 shrink-0 text-slate-800" />
+                    <div>
+                      <p class="text-[13px] font-medium text-[#5d5d5d]">Salle rattachée</p>
+                      <p class="mt-1 text-[15px] font-medium text-[#222]">
+                        {{ image.salle?.nom || 'Salle #' + image.salle_id }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex gap-3 border-b border-[#efeee9] pb-4">
+                    <CheckCircle2 :size="17" class="mt-0.5 shrink-0 text-slate-800" />
+                    <div>
+                      <p class="text-[13px] font-medium text-[#5d5d5d]">Statut d'affichage</p>
+                      <p class="mt-1 text-[15px] font-medium text-[#2f9967]">
+                        Publié dans le catalogue
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex gap-3 border-b border-[#efeee9] pb-4">
+                    <CheckCircle2 :size="17" class="mt-0.5 shrink-0 text-slate-800" />
+                    <div>
+                      <p class="text-[13px] font-medium text-[#5d5d5d]">Qualité de rendu</p>
+                      <p class="mt-1 text-[15px] font-medium text-[#222]">
+                        Haute Définition (HD)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex gap-3">
+                    <HardDrive :size="17" class="mt-0.5 shrink-0 text-slate-800" />
+                    <div class="min-w-0 flex-1">
+                      <p class="text-[13px] font-medium text-[#5d5d5d]">Chemin du fichier</p>
+                      <p class="mt-1 break-all text-[12px] font-mono text-[#777]">
+                        {{ image.path || 'Stockage local' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="rounded-xl bg-gray-50 p-3">
-                <p class="text-[11px] font-semibold uppercase text-gray-400">Dernière mise à jour</p>
-                <p class="mt-1 text-xs font-medium text-gray-700">{{ formatDate(image.updated_at) }}</p>
+
+              <!-- DÉTAILS ADMINISTRATIFS -->
+              <div class="mt-9 border-t border-[#ecebe7] pt-6">
+                <div class="flex items-center gap-2 mb-3">
+                  <Calendar :size="16" class="text-slate-800" />
+                  <h2 class="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#222]">
+                    Données d'enregistrement
+                  </h2>
+                </div>
+
+                <div class="space-y-2 rounded-[8px] border border-[#deddd9] bg-[#fafaf8] p-3 text-[11px]">
+                  <div class="flex items-center justify-between text-[#777]">
+                    <span>Identifiant</span>
+                    <span class="font-semibold text-[#191919]">#{{ image.id }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[#777]">
+                    <span>Ajoutée le</span>
+                    <span class="font-semibold text-[#191919">{{ formatDate(image.created_at) }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[#777]">
+                    <span>Modifiée le</span>
+                    <span class="font-semibold text-[#191919">{{ formatDate(image.updated_at) }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   </AppAdmin>

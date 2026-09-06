@@ -1,35 +1,30 @@
 <script setup>
-import { RouterLink } from 'vue-router'
-import { useAdminImagesStore } from '@/store/adminImages'
-import AppAdmin from '@/components/admin/AppAdmin.vue'
-import ImagesFilters from '@/components/admin/ImagesFilters.vue'
 import { ref, computed, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
+import AppAdmin from '@/components/admin/AppAdmin.vue'
+import { useAdminImagesStore } from '@/store/adminImages'
+import { useAdminSallesStore } from '@/store/adminSalles'
 import {
   Plus,
   Eye,
   Pencil,
   Trash2,
   AlertTriangle,
-  Image as ImageIcon,
-  DoorOpen,
-  Calendar,
   RefreshCw,
-  X,
-  Filter,
-  Layers,
+  Search,
   LayoutGrid,
   List,
+  Image as ImageIcon,
+  DoorOpen,
 } from 'lucide-vue-next'
 
 const adminImagesStore = useAdminImagesStore()
+const adminSallesStore = useAdminSallesStore()
 
 const search = ref('')
 const selectedSalle = ref('')
-const descending = ref(true)
-const viewMode = ref('grid') // 'grid' ou 'table'
-
-// Labels lisibles des filtres actifs
-const activeSearchLabel = ref('')
+const sortOrder = ref('desc') // 'desc' ou 'asc'
+const viewMode = ref('table') // 'table' par défaut pour le design demandé ou 'grid'
 
 // Modale de confirmation de suppression
 const isDeleteModalOpen = ref(false)
@@ -49,41 +44,30 @@ const loadImages = async () => {
     }
     await adminImagesStore.fetchImages(params)
   } catch (error) {
-    console.error('Erreur lors du chargement des images:', error)
+    console.error('Erreur chargement images :', error)
   }
 }
 
-onMounted(() => {
-  loadImages()
+onMounted(async () => {
+  await Promise.all([
+    loadImages(),
+    adminSallesStore.salles.length === 0 ? adminSallesStore.fetchSalles({ all: 'true' }) : Promise.resolve(),
+  ])
 })
 
-const handleSearch = (value) => {
-  search.value = value
-  activeSearchLabel.value = value
+const handleSearch = () => {
   loadImages()
 }
 
-const handleSalleChange = (value) => {
-  selectedSalle.value = value
-  loadImages()
-}
-
-const handleSortChange = (value) => {
-  descending.value = value
-}
-
-const resetFilters = () => {
-  search.value = ''
-  selectedSalle.value = ''
-  activeSearchLabel.value = ''
+const handleSalleChange = () => {
   loadImages()
 }
 
 const filteredImages = computed(() => {
-  let result = [...adminImagesStore.images]
+  const result = [...adminImagesStore.images]
 
   result.sort((a, b) => {
-    return descending.value ? b.id - a.id : a.id - b.id
+    return sortOrder.value === 'desc' ? b.id - a.id : a.id - b.id
   })
 
   return result
@@ -131,54 +115,32 @@ const confirmDelete = async () => {
 <template>
   <AppAdmin>
     <div class="min-h-screen bg-[#F8FAFC]">
-      <!-- TITRE & ACTIONS -->
-      <div class="mb-6 mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <!-- EN-TÊTE DE PAGE -->
+      <div class="mb-6 mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-[30px] font-bold tracking-[-0.8px] text-[#0F172A]">
-            Galerie & Médias des Salles
+          <h1 class="text-2xl font-bold tracking-tight text-slate-800">
+            Galerie & Médias
           </h1>
-          <p class="mt-1 text-sm text-[#64748B]">
-            Gérez les photos, perspectives et visuels associés aux différentes salles.
+          <p class="mt-1 text-xs text-slate-500">
+            Gérez les visuels, photos de couverture et médias associés à vos salles.
           </p>
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- Bascule Grid / Table -->
-          <div class="flex items-center rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
-            <button
-              type="button"
-              class="flex h-8 w-8 items-center justify-center rounded-lg transition"
-              :class="viewMode === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-800'"
-              title="Vue Grille"
-              @click="viewMode = 'grid'"
-            >
-              <LayoutGrid :size="16" />
-            </button>
-            <button
-              type="button"
-              class="flex h-8 w-8 items-center justify-center rounded-lg transition"
-              :class="viewMode === 'table' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-800'"
-              title="Vue Tableau"
-              @click="viewMode = 'table'"
-            >
-              <List :size="16" />
-            </button>
-          </div>
-
           <button
             type="button"
-            class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 active:scale-95"
+            class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 active:scale-95 cursor-pointer"
             @click="loadImages"
           >
-            <RefreshCw :size="16" :class="{ 'animate-spin': adminImagesStore.loading }" />
+            <RefreshCw :size="14" :class="{ 'animate-spin': adminImagesStore.loading }" />
             <span>Actualiser</span>
           </button>
 
           <RouterLink
             :to="{ name: 'create-image' }"
-            class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+            class="inline-flex items-center gap-2 rounded-xl border border-neutral-900 bg-neutral-900 px-4 py-2 text-xs font-medium uppercase tracking-widest text-white shadow-sm transition hover:bg-black active:scale-95"
           >
-            <Plus :size="18" />
+            <Plus :size="15" />
             <span>Ajouter une image</span>
           </RouterLink>
         </div>
@@ -187,313 +149,243 @@ const confirmDelete = async () => {
       <!-- MESSAGES FLASH -->
       <div
         v-if="adminImagesStore.successMessage"
-        class="mb-6 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+        class="mb-4 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800"
       >
         <span>{{ adminImagesStore.successMessage }}</span>
-        <button
-          class="font-bold text-green-700 hover:text-green-900"
-          @click="adminImagesStore.successMessage = null"
-        >
+        <button class="font-bold text-emerald-700 hover:text-emerald-900" @click="adminImagesStore.successMessage = null">
           ×
         </button>
       </div>
 
       <div
         v-if="adminImagesStore.errorMessage"
-        class="mb-6 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+        class="mb-4 flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800"
       >
         <span>{{ adminImagesStore.errorMessage }}</span>
-        <button
-          class="font-bold text-red-700 hover:text-red-900"
-          @click="adminImagesStore.errorMessage = null"
-        >
+        <button class="font-bold text-rose-700 hover:text-rose-900" @click="adminImagesStore.errorMessage = null">
           ×
         </button>
       </div>
 
-      <!-- FILTRES -->
-      <ImagesFilters
-        @search="handleSearch"
-        @salle-change="handleSalleChange"
-        @sort-change="handleSortChange"
-      />
-
-      <!-- BANDE RÉSUMÉ FILTRES -->
-      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <!-- Compteur résultats -->
-        <div class="flex items-center gap-2">
-          <Filter :size="15" class="text-[#64748B]" />
-          <span class="text-sm font-medium text-[#64748B]">
-            <span
-              v-if="adminImagesStore.loading"
-              class="text-[#94A3B8]"
-            >Chargement...</span>
-            <span v-else>
-              <span class="font-bold text-[#0F172A]">{{ filteredImages.length }}</span>
-              photo{{ filteredImages.length > 1 ? 's' : '' }} trouvée{{ filteredImages.length > 1 ? 's' : '' }}
-            </span>
-          </span>
-        </div>
-
-        <!-- Badges filtres actifs -->
-        <div class="flex flex-wrap items-center gap-2">
-          <!-- Badge recherche -->
-          <span
-            v-if="activeSearchLabel"
-            class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 py-1 pl-3 pr-2 text-xs font-medium text-blue-700"
-          >
-            Recherche : "{{ activeSearchLabel }}"
-            <button
-              type="button"
-              class="flex h-4 w-4 items-center justify-center rounded-full bg-blue-200 text-blue-700 transition hover:bg-blue-300"
-              @click="() => { search = ''; activeSearchLabel = ''; loadImages() }"
-            >
-              <X :size="10" />
-            </button>
-          </span>
-
-          <!-- Badge salle -->
-          <span
-            v-if="selectedSalle"
-            class="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 py-1 pl-3 pr-2 text-xs font-medium text-purple-700"
-          >
-            Salle filtrée
-            <button
-              type="button"
-              class="flex h-4 w-4 items-center justify-center rounded-full bg-purple-200 text-purple-700 transition hover:bg-purple-300"
-              @click="() => { selectedSalle = ''; loadImages() }"
-            >
-              <X :size="10" />
-            </button>
-          </span>
-
-          <!-- Réinitialiser -->
-          <button
-            v-if="activeSearchLabel || selectedSalle"
-            type="button"
-            class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-900"
-            @click="resetFilters"
-          >
-            <X :size="11" />
-            Réinitialiser
-          </button>
-        </div>
-      </div>
-
-      <!-- LOADING SPINNER -->
-      <div v-if="adminImagesStore.loading" class="flex flex-col items-center justify-center py-24">
-        <div class="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-        <p class="mt-4 text-sm font-medium text-gray-500">Chargement de la galerie...</p>
-      </div>
-
-      <!-- LISTE VIDE -->
-      <div
-        v-else-if="filteredImages.length === 0"
-        class="mt-6 flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-20 text-center shadow-sm"
-      >
-        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-blue-500">
-          <ImageIcon :size="32" />
-        </div>
-        <h3 class="mt-4 text-lg font-semibold text-gray-900">Aucune photo dans la galerie</h3>
-        <p class="mt-1 text-sm text-gray-500">
-          Ajoutez de superbes visuels pour valoriser vos salles de réunion.
-        </p>
-        <RouterLink
-          :to="{ name: 'create-image' }"
-          class="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-        >
-          <Plus :size="18" />
-          <span>Ajouter la première image</span>
-        </RouterLink>
-      </div>
-
-      <!-- AFFICHAGE EN GRILLE -->
-      <div
-        v-else-if="viewMode === 'grid'"
-        class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-      >
-        <div
-          v-for="img in filteredImages"
-          :key="img.id"
-          class="group relative flex flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md"
-        >
-          <!-- IMAGE APERÇU -->
-          <div class="relative h-48 w-full overflow-hidden bg-gray-100">
-            <img
-              v-if="img.url"
-              :src="img.url"
-              :alt="img.nom"
-              class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+      <!-- BARRE DE RECHERCHE & FILTRES (STYLE DIGILAB) -->
+      <div class="flex flex-wrap items-center justify-between gap-4 rounded-t-xl border border-b-0 border-slate-200 bg-white p-4 shadow-sm">
+        <div class="flex flex-1 flex-wrap items-center gap-3">
+          <!-- Recherche -->
+          <div class="relative w-64">
+            <input
+              v-model="search"
+              type="text"
+              placeholder="Rechercher une photo..."
+              class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 pl-9 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white"
+              @input="handleSearch"
             />
-            <div
-              v-else
-              class="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400"
-            >
-              <ImageIcon :size="36" />
-            </div>
-
-            <!-- BADGE SALLE -->
-            <div class="absolute left-3 top-3">
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
-                <DoorOpen :size="12" />
-                {{ img.salle?.nom || 'Salle #' + img.salle_id }}
-              </span>
-            </div>
+            <Search :size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           </div>
 
-          <!-- CONTENU CARTE -->
-          <div class="flex flex-1 flex-col justify-between p-4">
-            <div>
-              <h3 class="font-semibold text-[#0F172A] truncate">
-                {{ img.nom }}
-              </h3>
-              <p class="mt-1 text-xs text-gray-500 line-clamp-1">
-                {{ img.designation || 'Sans désignation particulière' }}
-              </p>
+          <!-- Filtre Salle -->
+          <select
+            v-model="selectedSalle"
+            class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white"
+            @change="handleSalleChange"
+          >
+            <option value="">Toutes les salles</option>
+            <option
+              v-for="salle in adminSallesStore.salles"
+              :key="salle.id"
+              :value="salle.id"
+            >
+              {{ salle.nom }}
+            </option>
+          </select>
+
+          <!-- Toggle vue Tableau / Grille -->
+          <div class="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+            <button
+              type="button"
+              class="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition"
+              :class="viewMode === 'table' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
+              @click="viewMode = 'table'"
+            >
+              <List :size="13" />
+              <span>Tableau</span>
+            </button>
+            <button
+              type="button"
+              class="flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition"
+              :class="viewMode === 'grid' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
+              @click="viewMode = 'grid'"
+            >
+              <LayoutGrid :size="13" />
+              <span>Grille</span>
+            </button>
+          </div>
+
+          <span class="text-xs text-slate-400">
+            {{ filteredImages.length }} image(s) affichée(s)
+          </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 text-xs text-slate-500">
+            <span>Tri :</span>
+            <select
+              v-model="sortOrder"
+              class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
+            >
+              <option value="desc">Plus récentes (ID Décroissant)</option>
+              <option value="asc">Plus anciennes (ID Croissant)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- VUE GRILLE OPTIONNELLE -->
+      <div v-if="viewMode === 'grid'" class="rounded-b-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div
+          v-if="filteredImages.length === 0"
+          class="flex flex-col items-center justify-center py-16 text-center"
+        >
+          <p class="font-semibold text-slate-800">Aucune photo trouvée</p>
+          <p class="mt-1 text-xs text-slate-400">Modifiez vos critères de recherche ou ajoutez une nouvelle image.</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div
+            v-for="img in filteredImages"
+            :key="img.id"
+            class="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs transition hover:shadow-md"
+          >
+            <div class="relative h-44 w-full overflow-hidden bg-slate-100">
+              <img
+                v-if="img.url"
+                :src="img.url"
+                :alt="img.nom"
+                class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              />
+              <div v-else class="flex h-full w-full items-center justify-center text-slate-400">
+                <ImageIcon :size="32" />
+              </div>
             </div>
-
-            <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-400">
-              <span>{{ formatDate(img.created_at) }}</span>
-
-              <!-- ACTIONS -->
-              <div class="flex items-center gap-1">
-                <RouterLink
-                  :to="{ name: 'info-image', params: { id: img.id } }"
-                  title="Voir les détails"
-                  class="flex h-7 w-7 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
-                >
-                  <Eye :size="13" />
-                </RouterLink>
-
-                <RouterLink
-                  :to="{ name: 'update-image', params: { id: img.id } }"
-                  title="Modifier"
-                  class="flex h-7 w-7 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600"
-                >
-                  <Pencil :size="13" />
-                </RouterLink>
-
-                <button
-                  type="button"
-                  title="Supprimer"
-                  class="flex h-7 w-7 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-                  @click="openDeleteModal(img)"
-                >
-                  <Trash2 :size="13" />
-                </button>
+            <div class="p-3">
+              <p class="font-semibold text-slate-800 truncate text-xs">{{ img.nom }}</p>
+              <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ img.salle?.nom || 'Salle non définie' }}</p>
+              <div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-[11px] text-slate-400">
+                <span>{{ formatDate(img.created_at) }}</span>
+                <div class="flex items-center gap-1">
+                  <RouterLink :to="{ name: 'info-image', params: { id: img.id } }" class="p-1 text-slate-500 hover:text-slate-800">
+                    <Eye :size="13" />
+                  </RouterLink>
+                  <RouterLink :to="{ name: 'update-image', params: { id: img.id } }" class="p-1 text-slate-500 hover:text-slate-800">
+                    <Pencil :size="13" />
+                  </RouterLink>
+                  <button type="button" @click="openDeleteModal(img)" class="p-1 text-rose-500 hover:text-rose-700">
+                    <Trash2 :size="13" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- AFFICHAGE EN TABLEAU -->
-      <div
-        v-else
-        class="mt-6 overflow-hidden rounded-[16px] border border-[#E2E8F0] bg-white shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]"
-      >
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b border-[#E2E8F0] bg-[#F8FAFC]">
-                <th class="px-6 py-4 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Image
-                </th>
-                <th class="px-6 py-4 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Nom & Désignation
-                </th>
-                <th class="px-6 py-4 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Salle associée
-                </th>
-                <th class="px-6 py-4 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Date d'ajout
-                </th>
-                <th class="px-6 py-4 text-right text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-
-            <tbody class="divide-y divide-[#E2E8F0]">
-              <tr
-                v-for="img in filteredImages"
-                :key="img.id"
-                class="transition-colors duration-200 hover:bg-[#F8FAFC]"
-              >
-                <!-- APERÇU -->
-                <td class="px-6 py-4">
-                  <div class="h-14 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
-                    <img
-                      v-if="img.url"
-                      :src="img.url"
-                      :alt="img.nom"
-                      class="h-full w-full object-cover"
-                    />
-                    <div v-else class="flex h-full w-full items-center justify-center text-gray-400">
-                      <ImageIcon :size="20" />
-                    </div>
-                  </div>
-                </td>
-
-                <!-- NOM & DESIGNATION -->
-                <td class="px-6 py-4">
-                  <p class="text-[14px] font-semibold text-[#0F172A]">
-                    {{ img.nom }}
-                  </p>
-                  <p class="text-[12px] text-gray-400">
-                    {{ img.designation || 'Sans désignation' }}
-                  </p>
-                </td>
-
-                <!-- SALLE -->
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2 text-[14px] font-medium text-gray-700">
-                    <DoorOpen :size="16" class="text-blue-500" />
-                    <span>{{ img.salle?.nom || 'Salle #' + img.salle_id }}</span>
-                  </div>
-                </td>
-
-                <!-- DATE -->
-                <td class="px-6 py-4 text-[14px] text-[#64748B]">
-                  <div class="flex items-center gap-1.5">
-                    <Calendar :size="14" class="text-gray-400" />
-                    <span>{{ formatDate(img.created_at) }}</span>
-                  </div>
-                </td>
-
-                <!-- ACTIONS -->
-                <td class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end gap-2">
-                    <RouterLink
-                      :to="{ name: 'info-image', params: { id: img.id } }"
-                      title="Voir les détails"
-                      class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      <Eye :size="15" />
-                    </RouterLink>
-
-                    <RouterLink
-                      :to="{ name: 'update-image', params: { id: img.id } }"
-                      title="Modifier"
-                      class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600"
-                    >
-                      <Pencil :size="15" />
-                    </RouterLink>
-
-                    <button
-                      type="button"
-                      title="Supprimer"
-                      class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-                      @click="openDeleteModal(img)"
-                    >
-                      <Trash2 :size="15" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- TABLEAU DES IMAGES (STYLE DIGILAB - 1 INFORMATION PAR COLONNE STRICTEMENT) -->
+      <div v-else class="overflow-x-auto rounded-b-xl border border-slate-200 bg-white shadow-sm">
+        <!-- CHARGEMENT -->
+        <div v-if="adminImagesStore.loading" class="flex flex-col items-center justify-center py-20">
+          <div class="h-8 w-8 animate-spin rounded-full border-3 border-slate-800 border-t-transparent"></div>
+          <p class="mt-3 text-xs font-medium text-slate-500">Chargement de la galerie...</p>
         </div>
+
+        <!-- LISTE VIDE -->
+        <div
+          v-else-if="filteredImages.length === 0"
+          class="flex flex-col items-center justify-center py-16 text-center"
+        >
+          <p class="font-semibold text-slate-800">Aucune photo trouvée</p>
+          <p class="mt-1 text-xs text-slate-400">
+            Modifiez vos filtres ou téléversez une nouvelle photo.
+          </p>
+        </div>
+
+        <!-- TABLE -->
+        <table v-else class="w-full text-left text-sm whitespace-nowrap">
+          <thead class="bg-slate-50 text-xs text-slate-400 uppercase tracking-wider">
+            <tr>
+              <th class="py-3 px-4 font-medium w-16">ID</th>
+              <th class="py-3 px-4 font-medium w-24 text-center">Aperçu</th>
+              <th class="py-3 px-4 font-medium">Nom de l'image</th>
+              <th class="py-3 px-4 font-medium">Salle associée</th>
+              <th class="py-3 px-4 font-medium text-right w-28">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-600">
+            <tr
+              v-for="img in filteredImages"
+              :key="img.id"
+              class="hover:bg-slate-50 transition"
+            >
+              <!-- 1. ID -->
+              <td class="py-3.5 px-4 font-mono text-xs text-slate-400">
+                #{{ img.id }}
+              </td>
+
+              <!-- 2. APERÇU -->
+              <td class="py-3.5 px-4 text-center">
+                <div class="mx-auto h-11 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                  <img
+                    v-if="img.url"
+                    :src="img.url"
+                    :alt="img.nom"
+                    class="h-full w-full object-cover"
+                  />
+                  <div v-else class="flex h-full w-full items-center justify-center text-slate-400">
+                    <ImageIcon :size="16" />
+                  </div>
+                </div>
+              </td>
+
+              <!-- 3. NOM -->
+              <td class="py-3.5 px-4 font-semibold text-slate-800">
+                {{ img.nom }}
+              </td>
+
+              <!-- 4. SALLE ASSOCIÉE -->
+              <td class="py-3.5 px-4 text-xs font-medium text-slate-700">
+                {{ img.salle?.nom || 'Salle #' + img.salle_id }}
+              </td>
+
+              <!-- 5. ACTIONS -->
+              <td class="py-3.5 px-4 text-right">
+                <div class="flex items-center justify-end gap-1.5">
+                  <RouterLink
+                    :to="{ name: 'info-image', params: { id: img.id } }"
+                    title="Voir les détails"
+                    class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                  >
+                    <Eye :size="13" />
+                  </RouterLink>
+
+                  <RouterLink
+                    :to="{ name: 'update-image', params: { id: img.id } }"
+                    title="Modifier"
+                    class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                  >
+                    <Pencil :size="13" />
+                  </RouterLink>
+
+                  <button
+                    type="button"
+                    title="Supprimer"
+                    class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-rose-500 transition hover:bg-rose-50 hover:border-rose-300 cursor-pointer"
+                    @click="openDeleteModal(img)"
+                  >
+                    <Trash2 :size="13" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -521,7 +413,7 @@ const confirmDelete = async () => {
         <div class="mt-6 flex justify-end gap-3">
           <button
             type="button"
-            class="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            class="rounded-xl border border-neutral-300 px-5 py-2.5 text-xs font-medium uppercase tracking-widest text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900"
             @click="closeDeleteModal"
           >
             Annuler
@@ -530,7 +422,7 @@ const confirmDelete = async () => {
           <button
             type="button"
             :disabled="isDeleting"
-            class="flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+            class="rounded-xl border border-rose-600 bg-rose-600 px-5 py-2.5 text-xs font-medium uppercase tracking-widest text-white transition hover:bg-rose-700 disabled:opacity-50"
             @click="confirmDelete"
           >
             <span v-if="isDeleting">Suppression...</span>

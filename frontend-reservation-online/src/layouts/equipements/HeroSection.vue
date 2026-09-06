@@ -2,12 +2,17 @@
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ArrowUpRight, Play, Pause, X } from 'lucide-vue-next'
+import router from '@/router'
 
 /*
 |--------------------------------------------------------------------------
 | Image de fond
 |--------------------------------------------------------------------------
 */
+
+function handleReserveHero() {
+    router.push({ name: 'user-create-reservation' })
+}
 
 const heroImage = '/images/hero/equipements/equipement.png'
 
@@ -238,7 +243,7 @@ onBeforeUnmount(() => {
                         type="button"
                         class="egypt-hero__book-btn reveal"
                         style="animation-delay: 1.2s"
-                        @click="openBooking"
+                        @click="handleReserveHero"
                     >
                         Réserver Maintenant
                         <span class="egypt-hero__book-btn-icon">

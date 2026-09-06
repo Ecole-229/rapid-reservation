@@ -240,352 +240,353 @@ const handleUpdate = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F8FAFC] flex flex-col justify-between">
-    <NavBar />
+    <div class="min-h-screen bg-[#f6f6f4] text-[#151515] flex flex-col justify-between">
+        <NavBar />
 
-    <main class="flex-1 pt-28 pb-16 px-4 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-4xl">
-        <!-- RETOUR -->
-        <div class="mb-6">
-          <RouterLink
-            :to="{ name: 'user-reservation-details', params: { id: reservationId } }"
-            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50"
-          >
-            <ArrowLeft :size="15" />
-            <span>Retour aux détails de la réservation</span>
-          </RouterLink>
-        </div>
+        <main class="flex-1 pt-28 pb-16 px-4 sm:px-6 lg:px-8 w-full max-w-[1240px] mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-5 min-h-[640px]">
 
-        <!-- CHARGEMENT INITIAL -->
-        <div
-          v-if="isFetching"
-          class="flex flex-col items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-16 shadow-xs"
-        >
-          <Loader2 :size="36" class="animate-spin text-[#4F46E5]" />
-          <p class="mt-4 text-sm font-semibold text-slate-600">Chargement de la réservation...</p>
-        </div>
+                <!-- GAUCHE : HERO / CARTE SALLE SÉLECTIONNÉE -->
+                <section class="relative min-h-[480px] lg:min-h-full overflow-hidden rounded-[20px] border border-[#ecebe7] bg-[#141515] flex flex-col justify-between p-6 sm:p-8">
+                    <img
+                        :src="selectedSalle?.images?.[0]?.url || selectedSalle?.images?.[0]?.path || defaultImage"
+                        :alt="selectedSalle?.nom || 'Salle'"
+                        class="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
 
-        <!-- ERREUR DE CHARGEMENT -->
-        <div
-          v-else-if="fetchError"
-          class="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center"
-        >
-          <AlertCircle :size="36" class="mx-auto mb-3 text-rose-500" />
-          <h3 class="text-base font-bold text-rose-900">Impossible de charger la réservation</h3>
-          <p class="mt-1 text-xs text-rose-600">{{ fetchError }}</p>
-          <div class="mt-5">
-            <RouterLink
-              :to="{ name: 'user-reservations' }"
-              class="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-[#4F46E5] transition"
-            >
-              Retour à la liste des réservations
-            </RouterLink>
-          </div>
-        </div>
+                    <!-- En-tête gauche -->
+                    <div class="relative z-10 flex items-center justify-between">
+                        <RouterLink
+                            :to="{ name: 'user-reservation-details', params: { id: reservationId } }"
+                            class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/40 px-3.5 py-1.5 text-[11px] uppercase tracking-[0.08em] text-white backdrop-blur-md transition hover:bg-white/10"
+                        >
+                            <ArrowLeft :size="13" />
+                            <span>Retour aux détails</span>
+                        </RouterLink>
+                        <div class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] text-white/90 backdrop-blur-md">
+                            <Pencil :size="12" />
+                            <span>Modification</span>
+                        </div>
+                    </div>
 
-        <!-- RESERVATION NON MODIFIABLE -->
-        <div
-          v-else-if="!isModifiable"
-          class="rounded-3xl border border-amber-200 bg-amber-50/80 p-8 text-center"
-        >
-          <AlertCircle :size="36" class="mx-auto mb-3 text-amber-600" />
-          <h3 class="text-base font-bold text-amber-900">Réservation non modifiable</h3>
-          <p class="mt-1.5 text-xs text-amber-700 max-w-md mx-auto leading-relaxed">
-            Cette réservation a le statut <strong>« {{ reservation?.status }} »</strong> et ne peut plus être modifiée. Seules les réservations en attente ou confirmées sont éditables.
-          </p>
-          <div class="mt-5">
-            <RouterLink
-              :to="{ name: 'user-reservation-details', params: { id: reservationId } }"
-              class="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-[#4F46E5] transition"
-            >
-              Consulter la réservation
-            </RouterLink>
-          </div>
-        </div>
+                    <!-- Pied gauche -->
+                    <div class="relative z-10 mt-auto pt-16">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <span class="rounded-full border border-white/20 bg-black/30 px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-white/80 backdrop-blur-sm">
+                                Réservation #{{ reservationId }}
+                            </span>
+                            <span
+                                v-if="reservation"
+                                class="rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.12em] backdrop-blur-sm"
+                                :class="reservation.status === 'confirmee'
+                                    ? 'border-emerald-300/35 bg-emerald-500/20 text-emerald-100'
+                                    : reservation.status === 'annulee'
+                                        ? 'border-rose-300/35 bg-rose-500/20 text-rose-100'
+                                        : 'border-amber-300/35 bg-amber-500/20 text-amber-100'"
+                            >
+                                {{ reservation.status }}
+                            </span>
+                        </div>
+                        <h1 class="font-serif text-[42px] sm:text-[54px] leading-[0.95] tracking-[-0.03em] text-white">
+                            {{ selectedSalle ? selectedSalle.nom : 'MODIFIER LA RÉSERVATION' }}
+                        </h1>
+                        <div v-if="selectedSalle" class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.08em] text-white/80">
+                            <span class="inline-flex items-center gap-1.5">
+                                <MapPin :size="13" class="text-white/70" />
+                                {{ selectedSalle.localisation || 'Sur site' }}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <Users :size="13" class="text-white/70" />
+                                {{ selectedSalle.capacite }} personnes max
+                            </span>
+                        </div>
+                        <p v-else class="mt-4 text-xs text-white/60">
+                            Choisissez une salle dans le formulaire pour configurer votre événement.
+                        </p>
+                    </div>
+                </section>
 
-        <!-- FORMULAIRE DE MODIFICATION -->
-        <form v-else @submit.prevent="handleUpdate" class="space-y-6">
-          <!-- TITRE & AVERTISSEMENT -->
-          <div>
-            <div class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3.5 py-1 text-xs font-semibold text-[#4F46E5] mb-3">
-              <Pencil :size="13" />
-              <span>Modification de réservation</span>
+                <!-- DROITE : FORMULAIRE -->
+                <section class="flex flex-col justify-between rounded-[20px] border border-[#ecebe7] bg-white p-6 sm:p-10 shadow-sm overflow-y-auto">
+                    <div class="mx-auto w-full max-w-[540px]">
+
+                        <!-- CHARGEMENT INITIAL -->
+                        <div v-if="isFetching" class="flex flex-col items-center justify-center py-16">
+                            <Loader2 :size="36" class="animate-spin text-[#181818]" />
+                            <p class="mt-4 text-[13px] text-[#777]">Chargement de la réservation...</p>
+                        </div>
+
+                        <!-- ERREUR DE CHARGEMENT -->
+                        <div v-else-if="fetchError" class="rounded-[12px] border border-rose-200 bg-rose-50 p-6 text-center">
+                            <AlertCircle :size="32" class="mx-auto mb-3 text-rose-600" />
+                            <h3 class="font-serif text-[18px] text-rose-900">Impossible de charger la réservation</h3>
+                            <p class="mt-1 text-[12px] text-rose-700">{{ fetchError }}</p>
+                            <div class="mt-5">
+                                <RouterLink
+                                    :to="{ name: 'user-reservations' }"
+                                    class="inline-flex rounded-[8px] border border-gray-300 bg-white px-5 py-2.5 text-[11px] uppercase tracking-[0.08em] text-gray-700 transition hover:bg-gray-50"
+                                >
+                                    Retour à la liste
+                                </RouterLink>
+                            </div>
+                        </div>
+
+                        <!-- RESERVATION NON MODIFIABLE -->
+                        <div v-else-if="!isModifiable" class="rounded-[12px] border border-amber-200 bg-amber-50 p-6 text-center">
+                            <AlertCircle :size="32" class="mx-auto mb-3 text-amber-600" />
+                            <h3 class="font-serif text-[18px] text-amber-900">Réservation non modifiable</h3>
+                            <p class="mt-2 text-[12px] leading-relaxed text-amber-800 max-w-xs mx-auto">
+                                Cette réservation a le statut <strong class="text-amber-900">« {{ reservation?.status }} »</strong> et ne peut plus être modifiée.
+                            </p>
+                            <div class="mt-5">
+                                <RouterLink
+                                    :to="{ name: 'user-reservation-details', params: { id: reservationId } }"
+                                    class="inline-flex rounded-[8px] border border-gray-300 bg-white px-5 py-2.5 text-[11px] uppercase tracking-[0.08em] text-gray-700 transition hover:bg-gray-50"
+                                >
+                                    Consulter la réservation
+                                </RouterLink>
+                            </div>
+                        </div>
+
+                        <!-- FORMULAIRE DE MODIFICATION -->
+                        <form v-else @submit.prevent="handleUpdate" class="space-y-6">
+
+                            <!-- En-tête -->
+                            <div class="text-center">
+                                <div class="mb-3 flex items-center justify-center gap-2 text-gray-300">
+                                    <span class="h-px w-7 bg-gray-200"></span>
+                                    <span class="text-[14px]">◇</span>
+                                    <span class="h-px w-7 bg-gray-200"></span>
+                                </div>
+                                <h2 class="font-serif text-[32px] sm:text-[38px] uppercase leading-none tracking-[0.02em] text-[#191919]">
+                                    Modification
+                                </h2>
+                                <p class="mx-auto mt-2.5 max-w-[420px] text-[13px] leading-relaxed text-[#777]">
+                                    Ajustez vos dates, la salle ou les équipements de votre réservation.
+                                </p>
+                            </div>
+
+                            <!-- Alerte si confirmée -->
+                            <div
+                                v-if="reservation.status === 'confirmee'"
+                                class="flex items-start gap-3 rounded-[9px] border border-amber-200 bg-amber-50 p-4 text-[12px] text-amber-800"
+                            >
+                                <Info :size="16" class="text-amber-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <p class="font-semibold text-amber-900">Attention</p>
+                                    <p class="mt-0.5 leading-relaxed text-amber-800">
+                                        Toute modification repositionnera cette réservation sous le statut <strong>« En attente »</strong>.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- SECTION : SALLE -->
+                            <div class="space-y-2">
+                                <p class="text-[12px] font-semibold uppercase tracking-[0.06em] text-[#555]">Salle</p>
+                                <div class="grid grid-cols-1 gap-2.5 max-h-64 overflow-y-auto pr-1">
+                                    <label
+                                        v-for="salle in salles"
+                                        :key="salle.id"
+                                        class="flex cursor-pointer items-center gap-3 rounded-[9px] border p-3 transition-all"
+                                        :class="selectedSalleId === salle.id
+                                            ? 'border-[#181818] bg-gray-50'
+                                            : 'border-[#ecebe7] bg-[#fafaf8] hover:border-gray-300'"
+                                    >
+                                        <input type="radio" :value="salle.id" v-model="selectedSalleId" class="sr-only" />
+                                        <div class="h-11 w-11 shrink-0 overflow-hidden rounded-[7px] border border-gray-200 bg-gray-100">
+                                            <img
+                                                :src="salle.images?.[0]?.url || salle.images?.[0]?.path || defaultImage"
+                                                :alt="salle.nom"
+                                                class="h-full w-full object-cover"
+                                            />
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="truncate text-[13px] font-medium text-[#191919]">{{ salle.nom }}</p>
+                                            <p class="text-[11px] text-[#777] flex items-center gap-1 mt-0.5">
+                                                <MapPin :size="10" />
+                                                <span class="truncate">{{ salle.localisation }}</span>
+                                                <span>•</span>
+                                                <Users :size="10" />
+                                                <span>{{ salle.capacite }} pers.</span>
+                                            </p>
+                                        </div>
+                                        <span v-if="selectedSalleId === salle.id" class="shrink-0 rounded-full bg-[#181818] p-0.5 text-white">
+                                            <CheckCircle2 :size="14" />
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- SECTION : DATES -->
+                            <div class="space-y-3">
+                                <p class="text-[12px] font-semibold uppercase tracking-[0.06em] text-[#555]">Date & Horaire</p>
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="mb-2 block text-[12px] font-semibold uppercase tracking-[0.04em] text-[#555]">Début</label>
+                                        <input
+                                            v-model="debutDateTime"
+                                            type="datetime-local"
+                                            required
+                                            class="w-full rounded-[9px] border border-[#deddd9] bg-[#fafaf8] px-4 py-3 text-[13px] text-[#222] outline-none transition focus:border-[#181818] focus:bg-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label class="mb-2 block text-[12px] font-semibold uppercase tracking-[0.04em] text-[#555]">Fin</label>
+                                        <input
+                                            v-model="finDateTime"
+                                            type="datetime-local"
+                                            required
+                                            class="w-full rounded-[9px] border border-[#deddd9] bg-[#fafaf8] px-4 py-3 text-[13px] text-[#222] outline-none transition focus:border-[#181818] focus:bg-white"
+                                        />
+                                    </div>
+                                </div>
+
+                                <!-- Vérification disponibilité -->
+                                <button
+                                    type="button"
+                                    @click="checkCreneau"
+                                    :disabled="checkingDispo"
+                                    class="w-full rounded-[9px] border border-gray-300 bg-white py-3 text-[11px] uppercase tracking-[0.08em] text-[#333] transition hover:bg-gray-50 disabled:opacity-50 cursor-pointer font-medium"
+                                >
+                                    <span class="inline-flex items-center justify-center gap-2">
+                                        <Loader2 v-if="checkingDispo" :size="14" class="animate-spin" />
+                                        {{ checkingDispo ? 'Vérification en cours...' : 'Vérifier la disponibilité' }}
+                                    </span>
+                                </button>
+
+                                <div
+                                    v-if="dispoResult"
+                                    class="rounded-[9px] border p-3.5 text-[12px]"
+                                    :class="dispoResult.disponible ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'"
+                                >
+                                    <div class="flex items-center gap-2">
+                                        <CheckCircle2 v-if="dispoResult.disponible" :size="16" />
+                                        <AlertCircle v-else :size="16" />
+                                        <span>{{ dispoResult.disponible ? '✓ Créneau disponible' : '✗ Créneau indisponible' }}</span>
+                                    </div>
+                                </div>
+                                <div v-if="dispoError" class="rounded-[9px] border border-rose-200 bg-rose-50 p-3 text-[12px] text-rose-700">
+                                    {{ dispoError }}
+                                </div>
+                            </div>
+
+                            <!-- SECTION : NOMBRE DE PERSONNES -->
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="mb-2 block text-[12px] font-semibold uppercase tracking-[0.04em] text-[#555]">Nombre de personnes</label>
+                                    <input
+                                        v-model.number="nombrePersonnes"
+                                        type="number"
+                                        min="1"
+                                        :max="selectedSalle?.capacite || 500"
+                                        class="w-full rounded-[9px] border border-[#deddd9] bg-[#fafaf8] px-4 py-3 text-[13px] text-[#222] outline-none transition focus:border-[#181818] focus:bg-white"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="mb-2 block text-[12px] font-semibold uppercase tracking-[0.04em] text-[#777]">Capacité max</label>
+                                    <div class="flex h-[47px] items-center rounded-[9px] border border-gray-200 bg-gray-50 px-4 text-[13px] text-[#555]">
+                                        {{ selectedSalle?.capacite ? `${selectedSalle.capacite} places` : '—' }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECTION : ÉQUIPEMENTS SÉLECTIONNÉS -->
+                            <div class="space-y-2">
+                                <p class="text-[12px] font-semibold uppercase tracking-[0.06em] text-[#555]">Équipements réservés</p>
+
+                                <div v-if="selectedEquipements.length > 0" class="rounded-[9px] border border-[#ecebe7] bg-[#fafaf8] p-4">
+                                    <p class="mb-2.5 text-[10px] uppercase tracking-[0.12em] text-[#777]">Équipements retenus</p>
+                                    <div class="space-y-2">
+                                        <div
+                                            v-for="item in selectedEquipements"
+                                            :key="item.equipement_id"
+                                            class="flex items-center gap-3 rounded-[7px] border border-gray-200 bg-white px-3 py-2.5"
+                                        >
+                                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] border border-gray-200 text-gray-700 bg-gray-50">
+                                                <Package :size="14" />
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="truncate text-[12px] font-medium text-[#191919]">{{ item.nom }}</p>
+                                                <p class="text-[10px] text-[#777]">Stock : {{ item.stock_total }}</p>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <button type="button" @click="decrementQty(item)" class="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 cursor-pointer">
+                                                    <Minus :size="11" />
+                                                </button>
+                                                <span class="w-5 text-center text-[11px] font-semibold text-[#191919]">{{ item.quantity }}</span>
+                                                <button type="button" @click="incrementQty(item)" class="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 cursor-pointer">
+                                                    <Plus :size="11" />
+                                                </button>
+                                            </div>
+                                            <button type="button" @click="removeEquipement(item.equipement_id)" class="flex h-6 w-6 items-center justify-center text-rose-500 hover:text-rose-700 cursor-pointer" title="Retirer">
+                                                <Trash2 :size="12" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-else class="rounded-[9px] border border-dashed border-gray-300 bg-gray-50 p-5 text-center text-[12px] text-[#777]">
+                                    Aucun équipement supplémentaire sélectionné.
+                                </div>
+                            </div>
+
+                            <!-- SECTION : AJOUTER DES ÉQUIPEMENTS -->
+                            <div v-if="availableEquipementsToAdd.length > 0" class="space-y-2">
+                                <p class="text-[12px] font-semibold uppercase tracking-[0.06em] text-[#555]">Ajouter un équipement</p>
+                                <div class="space-y-2">
+                                    <div
+                                        v-for="eq in availableEquipementsToAdd"
+                                        :key="eq.id"
+                                        class="flex items-center gap-3.5 rounded-[9px] border border-[#ecebe7] bg-[#fafaf8] p-3.5 transition hover:border-gray-300"
+                                    >
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[7px] border border-gray-200 bg-white text-gray-700">
+                                            <Package :size="16" />
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="truncate text-[13px] font-medium text-[#191919]">{{ eq.nom }}</p>
+                                            <p class="mt-0.5 text-[10px] uppercase tracking-[0.07em] text-[#777]">Stock : {{ eq.stock_total || 'Disponible' }}</p>
+                                        </div>
+                                        <button type="button" @click="addEquipement(eq)" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-300 text-gray-700 transition hover:bg-gray-100 cursor-pointer" title="Ajouter">
+                                            <Plus :size="14" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ERREUR DE SOUMISSION -->
+                            <div v-if="submitError" class="rounded-[9px] border border-rose-200 bg-rose-50 p-3.5 text-[12px] text-rose-700">
+                                <div class="flex items-start gap-2">
+                                    <AlertCircle :size="15" class="mt-0.5 shrink-0" />
+                                    <span>{{ submitError }}</span>
+                                </div>
+                            </div>
+
+                            <!-- ACTIONS -->
+                            <div class="grid grid-cols-2 gap-3 pt-2">
+                                <RouterLink
+                                    :to="{ name: 'user-reservation-details', params: { id: reservationId } }"
+                                    class="flex items-center justify-center rounded-[9px] border border-gray-300 bg-white py-3 text-[11px] uppercase tracking-[0.08em] text-[#555] transition hover:bg-gray-50"
+                                >
+                                    Annuler
+                                </RouterLink>
+                                <button
+                                    type="submit"
+                                    :disabled="submitting"
+                                    class="rounded-[9px] bg-[#181818] py-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-white transition hover:bg-black disabled:opacity-55 cursor-pointer"
+                                >
+                                    <span class="inline-flex items-center justify-center gap-2">
+                                        <Loader2 v-if="submitting" :size="14" class="animate-spin" />
+                                        <Save v-else :size="14" />
+                                        {{ submitting ? 'Enregistrement...' : 'Enregistrer' }}
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-[#0F172A]">
-              Modifier la réservation #{{ reservationId }}
-            </h1>
-            <p class="mt-1 text-sm text-slate-500">
-              Ajustez vos dates, la salle souhaitée ou le nombre d'équipements pour cet événement.
-            </p>
-          </div>
+        </main>
 
-          <div
-            v-if="reservation.status === 'confirmee'"
-            class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs text-amber-900"
-          >
-            <Info :size="18" class="text-amber-600 shrink-0 mt-0.5" />
-            <div>
-              <p class="font-bold">Attention</p>
-              <p class="mt-0.5 text-amber-800 leading-relaxed">
-                Cette réservation était confirmée. Toute modification des dates ou de la salle la repositionnera sous le statut <strong>« En attente »</strong> afin d'être validée à nouveau par notre équipe.
-              </p>
-            </div>
-          </div>
-
-          <!-- SECTION 1 : CHOIX OU CHANGEMENT DE SALLE -->
-          <div class="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-xs">
-            <h2 class="text-base font-bold text-[#0F172A] flex items-center gap-2 mb-4">
-              <Building2 :size="18" class="text-[#4F46E5]" />
-              <span>Salle sélectionnée</span>
-            </h2>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-1">
-              <label
-                v-for="salle in salles"
-                :key="salle.id"
-                class="flex cursor-pointer items-start gap-3 rounded-2xl border-2 p-3.5 transition-all"
-                :class="
-                  selectedSalleId === salle.id
-                    ? 'border-[#4F46E5] bg-indigo-50/50 shadow-xs'
-                    : 'border-slate-200 hover:border-slate-300'
-                "
-              >
-                <input
-                  type="radio"
-                  :value="salle.id"
-                  v-model="selectedSalleId"
-                  class="sr-only"
-                />
-
-                <div class="h-14 w-14 rounded-xl bg-slate-100 overflow-hidden shrink-0">
-                  <img
-                    :src="salle.images?.[0]?.url || salle.images?.[0]?.path || defaultImage"
-                    :alt="salle.nom"
-                    class="h-full w-full object-cover"
-                  />
-                </div>
-
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center justify-between">
-                    <p class="text-xs font-bold text-slate-900 truncate">{{ salle.nom }}</p>
-                    <span
-                      v-if="selectedSalleId === salle.id"
-                      class="rounded-full bg-[#4F46E5] p-0.5 text-white"
-                    >
-                      <CheckCircle2 :size="14" />
-                    </span>
-                  </div>
-                  <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                    <MapPin :size="11" />
-                    <span class="truncate">{{ salle.localisation }}</span>
-                  </p>
-                  <p class="text-[11px] font-semibold text-indigo-600 mt-1">
-                    Capacité : {{ salle.capacite }} pers.
-                  </p>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <!-- SECTION 2 : CRÉNEAUX & NOMBRE DE PERSONNES -->
-          <div class="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-xs">
-            <h2 class="text-base font-bold text-[#0F172A] flex items-center gap-2 mb-4">
-              <Calendar :size="18" class="text-[#4F46E5]" />
-              <span>Date, horaire & capacité</span>
-            </h2>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- Début -->
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                  Date et heure de début
-                </label>
-                <input
-                  v-model="debutDateTime"
-                  type="datetime-local"
-                  required
-                  class="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-xs font-medium text-slate-800 focus:border-[#4F46E5] focus:bg-white focus:outline-hidden"
-                />
-              </div>
-
-              <!-- Fin -->
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                  Date et heure de fin
-                </label>
-                <input
-                  v-model="finDateTime"
-                  type="datetime-local"
-                  required
-                  class="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-xs font-medium text-slate-800 focus:border-[#4F46E5] focus:bg-white focus:outline-hidden"
-                />
-              </div>
-            </div>
-
-            <!-- Bouton test disponibilité -->
-            <div class="mt-3 flex items-center justify-between">
-              <button
-                type="button"
-                @click="checkCreneau"
-                :disabled="checkingDispo"
-                class="inline-flex items-center gap-1.5 text-xs font-bold text-[#4F46E5] hover:text-[#4338CA] hover:underline cursor-pointer disabled:opacity-50"
-              >
-                <Loader2 v-if="checkingDispo" :size="13" class="animate-spin" />
-                <span>Tester la disponibilité de ce créneau</span>
-              </button>
-
-              <span
-                v-if="dispoResult"
-                class="text-xs font-bold"
-                :class="dispoResult.disponible ? 'text-emerald-600' : 'text-rose-600'"
-              >
-                {{ dispoResult.disponible ? '✓ Créneau disponible' : '✗ Créneau indisponible' }}
-              </span>
-            </div>
-
-            <div v-if="dispoError" class="mt-2 text-xs text-rose-600">
-              {{ dispoError }}
-            </div>
-
-            <!-- Nombre de personnes -->
-            <div class="mt-5 pt-5 border-t border-slate-100">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <label class="block text-xs font-bold text-slate-700">
-                    Nombre de personnes
-                  </label>
-                  <p class="text-[11px] text-slate-400">
-                    Capacité maximale de la salle : {{ selectedSalle?.capacite || '—' }} places.
-                  </p>
-                </div>
-                <div class="flex items-center gap-3">
-                  <input
-                    v-model.number="nombrePersonnes"
-                    type="number"
-                    min="1"
-                    :max="selectedSalle?.capacite || 500"
-                    class="w-28 rounded-xl border border-slate-200 bg-slate-50/50 p-2.5 text-center text-sm font-bold text-slate-900 focus:border-[#4F46E5] focus:bg-white focus:outline-hidden"
-                  />
-                  <span class="text-xs text-slate-500 font-medium">personnes</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 3 : ÉQUIPEMENTS -->
-          <div class="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-xs">
-            <h2 class="text-base font-bold text-[#0F172A] flex items-center gap-2 mb-4">
-              <Package :size="18" class="text-[#4F46E5]" />
-              <span>Équipements réservés</span>
-            </h2>
-
-            <!-- Liste des équipements déjà sélectionnés -->
-            <div v-if="selectedEquipements.length > 0" class="space-y-2.5 mb-6">
-              <div
-                v-for="item in selectedEquipements"
-                :key="item.equipement_id"
-                class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5"
-              >
-                <div class="flex items-center gap-3">
-                  <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100/60 text-[#4F46E5] shrink-0">
-                    <Package :size="16" />
-                  </div>
-                  <div>
-                    <p class="text-xs font-bold text-slate-900">{{ item.nom }}</p>
-                    <p class="text-[10px] text-slate-400">Stock max : {{ item.stock_total }}</p>
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-3">
-                  <!-- Contrôle quantité -->
-                  <div class="flex items-center rounded-xl border border-slate-200 bg-white p-1">
-                    <button
-                      type="button"
-                      @click="decrementQty(item)"
-                      class="flex h-6 w-6 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 cursor-pointer"
-                    >
-                      <Minus :size="12" />
-                    </button>
-                    <span class="w-8 text-center text-xs font-bold text-slate-900">
-                      {{ item.quantity }}
-                    </span>
-                    <button
-                      type="button"
-                      @click="incrementQty(item)"
-                      class="flex h-6 w-6 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 cursor-pointer"
-                    >
-                      <Plus :size="12" />
-                    </button>
-                  </div>
-
-                  <!-- Supprimer -->
-                  <button
-                    type="button"
-                    @click="removeEquipement(item.equipement_id)"
-                    class="p-1.5 text-slate-400 hover:text-rose-600 transition cursor-pointer"
-                  >
-                    <Trash2 :size="15" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div v-else class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-5 text-center text-xs text-slate-400 mb-6">
-              Aucun équipement supplémentaire n'est sélectionné.
-            </div>
-
-            <!-- Ajouter d'autres équipements -->
-            <div v-if="availableEquipementsToAdd.length > 0">
-              <label class="block text-xs font-bold text-slate-700 mb-2">
-                Ajouter un équipement additionnel
-              </label>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="eq in availableEquipementsToAdd"
-                  :key="eq.id"
-                  type="button"
-                  @click="addEquipement(eq)"
-                  class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-[#4F46E5] transition cursor-pointer"
-                >
-                  <Plus :size="13" />
-                  <span>{{ eq.nom }}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- ERREUR DE SOUMISSION -->
-          <div
-            v-if="submitError"
-            class="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700"
-          >
-            <AlertCircle :size="17" class="shrink-0 mt-0.5" />
-            <span>{{ submitError }}</span>
-          </div>
-
-          <!-- ACTIONS : ENREGISTRER & ANNULER -->
-          <div class="flex items-center justify-between gap-4 pt-4">
-            <RouterLink
-              :to="{ name: 'user-reservation-details', params: { id: reservationId } }"
-              class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
-            >
-              Annuler les modifications
-            </RouterLink>
-
-            <button
-              type="submit"
-              :disabled="submitting"
-              class="inline-flex items-center gap-2 rounded-2xl bg-[#4F46E5] px-7 py-3 text-sm font-bold text-white shadow-md shadow-indigo-300/40 hover:bg-[#4338CA] active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
-            >
-              <Loader2 v-if="submitting" :size="16" class="animate-spin" />
-              <Save v-else :size="16" />
-              <span>{{ submitting ? 'Enregistrement...' : 'Enregistrer les modifications' }}</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </main>
-
-    <Footer />
-  </div>
+        <Footer />
+    </div>
 </template>

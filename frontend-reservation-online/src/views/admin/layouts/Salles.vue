@@ -1,38 +1,24 @@
 <script setup>
-import { RouterLink } from 'vue-router'
-import { useAdminSallesStore } from '@/store/adminSalles'
-import AppAdmin from '@/components/admin/AppAdmin.vue'
-import SallesFilters from '@/components/admin/SallesFilters.vue'
 import { ref, computed, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
+import AppAdmin from '@/components/admin/AppAdmin.vue'
+import { useAdminSallesStore } from '@/store/adminSalles'
 import {
   Plus,
   Eye,
   Pencil,
   Trash2,
   AlertTriangle,
-  DoorOpen,
-  MapPin,
-  Users as UsersIcon,
-  Calendar,
   RefreshCw,
-  Coins,
-  X,
-  Filter,
+  Search,
+  DoorOpen,
 } from 'lucide-vue-next'
 
 const adminSallesStore = useAdminSallesStore()
 
 const search = ref('')
 const status = ref('')
-const descending = ref(true)
-
-// Labels lisibles des filtres actifs
-const activeSearchLabel = ref('')
-const activeStatusLabel = ref('')
-
-// Filtres avancés : prix et capacité
-const priceFilter = ref({ min: null, max: null })
-const capacityFilter = ref({ min: null, max: null })
+const sortOrder = ref('desc') // 'desc' ou 'asc'
 
 // Modale de confirmation de suppression
 const isDeleteModalOpen = ref(false)
@@ -52,7 +38,7 @@ const loadSalles = async () => {
     }
     await adminSallesStore.fetchSalles(params)
   } catch (error) {
-    console.error('Erreur lors du chargement des salles:', error)
+    console.error('Erreur chargement salles :', error)
   }
 }
 
@@ -60,62 +46,19 @@ onMounted(() => {
   loadSalles()
 })
 
-const handleSearch = (value) => {
-  search.value = value
-  activeSearchLabel.value = value
+const handleSearch = () => {
   loadSalles()
 }
 
-const handleStatusChange = (value) => {
-  status.value = value
-  const labels = { disponible: 'Disponible', indisponible: 'Indisponible' }
-  activeStatusLabel.value = labels[value] || ''
+const handleStatusChange = () => {
   loadSalles()
-}
-
-const handleSortChange = (value) => {
-  descending.value = value
-}
-
-const resetFilters = () => {
-  search.value = ''
-  status.value = ''
-  activeSearchLabel.value = ''
-  activeStatusLabel.value = ''
-  priceFilter.value = { min: null, max: null }
-  capacityFilter.value = { min: null, max: null }
-  loadSalles()
-}
-
-const handlePriceChange = ({ min, max }) => {
-  priceFilter.value = { min, max }
-}
-
-const handleCapacityChange = ({ min, max }) => {
-  capacityFilter.value = { min, max }
 }
 
 const filteredSalles = computed(() => {
-  let result = [...adminSallesStore.salles]
-
-  // Filtre par prix
-  if (priceFilter.value.min !== null) {
-    result = result.filter((s) => Number(s.prix) >= priceFilter.value.min)
-  }
-  if (priceFilter.value.max !== null) {
-    result = result.filter((s) => Number(s.prix) <= priceFilter.value.max)
-  }
-
-  // Filtre par capacité
-  if (capacityFilter.value.min !== null) {
-    result = result.filter((s) => Number(s.capacite) >= capacityFilter.value.min)
-  }
-  if (capacityFilter.value.max !== null) {
-    result = result.filter((s) => Number(s.capacite) <= capacityFilter.value.max)
-  }
+  const result = [...adminSallesStore.salles]
 
   result.sort((a, b) => {
-    return descending.value ? b.id - a.id : a.id - b.id
+    return sortOrder.value === 'desc' ? b.id - a.id : a.id - b.id
   })
 
   return result
@@ -168,32 +111,32 @@ const confirmDelete = async () => {
 <template>
   <AppAdmin>
     <div class="min-h-screen bg-[#F8FAFC]">
-      <!-- TITRE & ACTIONS -->
-      <div class="mb-6 mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <!-- EN-TÊTE DE PAGE -->
+      <div class="mb-6 mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-[30px] font-bold tracking-[-0.8px] text-[#0F172A]">
+          <h1 class="text-2xl font-bold tracking-tight text-slate-800">
             Gestion des Salles
           </h1>
-          <p class="mt-1 text-sm text-[#64748B]">
-            Consultez, filtrez, créez et gérez l'ensemble des salles de réunion et d'événements.
+          <p class="mt-1 text-xs text-slate-500">
+            Consultez, ajoutez ou modifiez l'ensemble des salles et espaces réservables.
           </p>
         </div>
 
         <div class="flex items-center gap-3">
           <button
             type="button"
-            class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 active:scale-95"
+            class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 active:scale-95 cursor-pointer"
             @click="loadSalles"
           >
-            <RefreshCw :size="16" :class="{ 'animate-spin': adminSallesStore.loading }" />
+            <RefreshCw :size="14" :class="{ 'animate-spin': adminSallesStore.loading }" />
             <span>Actualiser</span>
           </button>
 
           <RouterLink
             :to="{ name: 'create-salle' }"
-            class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+            class="inline-flex items-center gap-2 rounded-xl border border-neutral-900 bg-neutral-900 px-4 py-2 text-xs font-medium uppercase tracking-widest text-white shadow-sm transition hover:bg-black active:scale-95"
           >
-            <Plus :size="18" />
+            <Plus :size="15" />
             <span>Ajouter une salle</span>
           </RouterLink>
         </div>
@@ -202,143 +145,75 @@ const confirmDelete = async () => {
       <!-- MESSAGES FLASH -->
       <div
         v-if="adminSallesStore.successMessage"
-        class="mb-6 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+        class="mb-4 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800"
       >
         <span>{{ adminSallesStore.successMessage }}</span>
-        <button class="font-bold text-green-700 hover:text-green-900" @click="adminSallesStore.successMessage = null">
+        <button class="font-bold text-emerald-700 hover:text-emerald-900" @click="adminSallesStore.successMessage = null">
           ×
         </button>
       </div>
 
       <div
         v-if="adminSallesStore.errorMessage"
-        class="mb-6 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+        class="mb-4 flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800"
       >
         <span>{{ adminSallesStore.errorMessage }}</span>
-        <button class="font-bold text-red-700 hover:text-red-900" @click="adminSallesStore.errorMessage = null">
+        <button class="font-bold text-rose-700 hover:text-rose-900" @click="adminSallesStore.errorMessage = null">
           ×
         </button>
       </div>
 
-      <!-- FILTRES -->
-      <SallesFilters
-        @search="handleSearch"
-        @status-change="handleStatusChange"
-        @sort-change="handleSortChange"
-        @price-change="handlePriceChange"
-        @capacity-change="handleCapacityChange"
-      />
+      <!-- BARRE DE RECHERCHE & FILTRES (STYLE DIGILAB) -->
+      <div class="flex flex-wrap items-center justify-between gap-4 rounded-t-xl border border-b-0 border-slate-200 bg-white p-4 shadow-sm">
+        <div class="flex flex-1 flex-wrap items-center gap-3">
+          <!-- Recherche -->
+          <div class="relative w-64">
+            <input
+              v-model="search"
+              type="text"
+              placeholder="Rechercher par nom, lieu..."
+              class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 pl-9 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white"
+              @input="handleSearch"
+            />
+            <Search :size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          </div>
 
-      <!-- BANDE RÉSUMÉ FILTRES -->
-      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <!-- Compteur résultats -->
-        <div class="flex items-center gap-2">
-          <Filter :size="15" class="text-[#64748B]" />
-          <span class="text-sm font-medium text-[#64748B]">
-            <span
-              v-if="adminSallesStore.loading"
-              class="text-[#94A3B8]"
-            >Chargement...</span>
-            <span v-else>
-              <span class="font-bold text-[#0F172A]">{{ filteredSalles.length }}</span>
-              salle{{ filteredSalles.length > 1 ? 's' : '' }} trouvée{{ filteredSalles.length > 1 ? 's' : '' }}
-            </span>
+          <!-- Filtre Statut -->
+          <select
+            v-model="status"
+            class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white"
+            @change="handleStatusChange"
+          >
+            <option value="">Tous les statuts</option>
+            <option value="disponible">Disponible</option>
+            <option value="indisponible">Indisponible</option>
+          </select>
+
+          <span class="text-xs text-slate-400">
+            {{ filteredSalles.length }} salle(s) affichée(s)
           </span>
         </div>
 
-        <!-- Badges filtres actifs -->
-        <div class="flex flex-wrap items-center gap-2">
-          <!-- Badge recherche -->
-          <span
-            v-if="activeSearchLabel"
-            class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 py-1 pl-3 pr-2 text-xs font-medium text-blue-700"
-          >
-            Recherche : "{{ activeSearchLabel }}"
-            <button
-              type="button"
-              class="flex h-4 w-4 items-center justify-center rounded-full bg-blue-200 text-blue-700 transition hover:bg-blue-300"
-              @click="() => { search.value = ''; activeSearchLabel.value = ''; loadSalles() }"
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 text-xs text-slate-500">
+            <span>Tri :</span>
+            <select
+              v-model="sortOrder"
+              class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
             >
-              <X :size="10" />
-            </button>
-          </span>
-
-          <!-- Badge statut -->
-          <span
-            v-if="activeStatusLabel"
-            class="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 py-1 pl-3 pr-2 text-xs font-medium text-indigo-700"
-          >
-            Statut : {{ activeStatusLabel }}
-            <button
-              type="button"
-              class="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-200 text-indigo-700 transition hover:bg-indigo-300"
-              @click="() => { status.value = ''; activeStatusLabel.value = ''; loadSalles() }"
-            >
-              <X :size="10" />
-            </button>
-          </span>
-
-          <!-- Badge prix -->
-          <span
-            v-if="priceFilter.min !== null || priceFilter.max !== null"
-            class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 py-1 pl-3 pr-2 text-xs font-medium text-emerald-700"
-          >
-            Tarif :
-            <template v-if="priceFilter.min !== null && priceFilter.max !== null">
-              {{ priceFilter.min.toLocaleString('fr-FR') }} – {{ priceFilter.max.toLocaleString('fr-FR') }} FCFA
-            </template>
-            <template v-else-if="priceFilter.min !== null">≥ {{ priceFilter.min.toLocaleString('fr-FR') }} FCFA</template>
-            <template v-else>≤ {{ priceFilter.max.toLocaleString('fr-FR') }} FCFA</template>
-            <button
-              type="button"
-              class="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-200 text-emerald-700 transition hover:bg-emerald-300"
-              @click="priceFilter.value = { min: null, max: null }"
-            >
-              <X :size="10" />
-            </button>
-          </span>
-
-          <!-- Badge capacité -->
-          <span
-            v-if="capacityFilter.min !== null || capacityFilter.max !== null"
-            class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 py-1 pl-3 pr-2 text-xs font-medium text-amber-700"
-          >
-            Capacité :
-            <template v-if="capacityFilter.min !== null && capacityFilter.max !== null">
-              {{ capacityFilter.min }} – {{ capacityFilter.max }} places
-            </template>
-            <template v-else-if="capacityFilter.min !== null">≥ {{ capacityFilter.min }} places</template>
-            <template v-else>≤ {{ capacityFilter.max }} places</template>
-            <button
-              type="button"
-              class="flex h-4 w-4 items-center justify-center rounded-full bg-amber-200 text-amber-700 transition hover:bg-amber-300"
-              @click="capacityFilter.value = { min: null, max: null }"
-            >
-              <X :size="10" />
-            </button>
-          </span>
-
-          <!-- Réinitialiser -->
-          <button
-            v-if="activeSearchLabel || activeStatusLabel || priceFilter.min !== null || priceFilter.max !== null || capacityFilter.min !== null || capacityFilter.max !== null"
-            type="button"
-            class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-900"
-            @click="resetFilters"
-          >
-            <X :size="11" />
-            Réinitialiser tout
-          </button>
+              <option value="desc">Plus récentes (ID Décroissant)</option>
+              <option value="asc">Plus anciennes (ID Croissant)</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <!-- TABLE / CONTENU -->
-      <div
-        class="mt-6 overflow-hidden rounded-[16px] border border-[#E2E8F0] bg-white shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]"
-      >
-        <!-- LOADING SPINNER -->
+      <!-- TABLEAU DES SALLES (STYLE DIGILAB - 1 INFORMATION PAR COLONNE STRICTEMENT) -->
+      <div class="overflow-x-auto rounded-b-xl border border-slate-200 bg-white shadow-sm">
+        <!-- CHARGEMENT -->
         <div v-if="adminSallesStore.loading" class="flex flex-col items-center justify-center py-20">
-          <div class="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-          <p class="mt-4 text-sm font-medium text-gray-500">Chargement des salles...</p>
+          <div class="h-8 w-8 animate-spin rounded-full border-3 border-slate-800 border-t-transparent"></div>
+          <p class="mt-3 text-xs font-medium text-slate-500">Chargement des salles...</p>
         </div>
 
         <!-- LISTE VIDE -->
@@ -346,148 +221,98 @@ const confirmDelete = async () => {
           v-else-if="filteredSalles.length === 0"
           class="flex flex-col items-center justify-center py-16 text-center"
         >
-          <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-            <DoorOpen :size="24" />
-          </div>
-          <h3 class="mt-4 text-base font-semibold text-gray-900">Aucune salle trouvée</h3>
-          <p class="mt-1 text-sm text-gray-500">
-            Essayez de modifier vos filtres de recherche ou ajoutez une nouvelle salle.
+          <p class="font-semibold text-slate-800">Aucune salle trouvée</p>
+          <p class="mt-1 text-xs text-slate-400">
+            Modifiez vos filtres ou ajoutez une nouvelle salle.
           </p>
         </div>
 
-        <!-- TABLEAU -->
-        <div v-else class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b border-[#E2E8F0] bg-[#F8FAFC]">
-                <th class="px-6 py-4 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Salle
-                </th>
-                <th class="px-6 py-4 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Capacité & Lieu
-                </th>
-                <th class="px-6 py-4 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Tarif
-                </th>
-                <th class="px-6 py-4 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Statut
-                </th>
-                <th class="px-6 py-4 text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Date d'ajout
-                </th>
-                <th class="px-6 py-4 text-right text-[12px] font-semibold uppercase tracking-wide text-[#64748B]">
-                  Actions
-                </th>
-              </tr>
-            </thead>
+        <!-- TABLE -->
+        <table v-else class="w-full text-left text-sm whitespace-nowrap">
+          <thead class="bg-slate-50 text-xs text-slate-400 uppercase tracking-wider">
+            <tr>
+              <th class="py-3 px-4 font-medium w-16">ID</th>
+              <th class="py-3 px-4 font-medium">Nom de la salle</th>
+              <th class="py-3 px-4 font-medium text-center">Capacité</th>
+              <th class="py-3 px-4 font-medium">Tarif</th>
+              <th class="py-3 px-4 font-medium">Statut</th>
+              <th class="py-3 px-4 font-medium text-right w-28">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-600">
+            <tr
+              v-for="salle in filteredSalles"
+              :key="salle.id"
+              class="hover:bg-slate-50 transition"
+            >
+              <!-- 1. ID -->
+              <td class="py-3.5 px-4 font-mono text-xs text-slate-400">
+                #{{ salle.id }}
+              </td>
 
-            <tbody class="divide-y divide-[#E2E8F0]">
-              <tr
-                v-for="salle in filteredSalles"
-                :key="salle.id"
-                class="transition-colors duration-200 hover:bg-[#F8FAFC]"
-              >
-                <!-- NOM & APERÇU -->
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 font-semibold text-blue-700"
-                    >
-                      <DoorOpen :size="20" />
-                    </div>
-                    <div>
-                      <p class="text-[14px] font-semibold text-[#0F172A]">
-                        {{ salle.nom }}
-                      </p>
-                      <p class="line-clamp-1 text-[12px] text-gray-400">
-                        {{ salle.description || 'Sans description' }}
-                      </p>
-                    </div>
-                  </div>
-                </td>
+              <!-- 2. NOM -->
+              <td class="py-3.5 px-4 font-semibold text-slate-800">
+                {{ salle.nom }}
+              </td>
 
-                <!-- CAPACITE & LOCALISATION -->
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-1.5 text-[14px] text-[#0F172A]">
-                    <UsersIcon :size="15" class="text-gray-400" />
-                    <span>{{ salle.capacite }} places</span>
-                  </div>
-                  <div class="mt-0.5 flex items-center gap-1 text-[12px] text-gray-500">
-                    <MapPin :size="12" class="text-gray-400" />
-                    <span>{{ salle.localisation }}</span>
-                  </div>
-                </td>
+              <!-- 3. CAPACITÉ -->
+              <td class="py-3.5 px-4 text-center text-xs font-semibold text-slate-800">
+                {{ salle.capacite }} places
+              </td>
 
-                <!-- PRIX -->
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-1 text-[14px] font-medium text-emerald-700">
-                    <Coins :size="15" class="text-emerald-500" />
-                    <span>{{ formatPrice(salle.prix) }}</span>
-                  </div>
-                </td>
+              <!-- 4. TARIF -->
+              <td class="py-3.5 px-4 text-xs font-semibold text-slate-800">
+                {{ formatPrice(salle.prix) }}
+              </td>
 
-                <!-- STATUT -->
-                <td class="px-6 py-4">
-                  <span
-                    v-if="salle.status === 'disponible'"
-                    class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[12px] font-semibold text-emerald-700"
+              <!-- 5. STATUT -->
+              <td class="py-3.5 px-4">
+                <span
+                  v-if="salle.status === 'disponible'"
+                  class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700"
+                >
+                  • Disponible
+                </span>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-700"
+                >
+                  • Indisponible
+                </span>
+              </td>
+
+              <!-- 6. ACTIONS -->
+              <td class="py-3.5 px-4 text-right">
+                <div class="flex items-center justify-end gap-1.5">
+                  <RouterLink
+                    :to="{ name: 'info-salle', params: { id: salle.id } }"
+                    title="Voir la fiche"
+                    class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
                   >
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                    Disponible
-                  </span>
-                  <span
-                    v-else
-                    class="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[12px] font-semibold text-rose-700"
+                    <Eye :size="13" />
+                  </RouterLink>
+
+                  <RouterLink
+                    :to="{ name: 'update-salle', params: { id: salle.id } }"
+                    title="Modifier"
+                    class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
                   >
-                    <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
-                    Indisponible
-                  </span>
-                </td>
+                    <Pencil :size="13" />
+                  </RouterLink>
 
-                <!-- DATE -->
-                <td class="px-6 py-4 text-[14px] text-[#64748B]">
-                  <div class="flex items-center gap-1.5">
-                    <Calendar :size="14" class="text-gray-400" />
-                    <span>{{ formatDate(salle.created_at) }}</span>
-                  </div>
-                </td>
-
-                <!-- ACTIONS -->
-                <td class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end gap-2">
-                    <!-- Voir -->
-                    <RouterLink
-                      :to="{ name: 'info-salle', params: { id: salle.id } }"
-                      title="Voir les détails"
-                      class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      <Eye :size="15" />
-                    </RouterLink>
-
-                    <!-- Modifier -->
-                    <RouterLink
-                      :to="{ name: 'update-salle', params: { id: salle.id } }"
-                      title="Modifier"
-                      class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600"
-                    >
-                      <Pencil :size="15" />
-                    </RouterLink>
-
-                    <!-- Supprimer -->
-                    <button
-                      type="button"
-                      title="Supprimer"
-                      class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-                      @click="openDeleteModal(salle)"
-                    >
-                      <Trash2 :size="15" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <button
+                    type="button"
+                    title="Supprimer"
+                    class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-rose-500 transition hover:bg-rose-50 hover:border-rose-300 cursor-pointer"
+                    @click="openDeleteModal(salle)"
+                  >
+                    <Trash2 :size="13" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -515,7 +340,7 @@ const confirmDelete = async () => {
         <div class="mt-6 flex justify-end gap-3">
           <button
             type="button"
-            class="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            class="rounded-xl border border-neutral-300 px-5 py-2.5 text-xs font-medium uppercase tracking-widest text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900"
             @click="closeDeleteModal"
           >
             Annuler
@@ -524,7 +349,7 @@ const confirmDelete = async () => {
           <button
             type="button"
             :disabled="isDeleting"
-            class="flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+            class="rounded-xl border border-rose-600 bg-rose-600 px-5 py-2.5 text-xs font-medium uppercase tracking-widest text-white transition hover:bg-rose-700 disabled:opacity-50"
             @click="confirmDelete"
           >
             <span v-if="isDeleting">Suppression...</span>

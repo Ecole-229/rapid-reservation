@@ -95,25 +95,17 @@ onMounted(() => {
 const handlePlus = (room) => {
     const token = localStorage.getItem('token')
     if (!token) {
-        router.push({ name: 'login', query: { redirect: 'reservation', salle_id: room.id } })
+        router.push({ name: 'login', query: { redirect: `/reserver?salle_id=${room.id}`, salle_id: room.id } })
         return
     }
-    // Si connecté : ouvrir la vérification de disponibilité pour cette salle
-    openDisponibiliteModal(room)
+    router.push({ name: 'user-create-reservation', query: { salle_id: room.id } })
 }
 
 const handleVoir = (room) => {
     router.push({ name: 'info-user-salle', params: { id: room.id } })
 }
 
-const handleVoirToutes = () => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-        router.push({ name: 'login' })
-        return
-    }
-    activeStatusFilter.value = 'all'
-}
+
 
 const openDisponibiliteModal = (room) => {
     selectedSalleForDispo.value = room
@@ -175,7 +167,7 @@ const proceedToReservation = () => {
     const room = selectedSalleForDispo.value
     closeDisponibiliteModal()
     router.push({
-        name: 'create-reservation',
+        name: 'user-create-reservation',
         query: {
             salle_id: room.id,
             debut: debutDateTime.value,
@@ -228,49 +220,53 @@ const proceedToReservation = () => {
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    @click="handleVoirToutes"
-                    class="hidden shrink-0 items-center gap-2
-                           rounded-full
-                           border border-[#E2E8F0]
-                           bg-white
-                           px-5 py-3
-                           text-[13px]
-                           font-medium
-                           text-[#0F172A]
-                           shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]
-                           transition-all duration-200
-                           hover:border-[#4F46E5]
-                           hover:bg-[#EEF2FF]
-                           hover:text-[#3730A3]
-                           sm:flex
-                           cursor-pointer"
-                >
-                    Voir toutes les salles
 
-                    <ArrowUpRight
-                        :size="16"
-                        :stroke-width="1.8"
-                    />
-                </button>
 
             </div>
 
-            <!-- ================================================= -->
-            <!-- BARRE DE FILTRE PAR STATUT (Visible uniquement quand connecté) -->
-            <!-- ================================================= -->
 
-            <div v-if="isConnected" class="mb-8 flex flex-wrap items-center justify-between gap-4">
-                <div class="inline-flex items-center gap-1.5 rounded-full bg-white p-1.5 border border-[#E2E8F0] shadow-sm">
+
+<!--
+
+    <div class="flex items-center justify-between rounded-2xl bg-white p-3 shadow-sm border border-neutral-200">
+      <div class="flex items-center gap-4">
+
+        <div  class="font-serif text-2xl tracking-wider text-neutral-900 font-normal">
+          Salle
+        </div>
+      </div>
+
+      <div class="hidden items-center gap-8 md:flex">
+        <button type="button"
+                        @click="activeStatusFilter = 'disponible'" class="text-sm font-medium uppercase tracking-widest text-neutral-800 transition hover:text-neutral-500">
+          Disponibles ({{ countDisponibles }})
+      </button>
+        <a href="#about" class="text-sm font-medium uppercase tracking-widest text-neutral-800 transition hover:text-neutral-500">
+          Toutes ({{ countAll }})
+        </a>
+        <a href="#about" class="text-sm font-medium uppercase tracking-widest text-neutral-800 transition hover:text-neutral-500">
+          outes ({{ countAll }})
+        </a>
+      </div>
+
+
+    </div>
+
+  </div>
+
+ -->
+
+            <div v-if="isConnected" class="mb-8 flex flex-row-reverse  flex-wrap items-center justify-between gap-4">
+
+                <div class="flex items-center justify-between rounded-2xl bg-white p-3 shadow-sm border border-neutral-200">
                     <button
                         type="button"
                         @click="activeStatusFilter = 'disponible'"
                         :class="[
-                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer tracking-widest text-neutral-800  hover:text-neutral-500',
                             activeStatusFilter === 'disponible'
-                                ? 'bg-[#4F46E5] text-white shadow-sm'
-                                : 'text-[#64748B] hover:text-[#4F46E5] hover:bg-[#EEF2FF]/60'
+                                ?  'bg-[#0F172A] text-white shadow-sm'
+                                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100/70'
                         ]"
                     >
                         Disponibles ({{ countDisponibles }})
@@ -280,7 +276,7 @@ const proceedToReservation = () => {
                         type="button"
                         @click="activeStatusFilter = 'all'"
                         :class="[
-                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer tracking-widest text-neutral-800  hover:text-neutral-500',
                             activeStatusFilter === 'all'
                                 ? 'bg-[#0F172A] text-white shadow-sm'
                                 : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100/70'
@@ -289,23 +285,11 @@ const proceedToReservation = () => {
                         Toutes ({{ countAll }})
                     </button>
 
-                    <button
-                        type="button"
-                        @click="activeStatusFilter = 'indisponible'"
-                        :class="[
-                            'rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 cursor-pointer',
-                            activeStatusFilter === 'indisponible'
-                                ? 'bg-rose-600 text-white shadow-sm'
-                                : 'text-[#64748B] hover:text-rose-600 hover:bg-rose-50/70'
-                        ]"
-                    >
-                        Occupées ({{ countOccupes }})
-                    </button>
+                    
                 </div>
 
-                <div v-if="isConnected" class="flex items-center gap-2 text-xs text-[#4F46E5] font-medium bg-[#EEF2FF] px-3.5 py-1.5 rounded-full border border-indigo-100">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Connecté : vérification de disponibilité en temps réel active</span>
+                <div v-if="isConnected" class="flex items-center gap-2 text-xs  font-medium tracking-widest text-neutral-800  ">
+                    Des salles de luxe
                 </div>
             </div>
 
