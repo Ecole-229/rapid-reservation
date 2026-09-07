@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import NavBar from '@/layouts/NavBar.vue'
 import Footer from '@/layouts/Footer.vue'
@@ -54,6 +54,38 @@ const submitting = computed(() => reservationsStore.submitting)
 
 const defaultImage =
   'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80'
+
+// Index de l'image actuelle pour la salle sélectionnée
+const selectedSalleImageIndex = ref(0)
+const autoPlayInterval = ref(null)
+const AUTO_PLAY_DELAY = 4000 // 4 secondes entre chaque image
+
+const startAutoPlay = () => {
+  if (!selectedSalle.value) return
+  const imgs = selectedSalle.value.images
+  if (imgs && imgs.length > 1) {
+    autoPlayInterval.value = setInterval(() => {
+      selectedSalleImageIndex.value = (selectedSalleImageIndex.value + 1) % imgs.length
+    }, AUTO_PLAY_DELAY)
+  }
+}
+
+const stopAutoPlay = () => {
+  if (autoPlayInterval.value) {
+    clearInterval(autoPlayInterval.value)
+    autoPlayInterval.value = null
+  }
+}
+
+const salleCoverUrl = computed(() => {
+  if (!selectedSalle.value) return defaultImage
+  const imgs = selectedSalle.value.images
+  if (imgs && imgs.length > 0) {
+    const index = selectedSalleImageIndex.value % imgs.length
+    return imgs[index].url || imgs[index].path || defaultImage
+  }
+  return defaultImage
+})
 
 // Convertir une date ISO en format input datetime-local (YYYY-MM-DDTHH:mm)
 const toInputDateTime = (dtStr) => {
@@ -111,6 +143,21 @@ onMounted(async () => {
   } finally {
     isFetching.value = false
   }
+
+  // Démarrer le carrousel automatique
+  startAutoPlay()
+})
+
+// Quand la salle change, réinitialiser l'index et redémarrer le carrousel
+watch(selectedSalleId, () => {
+  selectedSalleImageIndex.value = 0
+  stopAutoPlay()
+  startAutoPlay()
+})
+
+onUnmounted(() => {
+  // Arrêter le carrousel automatique lors de la destruction du composant
+  stopAutoPlay()
 })
 
 // Stores computed
@@ -249,9 +296,9 @@ const handleUpdate = async () => {
                 <!-- GAUCHE : HERO / CARTE SALLE SÉLECTIONNÉE -->
                 <section class="relative min-h-[480px] lg:min-h-full overflow-hidden rounded-[20px] border border-[#ecebe7] bg-[#141515] flex flex-col justify-between p-6 sm:p-8">
                     <img
-                        :src="selectedSalle?.images?.[0]?.url || selectedSalle?.images?.[0]?.path || defaultImage"
+                        :src="salleCoverUrl"
                         :alt="selectedSalle?.nom || 'Salle'"
-                        class="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+                        class="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
                     />
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
 

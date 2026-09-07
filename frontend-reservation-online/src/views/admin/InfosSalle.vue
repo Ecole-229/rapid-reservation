@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import AppAdmin from '@/components/admin/AppAdmin.vue'
 import { useAdminSallesStore } from '@/store/adminSalles'
@@ -25,6 +25,25 @@ const salle = ref(null)
 const isFetching = ref(true)
 const selectedPhotoIndex = ref(0)
 
+// Défilement automatique des images
+const autoPlayInterval = ref(null)
+const AUTO_PLAY_DELAY = 4000 // 4 secondes entre chaque image
+
+const startAutoPlay = () => {
+  if (imagesList.value.length > 1) {
+    autoPlayInterval.value = setInterval(() => {
+      selectedPhotoIndex.value = (selectedPhotoIndex.value + 1) % imagesList.value.length
+    }, AUTO_PLAY_DELAY)
+  }
+}
+
+const stopAutoPlay = () => {
+  if (autoPlayInterval.value) {
+    clearInterval(autoPlayInterval.value)
+    autoPlayInterval.value = null
+  }
+}
+
 const defaultPlaceholder =
   'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
 
@@ -37,6 +56,14 @@ onMounted(async () => {
   } finally {
     isFetching.value = false
   }
+
+  // Démarrer le carrousel automatique
+  startAutoPlay()
+})
+
+onUnmounted(() => {
+  // Arrêter le carrousel automatique lors de la destruction du composant
+  stopAutoPlay()
 })
 
 const imagesList = computed(() => {
@@ -135,7 +162,7 @@ const formatPrice = (price) => {
               <img
                 :src="activeImage"
                 :alt="salle.nom"
-                class="absolute inset-0 h-full w-full object-cover"
+                class="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
               />
 
               <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/0 to-black/5"></div>
@@ -289,22 +316,7 @@ const formatPrice = (price) => {
             </div>
           </div>
 
-          <!-- GALERIE THUMBNAILS SI PLUSIEURS PHOTOS -->
-          <div
-            v-if="imagesList.length > 1"
-            class="flex gap-3 border-t border-[#ecebe7] bg-[#fafaf8] px-5 py-4"
-          >
-            <button
-              v-for="(img, idx) in imagesList"
-              :key="'thumb-' + idx"
-              type="button"
-              @click="selectedPhotoIndex = idx"
-              class="h-14 w-20 shrink-0 overflow-hidden rounded-[7px] border transition-all"
-              :class="selectedPhotoIndex === idx ? 'border-[#181818] opacity-100' : 'border-transparent opacity-55 hover:opacity-100'"
-            >
-              <img :src="img" :alt="`${salle.nom} – image ${idx + 1}`" class="h-full w-full object-cover" />
-            </button>
-          </div>
+          
         </section>
       </div>
     </div>

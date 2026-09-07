@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import NavBar from '@/layouts/NavBar.vue'
 import Footer from '@/layouts/Footer.vue'
@@ -78,11 +78,34 @@ const selectedSalle = computed(() => {
 const defaultPlaceholder =
     'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
 
+// Index de l'image actuelle pour la salle sélectionnée
+const selectedSalleImageIndex = ref(0)
+const autoPlayInterval = ref(null)
+const AUTO_PLAY_DELAY = 4000 // 4 secondes entre chaque image
+
+const startAutoPlay = () => {
+  if (!selectedSalle.value) return
+  const imgs = selectedSalle.value.images
+  if (imgs && imgs.length > 1) {
+    autoPlayInterval.value = setInterval(() => {
+      selectedSalleImageIndex.value = (selectedSalleImageIndex.value + 1) % imgs.length
+    }, AUTO_PLAY_DELAY)
+  }
+}
+
+const stopAutoPlay = () => {
+  if (autoPlayInterval.value) {
+    clearInterval(autoPlayInterval.value)
+    autoPlayInterval.value = null
+  }
+}
+
 const salleCoverUrl = computed(() => {
     if (!selectedSalle.value) return defaultPlaceholder
     const imgs = selectedSalle.value.images
     if (imgs && imgs.length > 0) {
-        return imgs[0].url || imgs[0].path || defaultPlaceholder
+        const index = selectedSalleImageIndex.value % imgs.length
+        return imgs[index].url || imgs[index].path || defaultPlaceholder
     }
     return defaultPlaceholder
 })
@@ -179,10 +202,13 @@ watch(
     { deep: true }
 )
 
-// Quand la salle change, réinitialiser l'état de dispo
+// Quand la salle change, réinitialiser l'état de dispo et redémarrer le carrousel
 watch(selectedSalleId, () => {
     dispoResult.value = null
     step1Error.value = null
+    selectedSalleImageIndex.value = 0
+    stopAutoPlay()
+    startAutoPlay()
 })
 
 // ─── Initialisation ─────────────────────────────────────────────────────────
@@ -218,6 +244,14 @@ onMounted(async () => {
     if (selectedSalleId.value && debutDateTime.value && finDateTime.value) {
         await verifierDisponibilite()
     }
+
+    // Démarrer le carrousel automatique
+    startAutoPlay()
+})
+
+onUnmounted(() => {
+    // Arrêter le carrousel automatique lors de la destruction du composant
+    stopAutoPlay()
 })
 
 const goStep2 = () => {
@@ -316,7 +350,7 @@ const submitReservation = async () => {
           <img
             :src="salleCoverUrl"
             :alt="selectedSalle?.nom || 'Salle'"
-            class="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+            class="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
           />
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30"></div>
 

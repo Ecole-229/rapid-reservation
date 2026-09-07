@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSallesStore } from '@/store/salles'
 import {
@@ -48,19 +48,59 @@ const formatAge = (createdAt) => {
 
 const defaultPlaceholder = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
 
+// Index d'image actuel pour chaque salle
+const roomImageIndexes = ref({})
+// Intervalles de carrousel pour chaque salle
+const roomIntervals = ref({})
+const AUTO_PLAY_DELAY = 4000 // 4 secondes entre chaque image
+
+// Démarrer le carrousel pour une salle spécifique
+const startRoomCarousel = (roomId, imagesCount) => {
+  if (imagesCount <= 1) return
+  
+  // Initialiser l'index si pas déjà fait
+  if (roomImageIndexes.value[roomId] === undefined) {
+    roomImageIndexes.value[roomId] = 0
+  }
+  
+  // Arrêter l'intervalle existant s'il y en a un
+  if (roomIntervals.value[roomId]) {
+    clearInterval(roomIntervals.value[roomId])
+  }
+  
+  // Démarrer le nouvel intervalle
+  roomIntervals.value[roomId] = setInterval(() => {
+    roomImageIndexes.value[roomId] = (roomImageIndexes.value[roomId] + 1) % imagesCount
+  }, AUTO_PLAY_DELAY)
+}
+
+// Arrêter le carrousel pour une salle spécifique
+const stopRoomCarousel = (roomId) => {
+  if (roomIntervals.value[roomId]) {
+    clearInterval(roomIntervals.value[roomId])
+    delete roomIntervals.value[roomId]
+  }
+}
+
+// Obtenir l'image actuelle pour une salle
+const getCurrentRoomImage = (salle) => {
+  const images = salle.images || []
+  if (images.length === 0) return defaultPlaceholder
+  
+  const index = roomImageIndexes.value[salle.id] || 0
+  return images[index].url || images[index].path || defaultPlaceholder
+}
+
 // Liste globale mappée
 const allRooms = computed(() => {
     return sallesStore.salles.map((salle, index) => {
-        const firstImg = salle.images && salle.images.length > 0
-            ? (salle.images[0].url || salle.images[0].path || defaultPlaceholder)
-            : defaultPlaceholder
-
         const isDispo = !salle.status || salle.status.toLowerCase() === 'disponible'
 
         return {
             id: salle.id,
             name: salle.nom || `Salle ${index + 1}`,
-            image: firstImg,
+            images: salle.images || [],
+            image: getCurrentRoomImage(salle),
             age: formatAge(salle.created_at),
             status: isDispo ? 'Disponible' : 'Occupée',
             isDisponible: isDispo,
@@ -90,6 +130,29 @@ const rooms = computed(() => {
 
 onMounted(() => {
     sallesStore.fetchSalles()
+})
+
+// Démarrer les carrousels pour toutes les salles avec plusieurs images
+watch(
+  () => sallesStore.salles,
+  (salles) => {
+    if (salles && salles.length > 0) {
+      salles.forEach((salle) => {
+        const imagesCount = salle.images?.length || 0
+        if (imagesCount > 1) {
+          startRoomCarousel(salle.id, imagesCount)
+        }
+      })
+    }
+  },
+  { immediate: true }
+)
+
+onUnmounted(() => {
+  // Arrêter tous les carrousels
+  Object.keys(roomIntervals.value).forEach((roomId) => {
+    stopRoomCarousel(roomId)
+  })
 })
 
 const handlePlus = (room) => {
@@ -338,9 +401,9 @@ const proceedToReservation = () => {
                             :alt="room.name"
                             class="h-full w-full
                                    object-cover
-                                   transition-transform
+                                   transition-opacity
                                    duration-700
-                                   ease-out
+                                   ease-in-out
                                    group-hover:scale-[1.035]"
                         />
 
