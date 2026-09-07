@@ -37,11 +37,7 @@ const createDropdownRef = ref(null)
 // Définition des options de création
 const createOptions = [
 
-    {
-
-        label: 'Ajouter',
-        routeName: '#',
-    } ,
+    
     {
         key: 'user',
         label: 'Utilisateur',
