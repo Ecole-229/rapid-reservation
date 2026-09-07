@@ -21,11 +21,11 @@ class DatabaseSeeder extends Seeder
 
         User::create([
 
-                'nom' => 'Tihno',
-                'email' => 'a@gmail.com',
+                'nom' => 'Romeo',
+                'email' => 'ro@gmail.com',
                 'mot_de_passe' => Hash::make('11111111'),
                 'telephone' => '0164458812',
-                'role' => 'admin',
+                'role' => 'responsable',
         ]);
 
 

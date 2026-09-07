@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class ResponsableSeeder extends Seeder
+/* class ResponsableSeeder extends Seeder
 {
     public function run(): void
     {
@@ -21,3 +21,4 @@ class ResponsableSeeder extends Seeder
         );
     }
 }
+ */
