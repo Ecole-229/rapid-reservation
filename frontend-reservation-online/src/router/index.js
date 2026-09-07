@@ -1,4 +1,4 @@
-import AppAdmin from "@/views/admin/AppAdmin.vue";
+import AppAdmin from "@/components/admin/AppAdmin.vue";
 import Login from "@/views/auth/Login.vue";
 import Register from "@/views/auth/Register.vue";
 import Home from "@/views/Home.vue";
@@ -21,11 +21,8 @@ import Galeries from '@/views/admin/layouts/Galeries.vue'
 import Reservations from '@/views/admin/layouts/Reservations.vue'
 import Salles from '@/views/admin/layouts/Salles.vue'
 import Users from '@/views/admin/layouts/Users.vue'
-import Login from '@/views/auth/Login.vue'
-import Register from '@/views/auth/Register.vue'
-import Home from '@/views/Home.vue'
-import AppResponsable from '@/views/responsable/AppResponsable.vue'
-import { createRouter, createWebHistory } from 'vue-router'
+
+
 import CreateEquipement from '@/views/admin/CreateEquipement.vue'
 import UpdateEquipement from '@/views/admin/UpdateEquipement.vue'
 import InfosEquipement from '@/views/admin/InfosEquipement.vue'
@@ -343,12 +340,6 @@ router.beforeEach((to, from, next) => {
     if (user?.role === "admin") return next({ name: "admin-home" });
     if (user?.role === "responsable") return next({ name: "responsable-home" });
     return next({ name: "home" });
-    if (user?.role === 'admin') {
-      return next({ name: 'admin-users' })
-    } else if (user?.role === 'responsable') {
-      return next({ name: 'responsable-home' })
-    }
-    return next({ name: 'home' })
   }
 
   if (to.meta.requiresAuth && !token) {
@@ -359,16 +350,9 @@ router.beforeEach((to, from, next) => {
     if (user?.role === "admin") return next({ name: "admin-home" });
     if (user?.role === "responsable") return next({ name: "responsable-home" });
     return next({ name: "home" });
-    if (user?.role === 'admin') {
-      return next({ name: 'admin-users' })
-    } else if (user?.role === 'responsable') {
-      return next({ name: 'responsable-home' })
-    }
-    return next({ name: 'home' })
   }
 
   return next();
 });
 
 export default router;
-export default router
