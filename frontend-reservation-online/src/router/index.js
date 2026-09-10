@@ -44,9 +44,16 @@ import UserUpdateReservation from '@/views/UserUpdateReservation.vue'
 const routes = [
 
   {
+    path: "/",
+    name: "home",
+    component: Home,
+  },
+
+  {
     path: '/salles',
     name: 'salles',
     component: SallesUser,
+
   },
 
   {
@@ -96,11 +103,7 @@ const routes = [
   },
 
 
-  {
-    path: "/",
-    name: "home",
-    component: Home,
-  },
+
 
   // ==========================================
   // ADMIN — UTILISATEURS

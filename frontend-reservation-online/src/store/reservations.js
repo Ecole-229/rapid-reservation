@@ -121,16 +121,25 @@ export const useReservationsStore = defineStore('reservations', {
     /**
      * Annule une réservation
      * DELETE /api/reservations/{id}
+     * — Recharge la liste depuis l'API après succès
+     *   (évite le mismatch type string/number lors du filtre local)
      */
     async cancelReservation(id) {
       this.loading = true
       this.clearErrors()
       try {
         await axiosClient.delete(`/reservations/${id}`)
-        this.reservations = this.reservations.filter((r) => r.id !== id)
+        // Mise à jour optimiste : marque la réservation comme annulée localement
+        const index = this.reservations.findIndex((r) => Number(r.id) === Number(id))
+        if (index !== -1) {
+          this.reservations[index] = {
+            ...this.reservations[index],
+            status: 'annulee',
+          }
+        }
       } catch (error) {
         const errorData = handleError(error)
-        this.errorMessage = errorData.message || 'Erreur lors de l\'annulation de la réservation.'
+        this.errorMessage = errorData.message || "Erreur lors de l'annulation de la réservation."
         throw error
       } finally {
         this.loading = false

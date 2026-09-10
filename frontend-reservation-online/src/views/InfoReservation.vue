@@ -152,7 +152,7 @@ const confirmCancel = async () => {
     <!-- NAVBAR -->
     <NavBar />
 
-    <main class="px-4 py-10 sm:px-6 lg:px-10">
+    <main class="px-4 pt-28 py-10 sm:px-6 lg:px-10">
       <div class="mx-auto max-w-[1180px]">
         <!-- NAVIGATION RETOUR -->
         <div class="mb-7">
@@ -193,7 +193,7 @@ const confirmCancel = async () => {
         </div>
 
         <!-- CONTENU DE LA RÉSERVATION -->
-        <div v-else-if="reservation">
+        <div v-else-if="reservation" v-scroll-reveal="{ direction: 'up', delay: 80 }">
           <section class="overflow-hidden rounded-[15px] border border-[#ecebe7] bg-white">
             <div class="grid min-h-[465px] grid-cols-1 lg:grid-cols-[1.06fr_0.98fr_1fr]">
               <!-- COLONNE 1 (GAUCHE) : IMAGE DE LA SALLE RÉSERVÉE -->

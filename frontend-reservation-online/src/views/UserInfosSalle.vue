@@ -166,7 +166,7 @@ const handleReserver = () => {
 </script>
 
 <template>
-    <div class="min-h-[80vh] bg-[#f6f6f4] text-[#151515]">
+    <div class="min-h-[80vh] pt-28 bg-[#f6f6f4] text-[#151515]">
         <NavBar />
 
         <div class="px-4 py-10 sm:px-6 lg:px-10">
@@ -199,7 +199,7 @@ const handleReserver = () => {
                 </div>
 
                 <div v-else-if="salle">
-                    <section class="overflow-hidden rounded-[15px] border border-[#ecebe7] bg-white">
+                    <section class="overflow-hidden rounded-[15px] border border-[#ecebe7] bg-white" v-scroll-reveal="{ direction: 'up', delay: 80 }">
                         <div class="grid min-h-[465px] grid-cols-1 lg:grid-cols-[1.06fr_0.98fr_1fr]">
                             <!-- IMAGE : même rôle visuel que dans la référence -->
                             <div class="relative min-h-[390px] overflow-hidden bg-[#e9e8e4] lg:min-h-0">
@@ -404,7 +404,7 @@ const handleReserver = () => {
                             </div>
                         </div>
 
-                        
+
                     </section>
                 </div>
             </div>

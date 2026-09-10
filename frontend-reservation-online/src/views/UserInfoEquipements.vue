@@ -103,7 +103,7 @@ const handleReserver = () => {
                 </div>
 
                 <div v-else-if="equipement">
-                    <section class="overflow-hidden rounded-[15px] border border-[#ecebe7] bg-white">
+                    <section class="overflow-hidden rounded-[15px] border border-[#ecebe7] bg-white" v-scroll-reveal="{ direction: 'up', delay: 80 }">
                         <div class="grid min-h-[465px] grid-cols-1 lg:grid-cols-[1.06fr_0.98fr_1fr]">
                             <!-- IMAGE -->
                             <div class="relative min-h-[390px] overflow-hidden bg-[#e9e8e4] lg:min-h-0">

@@ -204,6 +204,9 @@ onBeforeUnmount(() => {
             :src="heroImage"
             alt="Vue apaisante d'une destination de voyage"
             class="egypt-hero__image"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
         />
 
         <!-- ================================================== -->
@@ -824,6 +827,38 @@ onBeforeUnmount(() => {
     }
     .egypt-booking-row {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ================================================================
+   RESPONSIVE MOBILE (< 480px)
+================================================================ */
+
+@media (max-width: 480px) {
+    .egypt-hero__title {
+        white-space: normal;
+        word-break: break-word;
+        font-size: clamp(32px, 11vw, 72px);
+        letter-spacing: -1px;
+        padding: 0 12px;
+    }
+
+    .egypt-hero__content {
+        padding: 16px 16px clamp(20px, 6vw, 36px);
+        gap: 16px;
+    }
+
+    .egypt-hero__stat-value {
+        font-size: 22px;
+    }
+
+    .egypt-hero__stat-label {
+        font-size: 10px;
+    }
+
+    .egypt-hero__description {
+        max-width: 100%;
+        font-size: 12px;
     }
 }
 </style>

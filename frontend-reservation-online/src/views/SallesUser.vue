@@ -13,8 +13,8 @@ import HeroSection from '@/layouts/salle/HeroSection.vue';
 
     <NavBar :class="$route.name === 'login' || $route.name === 'register' ? 'hidden' : 'block'" />
     <HeroSection/>
-    <Confort/>
-    <NosSalle/>
+    <Confort v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
+    <NosSalle v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
     <Footer/>
 
 

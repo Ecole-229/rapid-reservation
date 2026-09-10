@@ -197,11 +197,11 @@ const handleVoirTous = () => {
                     Toutes ({{ countAll }})
                 </button>
 
-                
+
             </div>
 
             <div v-if="isConnected" class="flex items-center gap-2 text-xs  font-medium tracking-widest text-neutral-800  ">
-                Des salles de luxe
+                Nos Equipements
             </div>
             </div>
 

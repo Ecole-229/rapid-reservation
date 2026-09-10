@@ -18,11 +18,11 @@ import TrueSections from '@/layouts/TrueSections.vue'
 
     <NavBar :class="$route.name === 'login' || $route.name === 'register' ? 'hidden' : 'block'" />
     <HeroSection/>
-    <TrueSections/>
-    <Marketing/>
-    <Temoignage/>
-    <Exprerience/>
-    <FaqSection/>
+    <TrueSections v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
+    <Marketing v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
+    <Temoignage v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
+    <Exprerience v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
+    <FaqSection v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
     <Footer/>
 
 

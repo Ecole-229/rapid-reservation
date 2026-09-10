@@ -156,11 +156,14 @@ const confirmCancelReservation = async () => {
   cancelError.value = null
   try {
     await reservationsStore.cancelReservation(reservationToCancel.value.id)
-    closeCancelModal()
+    // Reset AVANT closeCancelModal pour ne pas être bloqué par la guard
+    isCancelling.value = false
+    isCancelModalOpen.value = false
+    reservationToCancel.value = null
+    cancelError.value = null
     await loadReservations()
   } catch (err) {
     cancelError.value = reservationsStore.errorMessage || "Impossible d'annuler cette réservation."
-  } finally {
     isCancelling.value = false
   }
 }
@@ -177,7 +180,7 @@ const confirmCancelReservation = async () => {
         <!-- =====================================================
              HERO
         ====================================================== -->
-        <section class="hero-grid">
+        <section class="hero-grid" v-scroll-reveal="{ direction: 'up', delay: 0 }">
 
           <!-- GRANDE CARTE IMAGE -->
           <div class="hero-image-card">
@@ -409,7 +412,7 @@ const confirmCancelReservation = async () => {
         <!-- =====================================================
              FILTRES
         ====================================================== -->
-        <section class="filters-card">
+        <section class="filters-card" v-scroll-reveal="{ direction: 'up', delay: 100 }">
 
           <div class="filters-scroll">
 
@@ -612,6 +615,7 @@ const confirmCancelReservation = async () => {
         <section
           v-else
           class="reservation-grid"
+          v-scroll-reveal="{ direction: 'up', delay: 150 }"
         >
 
           <article

@@ -16,9 +16,9 @@ import HeroSection from '@/layouts/equipements/HeroSection.vue';
 
     <NavBar :class="$route.name === 'login' || $route.name === 'register' ? 'hidden' : 'block'" />
     <HeroSection/>
-    <Quality/>
-    <NosEquipement/>
-    <FaqSection/>
+    <Quality v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
+    <NosEquipement v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
+    <FaqSection v-scroll-reveal="{ direction: 'up', delay: 0 }"/>
     <Footer/>
 
 

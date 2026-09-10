@@ -294,7 +294,7 @@ const handleUpdate = async () => {
             <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-5 min-h-[640px]">
 
                 <!-- GAUCHE : HERO / CARTE SALLE SÉLECTIONNÉE -->
-                <section class="relative min-h-[480px] lg:min-h-full overflow-hidden rounded-[20px] border border-[#ecebe7] bg-[#141515] flex flex-col justify-between p-6 sm:p-8">
+                <section class="relative min-h-[480px] lg:min-h-full overflow-hidden rounded-[20px] border border-[#ecebe7] bg-[#141515] flex flex-col justify-between p-6 sm:p-8" v-scroll-reveal="{ direction: 'left', delay: 0 }">
                     <img
                         :src="salleCoverUrl"
                         :alt="selectedSalle?.nom || 'Salle'"
@@ -355,7 +355,7 @@ const handleUpdate = async () => {
                 </section>
 
                 <!-- DROITE : FORMULAIRE -->
-                <section class="flex flex-col justify-between rounded-[20px] border border-[#ecebe7] bg-white p-6 sm:p-10 shadow-sm overflow-y-auto">
+                <section class="flex flex-col justify-between rounded-[20px] border border-[#ecebe7] bg-white p-6 sm:p-10 shadow-sm overflow-y-auto" v-scroll-reveal="{ direction: 'right', delay: 120 }">
                     <div class="mx-auto w-full max-w-[540px]">
 
                         <!-- CHARGEMENT INITIAL -->
