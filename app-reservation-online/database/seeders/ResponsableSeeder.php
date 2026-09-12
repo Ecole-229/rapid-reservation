@@ -10,15 +10,7 @@ use Illuminate\Support\Facades\Hash;
 {
     public function run(): void
     {
-        User::firstOrCreate(
-            ['email' => 'responsablespace@gmail.com'],
-            [
-                'nom' => 'Responsable Hakim',
-                'mot_de_passe' => Hash::make('reservation229'),
-                'telephone' => '0197770707',
-                'role' => 'responsable',
-            ]
-        );
+        
     }
 }
  */
