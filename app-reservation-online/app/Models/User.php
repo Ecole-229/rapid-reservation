@@ -29,7 +29,12 @@ class User extends Authenticatable
 
     public function reservations(): HasMany
     {
-        return $this->hasMany(Reservation::class);
+        return $this->hasMany(Reservation::class, 'user_id');
+    }
+
+    public function reservationsCreees(): HasMany
+    {
+        return $this->hasMany(Reservation::class, 'cree_par_id');
     }
 
     public function isAdmin(): bool

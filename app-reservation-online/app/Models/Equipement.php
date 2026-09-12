@@ -5,14 +5,124 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Equipement extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['nom' , 'description' , 'status' , 'stock_total' ,'image'];
+    protected $fillable = [
+        'nom',
+        'description',
+        'status',
+        'stock_total',
+        'image',
+    ];
 
-    public function reservations(): BelongsToMany {
-        return $this->belongsToMany(Reservation::class)->withPivot('quantity') ;
+    protected $appends = ['image_url'];
+
+    public function reservations(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Reservation::class,
+            'equipement_reservation'
+        )->withPivot('quantity');
+    }
+
+    public function quantiteDisponible(string|\DateTimeInterface $debut, string|\DateTimeInterface $fin): int
+    {
+        $debut = \Carbon\Carbon::parse($debut);
+        $fin = \Carbon\Carbon::parse($fin);
+
+        $quantiteReservee = $this->reservations()
+            ->whereIn('reservations.status', ['en_attente', 'confirmee'])
+            ->where('date_heure_debut', '<', $fin)
+            ->where('date_heure_fin', '>', $debut)
+            ->sum('equipement_reservation.quantity');
+
+        return $this->stock_total - $quantiteReservee;
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Equipement $equipement) {
+            if ($equipement->stock_total <= 0) {
+                $equipement->status = 'indisponible';
+            }
+        });
+    }
+
+
+
+    /**
+     * Calcule le stock disponible pour cet équipement sur une plage horaire donnée.
+     */
+    public function getAvailableStockForPeriod(string $debut, string $fin, ?int $excludeReservationId = null): int
+    {
+        $quantiteReservee = DB::table('equipement_reservation')
+            ->join('reservations', 'reservations.id', '=', 'equipement_reservation.reservation_id')
+            ->where('equipement_reservation.equipement_id', $this->id)
+            ->whereNull('reservations.deleted_at')
+            ->whereIn('reservations.status', ['en_attente', 'confirmee'])
+            ->where('reservations.date_heure_debut', '<', $fin)
+            ->where('reservations.date_heure_fin', '>', $debut)
+            ->when($excludeReservationId, fn ($q) => $q->where('reservations.id', '!=', $excludeReservationId))
+            ->sum('equipement_reservation.quantity');
+
+        return max(0, (int) $this->stock_total - (int) $quantiteReservee);
+    }
+
+    /**
+     * Accesseur pour obtenir l'URL complète accessible de l'image de l'équipement.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (empty($this->image)) {
+            return null;
+        }
+
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return $this->image;
+        }
+
+        return asset(Storage::url($this->image));
+    }
+
+    /**
+     * Scope pour rechercher par nom ou description.
+     */
+    public function scopeSearch($query, ?string $search)
+    {
+        if (empty($search)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($search) {
+            $q->where('nom', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+        });
+    }
+
+    /**
+     * Scope pour filtrer par statut.
+     */
+    public function scopeStatus($query, ?string $status)
+    {
+        if (empty($status)) {
+            return $query;
+        }
+
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Conversion des types d'attributs.
+     */
+    protected function casts(): array
+    {
+        return [
+            'stock_total' => 'integer',
+        ];
     }
 }

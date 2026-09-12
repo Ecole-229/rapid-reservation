@@ -4,11 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('images', function (Blueprint $table) {
@@ -16,15 +12,16 @@ return new class extends Migration
             $table->string('nom');
             $table->string('path');
             $table->string('designation')->nullable();
-            $table->foreignId('salle_id')->constrained('salles')->cascadeOnDelete();
+
+            $table->foreignId('salle_id')
+                ->constrained('salles')
+                ->cascadeOnDelete();
+
             $table->softDeletes();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('images');

@@ -29,7 +29,7 @@
           class="h-[calc(100vh-40px)] w-full overflow-hidden rounded-tl-[30px] rounded-bl-[30px] rounded-tr-[30px] rounded-br-[60px]"
         >
           <img
-            src="../../public/image.png"
+            src="../../public/images/image.png"
             alt = "reserve"
             class="h-full w-full object-cover"
           />
