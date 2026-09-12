@@ -27,6 +27,7 @@ import { useAuthStore } from '@/store/auth'
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+const emit = defineEmits(['toggle-sidebar'])
 const isFullscreen = ref(false)
 const isProfileMenuOpen = ref(false)
 const isProfileModalOpen = ref(false)
@@ -182,19 +183,22 @@ onUnmounted(() => {
 
 <template>
     <header
-        class="sticky top-0 z-40 flex h-[84px] items-center
-               border-b border-[#E2E8F0] bg-white px-10 text-[#0F172A]"
+        class="sticky top-0 z-30 flex h-[74px] sm:h-[84px] items-center
+               border-b border-[#E2E8F0] bg-white px-4 sm:px-6 lg:px-8 text-[#0F172A]"
     >
-        <div class="flex w-full items-center gap-5">
+        <div class="flex w-full items-center gap-2.5 sm:gap-4">
 
             <!-- MENU BUTTON -->
             <button
-                class="flex h-[42px] w-[42px] shrink-0 items-center
+                type="button"
+                @click="emit('toggle-sidebar')"
+                class="flex h-[40px] w-[40px] sm:h-[42px] sm:w-[42px] shrink-0 items-center
                        justify-center rounded-[13px] border border-[#E2E8F0]
                        bg-white text-[#475569]
                        shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]
                        transition-all duration-150 hover:bg-[#F8FAFC] hover:text-[#0F172A]
-                       active:scale-[0.98]"
+                       active:scale-[0.98] cursor-pointer"
+                title="Afficher/Masquer le menu"
             >
                 <Menu
                     :size="19"
@@ -202,16 +206,16 @@ onUnmounted(() => {
                 />
             </button>
 
-            <!-- FULLSCREEN -->
+            <!-- FULLSCREEN (masqué sur mobile) -->
             <button
                 @click="toggleFullscreen"
                 :title="isFullscreen ? 'Quitter le plein écran' : 'Plein écran'"
-                class="flex h-[42px] w-[42px] shrink-0 items-center justify-center
+                class="hidden sm:flex h-[40px] w-[40px] sm:h-[42px] sm:w-[42px] shrink-0 items-center justify-center
                        rounded-[13px] border border-[#E2E8F0] bg-white
                        text-[#475569]
                        shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]
                        transition-all duration-150 hover:bg-[#F8FAFC] hover:text-[#0F172A]
-                       active:scale-[0.98]"
+                       active:scale-[0.98] cursor-pointer"
             >
                 <Minimize
                     v-if="isFullscreen"
@@ -225,41 +229,41 @@ onUnmounted(() => {
                 />
             </button>
 
-            <!-- SEARCH -->
-            <div class="relative ml-1 max-w-[480px] flex-1">
+            <!-- SEARCH (adaptatif) -->
+            <div class="relative ml-0 sm:ml-1 max-w-[480px] flex-1">
                 <input
                     type="text"
-                    placeholder="Search anything in Spark..."
-                    class="h-[42px] w-full rounded-full border border-[#E2E8F0]
-                           bg-white pl-5 pr-12 text-[14px] text-[#0F172A]
+                    placeholder="Rechercher..."
+                    class="h-[40px] sm:h-[42px] w-full rounded-full border border-[#E2E8F0]
+                           bg-white pl-4 sm:pl-5 pr-10 sm:pr-12 text-[13px] sm:text-[14px] text-[#0F172A]
                            outline-none placeholder:text-[#94A3B8]
                            transition focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/10"
                 />
 
                 <Search
-                    :size="19"
+                    :size="17"
                     :stroke-width="1.7"
-                    class="absolute right-5 top-1/2 -translate-y-1/2
+                    class="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2
                            text-[#64748B]"
                 />
             </div>
 
             <!-- RIGHT ACTIONS CLUSTER -->
-            <div class="ml-auto flex shrink-0 items-center gap-3">
+            <div class="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
 
                 <!-- CREATE DROPDOWN -->
                 <div ref="createDropdownRef" class="relative">
                     <button
                         @click.stop="toggleCreateMenu"
-                        class="flex h-[42px] shrink-0 items-center gap-2
-                               rounded-[13px] bg-[#0F172A] pl-4 pr-3
-                               text-[14px] font-semibold text-white
+                        class="flex h-[40px] sm:h-[42px] shrink-0 items-center gap-1.5 sm:gap-2
+                               rounded-[13px] bg-[#0F172A] px-3 sm:pl-4 sm:pr-3
+                               text-[13px] sm:text-[14px] font-semibold text-white
                                shadow-[0_4px_20px_-4px_rgba(15,23,42,0.3)]
                                transition-all duration-150 hover:bg-[#020617]
-                               active:scale-[0.98]"
+                               active:scale-[0.98] cursor-pointer"
                     >
                         <Plus :size="17" :stroke-width="2.2" />
-                        <span>{{ defaultCreateOption.label }}</span>
+                        <span class="hidden sm:inline">{{ defaultCreateOption.label }}</span>
                         <ChevronDown
                             :size="14"
                             :stroke-width="2"

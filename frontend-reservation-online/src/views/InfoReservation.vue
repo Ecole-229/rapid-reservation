@@ -135,13 +135,14 @@ const confirmCancel = async () => {
   cancelError.value = null
   try {
     await reservationsStore.cancelReservation(reservationId)
-    closeCancelModal()
+    isCancelling.value = false
+    isCancelModalOpen.value = false
+    cancelError.value = null
     await loadReservation()
   } catch (err) {
     cancelError.value =
       reservationsStore.errorMessage ||
       "Impossible d'annuler cette réservation."
-  } finally {
     isCancelling.value = false
   }
 }

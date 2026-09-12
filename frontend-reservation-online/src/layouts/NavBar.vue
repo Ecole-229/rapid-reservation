@@ -3,11 +3,22 @@ import { ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { Menu, X } from 'lucide-vue-next'
+import UserProfileModal from '@/components/UserProfileModal.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
 
 const isMenuOpen = ref(false)
+const isProfileModalOpen = ref(false)
+
+const openProfileModal = () => {
+  isProfileModalOpen.value = true
+}
+
+const openProfileModalFromMobile = () => {
+  isMenuOpen.value = false
+  isProfileModalOpen.value = true
+}
 
 const handleLogout = () => {
   authStore.logout()
@@ -51,8 +62,14 @@ watch(() => route.path, () => {
             <RouterLink to="/reservations"
               class="flex cursor-pointer items-center gap-1 rounded-full px-3 py-2 text-[13px] font-semibold text-black transition hover:bg-white/70"
               :class="{ 'bg-white/90': $route.path.startsWith('/reservations') }">Réservations</RouterLink>
-            <RouterLink to="/"
-              class="flex cursor-pointer items-center gap-1 rounded-full px-3 py-2 text-[13px] font-semibold text-black transition hover:bg-white/70">Mon profil</RouterLink>
+            <button
+              type="button"
+              @click="openProfileModal"
+              class="flex cursor-pointer items-center gap-1 rounded-full px-3 py-2 text-[13px] font-semibold text-black transition hover:bg-white/70"
+              :class="{ 'bg-white/90': isProfileModalOpen }"
+            >
+              Mon profil
+            </button>
           </template>
 
           <!-- Admin / Responsable -->
@@ -63,6 +80,14 @@ watch(() => route.path, () => {
               class="flex cursor-pointer items-center gap-1 rounded-full px-3 py-2 text-[13px] font-semibold text-black transition hover:bg-white/70">Salles</RouterLink>
             <RouterLink to="/equipements"
               class="flex cursor-pointer items-center gap-1 rounded-full px-3 py-2 text-[13px] font-semibold text-black transition hover:bg-white/70">Équipements</RouterLink>
+            <button
+              type="button"
+              @click="openProfileModal"
+              class="flex cursor-pointer items-center gap-1 rounded-full px-3 py-2 text-[13px] font-semibold text-black transition hover:bg-white/70"
+              :class="{ 'bg-white/90': isProfileModalOpen }"
+            >
+              Mon profil
+            </button>
           </template>
 
           <!-- Visiteur -->
@@ -80,10 +105,21 @@ watch(() => route.path, () => {
         <div class="hidden md:flex items-center gap-3">
           <template v-if="authStore.isAuthenticated">
             <div class="flex items-center gap-3">
-              <div class="flex flex-col text-right">
-                <span class="text-[13px] font-bold text-black leading-tight">{{ authStore.currentUser?.nom || 'Utilisateur' }}</span>
-                <span class="text-[11px] capitalize text-gray-500">{{ authStore.userRole }}</span>
-              </div>
+              <button
+                type="button"
+                @click="openProfileModal"
+                class="group flex items-center gap-2.5 text-right transition hover:opacity-85 cursor-pointer"
+                title="Consulter mon profil"
+              >
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-amber-200 text-[12px] font-black text-[#111] shadow-sm border border-black/10 transition group-hover:scale-105">
+                  {{ (authStore.currentUser?.nom || 'U').charAt(0).toUpperCase() }}
+                </div>
+                <div class="flex flex-col text-left">
+                  <span class="text-[13px] font-bold text-black leading-tight group-hover:underline decoration-black/30 underline-offset-2">
+                    {{ authStore.currentUser?.nom || 'Utilisateur' }}
+                  </span>
+                </div>
+              </button>
               <button @click="handleLogout"
                 class="cursor-pointer rounded-full border border-gray-200/70 bg-white/50 px-4 py-2 text-[13px] font-bold text-red-600 transition hover:bg-red-50 hover:border-red-200">
                 Déconnexion
@@ -125,16 +161,20 @@ watch(() => route.path, () => {
 
           <!-- Utilisateur connecté -->
           <template v-if="authStore.isAuthenticated && authStore.isUser">
-            <!-- Profil en-tête -->
-            <div class="flex items-center gap-3 px-3 py-2.5 mb-1 rounded-2xl bg-white/60 border border-gray-100">
-              <div class="h-9 w-9 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white text-[13px] font-bold shrink-0">
+            <!-- Profil en-tête cliquable -->
+            <button
+              type="button"
+              @click="openProfileModalFromMobile"
+              class="flex w-full items-center gap-3 px-3 py-2.5 mb-1 rounded-2xl bg-white/70 border border-gray-200/80 text-left transition hover:bg-white cursor-pointer"
+            >
+              <div class="h-9 w-9 rounded-full bg-gradient-to-tr from-amber-400 to-amber-200 flex items-center justify-center text-[#111] text-[13px] font-black shrink-0 border border-black/10">
                 {{ (authStore.currentUser?.nom || 'U')[0].toUpperCase() }}
               </div>
-              <div>
-                <p class="text-[13px] font-bold text-black leading-tight">{{ authStore.currentUser?.nom || 'Utilisateur' }}</p>
-                <p class="text-[11px] text-gray-500 capitalize">{{ authStore.userRole }}</p>
+              <div class="flex-1 min-w-0">
+                <p class="text-[13px] font-bold text-black leading-tight truncate">{{ authStore.currentUser?.nom || 'Utilisateur' }}</p>
+                <p class="text-[11px] text-gray-500 capitalize">{{ authStore.userRole }} • Voir profil</p>
               </div>
-            </div>
+            </button>
 
             <RouterLink to="/salles" @click="closeMenu"
               class="flex items-center rounded-xl px-4 py-3 text-[14px] font-semibold text-black transition hover:bg-white/70"
@@ -145,8 +185,13 @@ watch(() => route.path, () => {
             <RouterLink to="/reservations" @click="closeMenu"
               class="flex items-center rounded-xl px-4 py-3 text-[14px] font-semibold text-black transition hover:bg-white/70"
               :class="{ 'bg-white/80': $route.path.startsWith('/reservations') }">Réservations</RouterLink>
-            <RouterLink to="/" @click="closeMenu"
-              class="flex items-center rounded-xl px-4 py-3 text-[14px] font-semibold text-black transition hover:bg-white/70">Mon profil</RouterLink>
+            <button
+              type="button"
+              @click="openProfileModalFromMobile"
+              class="flex w-full items-center rounded-xl px-4 py-3 text-[14px] font-semibold text-black transition hover:bg-white/70 text-left cursor-pointer"
+            >
+              Mon profil
+            </button>
 
             <div class="mt-2 border-t border-gray-100 pt-2">
               <button @click="handleLogout"
@@ -158,18 +203,29 @@ watch(() => route.path, () => {
 
           <!-- Admin / Responsable -->
           <template v-else-if="authStore.isAuthenticated && (authStore.isAdmin || authStore.isResponsable)">
-            <div class="flex items-center gap-3 px-3 py-2.5 mb-1 rounded-2xl bg-white/60 border border-gray-100">
-              <div class="h-9 w-9 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white text-[13px] font-bold shrink-0">
+            <button
+              type="button"
+              @click="openProfileModalFromMobile"
+              class="flex w-full items-center gap-3 px-3 py-2.5 mb-1 rounded-2xl bg-white/70 border border-gray-200/80 text-left transition hover:bg-white cursor-pointer"
+            >
+              <div class="h-9 w-9 rounded-full bg-gradient-to-tr from-amber-400 to-amber-200 flex items-center justify-center text-[#111] text-[13px] font-black shrink-0 border border-black/10">
                 {{ (authStore.currentUser?.nom || 'A')[0].toUpperCase() }}
               </div>
-              <div>
-                <p class="text-[13px] font-bold text-black">{{ authStore.currentUser?.nom || 'Admin' }}</p>
-                <p class="text-[11px] text-gray-500 capitalize">{{ authStore.userRole }}</p>
+              <div class="flex-1 min-w-0">
+                <p class="text-[13px] font-bold text-black truncate">{{ authStore.currentUser?.nom || 'Admin' }}</p>
+                <p class="text-[11px] text-gray-500 capitalize">{{ authStore.userRole }} • Voir profil</p>
               </div>
-            </div>
+            </button>
             <RouterLink to="/" @click="closeMenu" class="flex items-center rounded-xl px-4 py-3 text-[14px] font-semibold text-black hover:bg-white/70">Accueil</RouterLink>
             <RouterLink to="/salles" @click="closeMenu" class="flex items-center rounded-xl px-4 py-3 text-[14px] font-semibold text-black hover:bg-white/70">Salles</RouterLink>
             <RouterLink to="/equipements" @click="closeMenu" class="flex items-center rounded-xl px-4 py-3 text-[14px] font-semibold text-black hover:bg-white/70">Équipements</RouterLink>
+            <button
+              type="button"
+              @click="openProfileModalFromMobile"
+              class="flex w-full items-center rounded-xl px-4 py-3 text-[14px] font-semibold text-black hover:bg-white/70 text-left cursor-pointer"
+            >
+              Mon profil
+            </button>
             <div class="mt-2 border-t border-gray-100 pt-2">
               <button @click="handleLogout" class="w-full rounded-xl px-4 py-3 text-left text-[14px] font-bold text-red-600 hover:bg-red-50 cursor-pointer">Déconnexion</button>
             </div>
@@ -195,6 +251,13 @@ watch(() => route.path, () => {
         </div>
       </div>
     </Transition>
+
+    <!-- MODAL PROFIL UTILISATEUR -->
+    <UserProfileModal
+      :is-open="isProfileModalOpen"
+      @close="isProfileModalOpen = false"
+      @update:is-open="isProfileModalOpen = $event"
+    />
   </div>
 </template>
 

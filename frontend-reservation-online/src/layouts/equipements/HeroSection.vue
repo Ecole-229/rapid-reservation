@@ -172,6 +172,12 @@ function onKeydown(e) {
 */
 
 onMounted(() => {
+    // Préchargement en arrière-plan des images du carrousel
+    previewImages.forEach((src) => {
+        const img = new Image()
+        img.src = src
+    })
+
     startPreview()
     window.addEventListener('keydown', onKeydown)
 

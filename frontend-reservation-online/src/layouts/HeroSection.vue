@@ -36,11 +36,6 @@ const layers = reactive([
 ])
 const activeLayer = ref(0)
 
-/*
-|--------------------------------------------------------------------------
-| Navigation — Bouton "Réserver Maintenant"
-|--------------------------------------------------------------------------
-*/
 
 const router = useRouter()
 
@@ -180,6 +175,12 @@ function onKeydown(e) {
 */
 
 onMounted(() => {
+    // Préchargement en arrière-plan des images du carrousel
+    previewImages.forEach((src) => {
+        const img = new Image()
+        img.src = src
+    })
+
     startPreview()
     window.addEventListener('keydown', onKeydown)
 
